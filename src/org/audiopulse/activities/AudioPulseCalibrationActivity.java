@@ -38,7 +38,6 @@
  */ 
 
 package org.audiopulse.activities;
-import org.audiopulse.R;
 
 import android.app.Activity;
 import android.os.Bundle;
