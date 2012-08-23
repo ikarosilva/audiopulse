@@ -54,13 +54,13 @@ import android.util.Log;
 public class PlayThreadRunnable implements Runnable
 {
 	public static String TAG = "PlayThreadRunnable";
-	private int mPLAYAudioBufferSize;
-	private AudioTrack mAudioPLAY;
-	int channelPLAYConfig = AudioFormat.CHANNEL_OUT_STEREO;
-	int audioPLAYFormat = AudioFormat.ENCODING_PCM_16BIT;
+	private int AudioBufferSize;
+	private AudioTrack track;
+	int channelConfig = AudioFormat.CHANNEL_OUT_MONO;
+	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int audioMode= AudioManager.STREAM_MUSIC;
-	int trackMode=AudioTrack.MODE_STATIC;
-	public final static int sampleRatePlay=8000;
+	int trackMode=AudioTrack.MODE_STREAM;
+	public final static int sampleRate=44100;
 	int PlayBufferSize;
 	short[] samples;
 	Handler mainThreadHandler = null;
@@ -71,9 +71,9 @@ public class PlayThreadRunnable implements Runnable
 	{
 		Log.v(TAG,"constructing playback thread");
 		mainThreadHandler = h;
-		PlayBufferSize=(int) (playTime*sampleRatePlay);
+		PlayBufferSize=(int) (playTime*sampleRate);
 
-		if(channelPLAYConfig == AudioFormat.CHANNEL_OUT_STEREO){
+		if(channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
 			//Interleave the tracks for processing
 			samples = new short[2*PlayBufferSize];
 		}else{
@@ -88,12 +88,6 @@ public class PlayThreadRunnable implements Runnable
 	{
 		Log.d(TAG,"Starting run in playback");
 		informStart();
-		//Send status of initialization
-		if(mAudioPLAY.getState() != AudioTrack.STATE_INITIALIZED) {
-			informMiddle("Error: Audio record was not properly initialized!!");
-			return;
-		}
-
 		//Play Stimulus
 		informMiddle("Playing stimulus");
 		playStimulus();
@@ -119,7 +113,7 @@ public class PlayThreadRunnable implements Runnable
 	public void informFinish()
 	{
 		Log.v(TAG,"informing finish of playback");
-		mAudioPLAY.release();
+		track.release();
 		Message m = mainThreadHandler.obtainMessage();
 		m.setData(Utils.getStringAsABundle("Finished and released playback in " + play_time/1000 + " seconds"));
 		mainThreadHandler.sendMessage(m);
@@ -127,69 +121,71 @@ public class PlayThreadRunnable implements Runnable
 
 
 	private void initPlayTrack(){
+		Log.v(TAG," rate= " + AudioTrack.getNativeOutputSampleRate(channelConfig));
 		try {
-			mPLAYAudioBufferSize =AudioTrack.getMinBufferSize(sampleRatePlay, channelPLAYConfig, audioPLAYFormat)*2;   
-			mAudioPLAY = new AudioTrack(audioMode, sampleRatePlay, channelPLAYConfig, audioPLAYFormat, 
-					mPLAYAudioBufferSize,trackMode); 
-			assert ( mAudioPLAY.getChannelConfiguration() == channelPLAYConfig ) : "Incorrect channel configuration: " +
-					mAudioPLAY.getChannelConfiguration() + " expected: " + channelPLAYConfig ;
-			if(channelPLAYConfig == AudioFormat.CHANNEL_OUT_STEREO){
-				mAudioPLAY.setStereoVolume(AudioTrack.getMaxVolume()/2,AudioTrack.getMaxVolume()/2);
+			AudioBufferSize =AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+			track = new AudioTrack(audioMode, sampleRate, channelConfig, audioFormat, 
+					AudioBufferSize*2,trackMode); 
+			assert ( track.getChannelConfiguration() == channelConfig ) : "Incorrect channel configuration: " +
+					track.getChannelConfiguration() + " expected: " + channelConfig ;
+			if(channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
+				track.setStereoVolume(AudioTrack.getMaxVolume()/2,AudioTrack.getMaxVolume()/2);
 			}
-			mAudioPLAY.setPlaybackRate(sampleRatePlay);
+			track.setPlaybackRate(sampleRate);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}	
-		Log.v(TAG,"Ch count= " + mAudioPLAY.getChannelCount() + " Play Fs= " + mAudioPLAY.getPlaybackRate() +
-				" Coding= " + mAudioPLAY.getAudioFormat() + " Fs= " + mAudioPLAY.getSampleRate());
+		Log.v(TAG,"Ch count= " + track.getChannelCount() + " Play Fs= " + track.getPlaybackRate() +
+				" Coding= " + track.getAudioFormat() + " Fs= " + track.getSampleRate());
 		
-		if(mAudioPLAY.getState() != AudioTrack.STATE_INITIALIZED) {
+		if(track.getState() != AudioTrack.STATE_INITIALIZED) {
 			informMiddle("Error: Audio record was not properly initialized!!");
 			Log.e(TAG,"Error: Audio record was not properly initialized!!");
+			return;
 		}
 	}
 
 
 	private void generateStimulus(){
-		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRatePlay + " seconds with samples= " + PlayBufferSize);
+		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
 		CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C);
-		PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRatePlay,caltone);
+		PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRate,caltone);
 		short[] tmpSamples = stimuli.generatePeriodicSeries();
-		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRatePlay,0.1,0.2);
+		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.2);
 		//short[] tmpSamples = stimuli.generateClickTrain();
-		//WhiteNoise stimuli = new WhiteNoise(PlayBufferSize,PlayThreadRunnable.sampleRatePlay);
+		//WhiteNoise stimuli = new WhiteNoise(PlayBufferSize,PlayThreadRunnable.sampleRate);
 	    //short[] tmpSamples = stimuli.generateWhiteNoise();
-		Log.v(TAG,"Generate stimulus of length " + tmpSamples.length + " ,seconds= " + tmpSamples.length/(double) sampleRatePlay);
-		if(channelPLAYConfig == AudioFormat.CHANNEL_OUT_STEREO){
+		Log.v(TAG,"Generate stimulus of length " + tmpSamples.length + " ,seconds= " + tmpSamples.length/(double) sampleRate);
+		if(channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
 			//Interleave the tracks for processing
 			for(int i=0;i<tmpSamples.length;i++){
 					samples[i]=tmpSamples[i];
 					samples[i+1]=tmpSamples[i];
 			}
-		}else if(channelPLAYConfig == AudioFormat.CHANNEL_OUT_MONO) {
+		}else if(channelConfig == AudioFormat.CHANNEL_OUT_MONO) {
 			//Mono channel
 			samples=tmpSamples;
 		}else {
-			Log.v(TAG,"Unexpected channel configuration: " + channelPLAYConfig);
+			Log.v(TAG,"Unexpected channel configuration: " + channelConfig);
 		}
 	}
 
 
 	private void playStimulus() {
-		int frameSize=mPLAYAudioBufferSize; 
+		int frameSize=AudioBufferSize; 
 		int dataLeft=samples.length;	
 		int ind=0;
 		int endbuffer;
 		int nWrite=1;
 		int total=0;
-		Log.v(TAG,"frame size is: " + frameSize + " card size is: " + mPLAYAudioBufferSize+ " play time is: " + PlayBufferSize);
+		Log.v(TAG,"frame size is: " + frameSize + " card size is: " + AudioBufferSize+ " play time is: " + PlayBufferSize);
 		Log.v(TAG, "samples.length= " + samples.length + " frameSize=" + frameSize );
-		mAudioPLAY.play();
+		track.play();
 		long st = System.currentTimeMillis();
 		while(dataLeft>0){
 			endbuffer=(frameSize<dataLeft) ? frameSize: dataLeft;	
 			Log.v(TAG, "Index: " + ind*frameSize + " size: " + endbuffer);
-			nWrite=mAudioPLAY.write( samples,ind*frameSize,endbuffer);
+			nWrite=track.write( samples,ind*frameSize,endbuffer);
 			if (nWrite == AudioTrack.ERROR_INVALID_OPERATION || nWrite == AudioTrack.ERROR_BAD_VALUE) {
 				Log.e(TAG, "Audio read failed: " + nWrite);
 				break;
