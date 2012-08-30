@@ -65,8 +65,10 @@ public class ThreadedPlayRecActivity extends Activity
 	Handler recordStatusBackHandler = null;
 	Thread playThread = null;
 	Thread recordThread = null;
-	public static double playTime=0.5;
-	public static double playRecDelay=0; //Allow for playback to stay playing while recording finishes
+	public static double playTime=1;
+	public static long playRecDelay=500; //Delay time between beggining of recording and begginin of play in ms
+										  //The recording will start first, wait playRecDelay ms, and then playback will start
+										  //value should not be set to more than 500 (500 ms).
 	public Bundle audioResultsBundle;
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 
@@ -130,14 +132,20 @@ public class ThreadedPlayRecActivity extends Activity
 		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
 		playThread = 
 				new Thread(
-						new PlayThreadRunnable(playStatusBackHandler,playTime+playRecDelay));
+						new PlayThreadRunnable(playStatusBackHandler,playTime));
 		recordThread = 
 				new Thread(
-						new RecordThreadRunnable(recordStatusBackHandler,playTime));
+						new RecordThreadRunnable(recordStatusBackHandler,playTime+2*(playRecDelay/1000)));
 
 		recordThread.setPriority(Thread.MAX_PRIORITY);
 		Log.v(TAG,"Executing thread pool");
 		execSvc.execute( recordThread );
+
+		try {
+			Thread.sleep(playRecDelay);
+		} catch(InterruptedException e) {
+		} 
+
 		execSvc.execute( playThread );
 		execSvc.shutdown();
 
@@ -149,9 +157,8 @@ public class ThreadedPlayRecActivity extends Activity
 		intent.putExtras(audioResultsBundle);
 		startActivity(intent);
 	}
-	
+
 	public void plotWaveform() {
-		Log.v(TAG,"Calling view to plot waveform data");
 		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
 		intent.putExtras(audioResultsBundle);
 		startActivity(intent);

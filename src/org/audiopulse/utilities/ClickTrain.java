@@ -70,22 +70,25 @@ public class ClickTrain {
 		int inClick=1; //Defined in terms of sample with positive values for clickDuration and negative for restDuration
 		for( int i = 0; i < N; i++ )
 		{		
+			data[i]= (short) (Math.random()*amplitude);
+			/*
 			if(inClick > 0){
 				//in click phase
-				//data[i]= (short) (Math.random()*amplitude/100 + amplitude);
-				data[i]= (short) (amplitude*Math.sin(2*Math.PI * 1000/Fs*i)/10);
+				data[i]= (short) (Math.random()*amplitude);
+				//data[i]= (short) (amplitude*Math.sin(2*Math.PI * 1000/Fs*i)/10);
 				inClick++;
 				if(inClick > (clickDuration*Fs)){
 					inClick=-1;
 				}
 			} else if (inClick < 0){
 				//in rest phase
-				data[i]=baseline;
+				data[i]=0;
 				inClick--;
 				if((inClick*-1) > (restDuration*Fs)){
 					inClick=1;
 				}
 			}	
+			*/
 		}
 		return data;
 	}

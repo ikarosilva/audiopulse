@@ -62,7 +62,6 @@ public class PlotSpectralActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG,"extracting bundle extras");
         Bundle audio_bundle = getIntent().getExtras();
         long N=audio_bundle.getLong("N");
         short[] audioBuffer;
@@ -70,7 +69,6 @@ public class PlotSpectralActivity extends Activity {
 		float sampleRate=audio_bundle.getFloat("recSampleRate");
 		
 		Log.v(TAG,"Sample rate is " + sampleRate);
-		Log.v(TAG,"Calling view to plot data");
         PlotSpectralView mView = new PlotSpectralView(this,N,audioBuffer,sampleRate);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(mView);

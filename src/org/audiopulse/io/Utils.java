@@ -71,14 +71,12 @@ public class Utils
 	
 	public static Bundle getStringAsABundle(String message)
 	{
-		Log.v(TAG,"Getting string AS A Bundle");
 		b= new Bundle();
 		b.putString("message", message);
 		return b;
 	}
 	public static String getStringFromABundle(Bundle b)
 	{
-		Log.v(TAG,"Getting string FROM A Bundle");
 		return b.getString("message");
 	}
 }
