@@ -4,15 +4,14 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-   	<ListView android:id="@+id/menu_list"
-	    style="@style/menu_style"
+    <ListView android:id="@+id/menu_list"
+        style="@style/menu_style"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:entries="@array/main_menu" />
 	<TextView  
 		android:id="@+id/text1"
 	    android:layout_width="fill_parent" 
-	    android:layout_height="wrap_content" 
-	    android:text="Click Menu to see Options"
+	    android:layout_height="wrap_content"
 	    />
 </LinearLayout>
