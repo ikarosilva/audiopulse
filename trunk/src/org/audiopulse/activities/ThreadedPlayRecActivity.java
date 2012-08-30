@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import org.audiopulse.R;
+//import org.audiopulse.R;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
@@ -55,11 +55,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class ThreadedPlayRecActivity extends Activity 
 {
 	public static final String TAG="ThreadedPlayRecActivity";
+	
+	static final int STIMULUS_DIALOG_ID = 0;
+	
 	Bundle audio_bundle = new Bundle();
 	Handler playStatusBackHandler = null;
 	Handler recordStatusBackHandler = null;
@@ -76,6 +82,30 @@ public class ThreadedPlayRecActivity extends Activity
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.thread);
+		
+		// set listener for main menu items
+		ListView menuList = (ListView) findViewById(R.id.menu_list);
+        menuList.setOnItemClickListener(
+        	new AdapterView.OnItemClickListener() {
+        		public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
+        			
+        			TextView item = (TextView) itemClicked;
+        			String itemText = item.getText().toString();
+        			int itemId = item.getId();
+        			
+        			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
+        				plotWaveform();
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_clear))) {
+        				emptyText();
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_play))) {
+        				playRecordThread();
+        			}
+        			
+        			Log.v(TAG,"Clicked item ID: " + Integer.toString(itemId));
+
+        		}
+        	}
+		);
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) 
@@ -103,6 +133,10 @@ public class ThreadedPlayRecActivity extends Activity
 		if(item.getItemId() == R.id.plot_waveform)
 		{
 			plotWaveform();
+			return true;
+		}
+		if(item.getItemId() == R.id.menu_stimulus) {
+			editStimulusSettings();
 			return true;
 		}
 		return false;
@@ -163,6 +197,13 @@ public class ThreadedPlayRecActivity extends Activity
 		intent.putExtras(audioResultsBundle);
 		startActivity(intent);
 	}
-
+	
+	public void editStimulusSettings() {
+		Log.v(TAG,"Calling view to edit stimulus settings");
+		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
+		intent.putExtras(audioResultsBundle);
+		startActivity(intent);
+	}
+	
 
 }
