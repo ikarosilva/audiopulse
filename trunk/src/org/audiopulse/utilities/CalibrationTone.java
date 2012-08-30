@@ -52,7 +52,7 @@ public class CalibrationTone {
 	public static enum device {
 
 		//For calibration of the ER10C we will use a 1 kHz
-		ER10C(500,0.5,"ER10C");
+		ER10C(1000,0.5,"ER10C");
 		
 		//ER10C Specs
 		/*

@@ -148,7 +148,6 @@ private static AFreeChart createChart2() {
 			true, // tooltips
 			false // urls
 			);
-	Log.v(TAG,"Generating plot");   
 	XYPlot plot = (XYPlot) chart.getPlot();
 	plot.setBackgroundPaintType(new SolidColor(Color.rgb(0, 0, 0)));
     plot.getDomainAxis().setLowerMargin(0.0);

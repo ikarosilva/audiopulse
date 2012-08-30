@@ -77,11 +77,9 @@ public class RecordThreadRunnable implements Runnable
 
 	public synchronized void run()
 	{
-		Log.d(TAG,"Starting run in recording");
 		informStart();
 
 		//Record Stimulus
-		informMiddle("Recording stimulus");
 		Log.d(TAG,"Recording stimulus");
 		this.IN_REC_MODE=1;
 		record();
@@ -100,18 +98,16 @@ public class RecordThreadRunnable implements Runnable
 
 	public void informStart()
 	{
-		Log.v(TAG,"inform record starting");
 		Message m = this.mainThreadHandler.obtainMessage();
 		m.setData(Utils.getStringAsABundle("Starting recording"));
 		this.mainThreadHandler.sendMessage(m);
 	}
 	public void informFinish()
 	{
-		Log.v(TAG,"Informing recording finish");
 		mAudio.release();
 		Message m = this.mainThreadHandler.obtainMessage();
 		this.results= new Bundle();
-		String msg="Finished and released recording in " + this.record_time/1000 + " seconds";
+		String msg="Released recording in " + this.record_time/1000 + " seconds";
 		this.results.putString("message", msg);
 		this.results.putShortArray("samples",this.samples);
 		this.results.putFloat("recSampleRate",this.sampleRate);

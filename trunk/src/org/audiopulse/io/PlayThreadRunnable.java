@@ -64,7 +64,7 @@ public class PlayThreadRunnable implements Runnable
 	int PlayBufferSize;
 	short[] samples;
 	Handler mainThreadHandler = null;
-	private long play_time;
+	private long real_play_time;
 
 
 	public PlayThreadRunnable(Handler h, double playTime)
@@ -86,10 +86,8 @@ public class PlayThreadRunnable implements Runnable
 
 	public synchronized void run()
 	{
-		Log.d(TAG,"Starting run in playback");
 		informStart();
 		//Play Stimulus
-		informMiddle("Playing stimulus");
 		playStimulus();
 		//Finish up
 		informFinish();
@@ -97,7 +95,6 @@ public class PlayThreadRunnable implements Runnable
 
 	public void informMiddle(String str)
 	{
-		Log.v(TAG,"informing middle of playback");
 		Message m = mainThreadHandler.obtainMessage();
 		m.setData(Utils.getStringAsABundle(str));
 		mainThreadHandler.sendMessage(m);
@@ -105,17 +102,15 @@ public class PlayThreadRunnable implements Runnable
 
 	public void informStart()
 	{
-		Log.v(TAG,"informing start of playback");
 		Message m = mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Starting playback"));
+		m.setData(Utils.getStringAsABundle("Playing sound for "  + samples.length/sampleRate + " seconds"));
 		mainThreadHandler.sendMessage(m);
 	}
 	public void informFinish()
 	{
-		Log.v(TAG,"informing finish of playback");
 		track.release();
 		Message m = mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Finished and released playback in " + play_time/1000 + " seconds"));
+		m.setData(Utils.getStringAsABundle("Released soundcard in " + real_play_time/1000 + " seconds"));
 		mainThreadHandler.sendMessage(m);
 	}
 
@@ -137,6 +132,7 @@ public class PlayThreadRunnable implements Runnable
 		}	
 		Log.v(TAG,"Ch count= " + track.getChannelCount() + " Play Fs= " + track.getPlaybackRate() +
 				" Coding= " + track.getAudioFormat() + " Fs= " + track.getSampleRate());
+		Log.v(TAG,"Ch config= " + track.getChannelConfiguration() + " mono is= " + AudioFormat.CHANNEL_OUT_MONO);
 		
 		if(track.getState() != AudioTrack.STATE_INITIALIZED) {
 			informMiddle("Error: Audio record was not properly initialized!!");
@@ -148,11 +144,11 @@ public class PlayThreadRunnable implements Runnable
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
-		CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C);
-		PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRate,caltone);
-		short[] tmpSamples = stimuli.generatePeriodicSeries();
-		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.2);
-		//short[] tmpSamples = stimuli.generateClickTrain();
+		//CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C);
+		//PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRate,caltone);
+		//short[] tmpSamples = stimuli.generatePeriodicSeries();
+		ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);
+		short[] tmpSamples = stimuli.generateClickTrain();
 		//WhiteNoise stimuli = new WhiteNoise(PlayBufferSize,PlayThreadRunnable.sampleRate);
 	    //short[] tmpSamples = stimuli.generateWhiteNoise();
 		Log.v(TAG,"Generate stimulus of length " + tmpSamples.length + " ,seconds= " + tmpSamples.length/(double) sampleRate);
@@ -178,8 +174,8 @@ public class PlayThreadRunnable implements Runnable
 		int endbuffer;
 		int nWrite=1;
 		int total=0;
-		Log.v(TAG,"frame size is: " + frameSize + " card size is: " + AudioBufferSize+ " play time is: " + PlayBufferSize);
-		Log.v(TAG, "samples.length= " + samples.length + " frameSize=" + frameSize );
+		Log.v(TAG,"frame size is: " + frameSize + " card size is: " + AudioBufferSize);
+		Log.v(TAG, "samples.length= " + samples.length + " frameSize=" + frameSize + " expected time is: " + samples.length/sampleRate);
 		track.play();
 		long st = System.currentTimeMillis();
 		while(dataLeft>0){
@@ -192,12 +188,12 @@ public class PlayThreadRunnable implements Runnable
 			}
 			Log.v(TAG,"wrote " + nWrite + " samples ( " + (long) 100*nWrite/endbuffer + " %)");
 			dataLeft -= endbuffer;
-			Log.v(TAG, "dataleft to play: " + dataLeft);
+			Log.v(TAG, "data left to play: " + dataLeft);
 			ind++;	
 			total+=nWrite;
 		}
-		play_time = System.currentTimeMillis()-st;
-		Log.v(TAG,"play time " + play_time/1000 + " seconds" + " total samples: " + total);
+		real_play_time = System.currentTimeMillis()-st;
+		Log.v(TAG,"play time " + real_play_time/1000 + " seconds" + " total samples: " + total);
 	}
 
 }

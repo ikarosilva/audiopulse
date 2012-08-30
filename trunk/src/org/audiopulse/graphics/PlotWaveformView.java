@@ -86,7 +86,6 @@ public class PlotWaveformView extends DemoView {
 		setChart(chart);
 	}
     private static XYSeriesCollection createDataset2() {	
-    		Log.v(TAG,"adding data to series");
     		XYSeriesCollection result = new XYSeriesCollection();
         	XYSeries series = new XYSeries(1);
         	long st=System.currentTimeMillis();
@@ -102,7 +101,6 @@ public class PlotWaveformView extends DemoView {
 
 
 private static AFreeChart createChart2() {
-	Log.v(TAG,"Creating chart");
 	XYDataset dataset = createDataset2();
 	// create the chart...
 	AFreeChart chart = ChartFactory.createXYLineChart(
