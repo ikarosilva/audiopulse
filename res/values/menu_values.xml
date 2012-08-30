@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="main_menu">
+        <item>@string/menu_plot</item>
+        <item>@string/menu_clear</item>
+        <item>@string/menu_play</item>
+    </array>
+    
+    <string name="menu_plot">Plot waveform</string>
+    <string name="menu_clear">Clear</string>
+    <string name="menu_play">Play thread</string>
+    
+    <style name="menu_style">
+        <item name="android:textColor">@color/foreground</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:divider">@color/lowlight</item>
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:listSelector">@color/highlight</item>            
+        <item name="android:gravity">left</item>
+        <item name="android:clickable">true</item>
+        <item name="android:selectable">true</item>
+	</style>
+    
+</resources>
