@@ -1,15 +1,17 @@
 #summary Documenting my attempt at using NetBeans
 
-= Installing NetBeans =
+=Installing NetBeans=
 Google it.
 
-= Installing Android plugin for NetBeans =
+=Installing Android plugin for NetBeans=
 Go to: http://kenai.com/projects/nbandroid/pages/Install
 
-= SVN =
+=SVN=
 I recommend using an independent SVN client regardless of which IDE you're using. See post at http://stackoverflow.com/a/2028447 . Windows: use TortoiseSVN.
 
-= Setting up AudioPulse Project =
+=Setting up AudioPulse Project=
 1. Update SVN code from repository using independent SVN client.
 2. File > New Project. Select Android > Android (Test?) Project. Next.
 3. Fill out info. Finish.
+
+Note: at first, R.java will not be generated automatically. NetBeans does not default to build automatically. Right-click on the project and hit "build".
