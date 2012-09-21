@@ -47,7 +47,6 @@ import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -60,7 +59,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ThreadedPlayRecActivity extends Activity 
+public class ThreadedPlayRecActivity extends AudioPulseActivity 
 {
 	public static final String TAG="ThreadedPlayRecActivity";
 	
@@ -98,7 +97,11 @@ public class ThreadedPlayRecActivity extends Activity
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_clear))) {
         				emptyText();
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_play))) {
+        				setAirplaneMode(true);
+        				//TODO: wait until airplane mode is set?
+        				//TODO: read airplane mode state onCreate of main activity, turn if on, then restore state onDestroy.
         				playRecordThread();
+        				
         			}
         			
         			Log.v(TAG,"Clicked item ID: " + Integer.toString(itemId));
