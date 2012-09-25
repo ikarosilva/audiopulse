@@ -144,11 +144,11 @@ public class PlayThreadRunnable implements Runnable
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
-		//CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C);
-		//PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRate,caltone);
-		//short[] tmpSamples = stimuli.generatePeriodicSeries();
-		ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);
-		short[] tmpSamples = stimuli.generateClickTrain();
+		CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C);
+		PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRate,caltone);
+		short[] tmpSamples = stimuli.generatePeriodicSeries();
+		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);
+		//short[] tmpSamples = stimuli.generateClickTrain();
 		//WhiteNoise stimuli = new WhiteNoise(PlayBufferSize,PlayThreadRunnable.sampleRate);
 	    //short[] tmpSamples = stimuli.generateWhiteNoise();
 		Log.v(TAG,"Generate stimulus of length " + tmpSamples.length + " ,seconds= " + tmpSamples.length/(double) sampleRate);

@@ -38,6 +38,8 @@
  */ 
 
 package org.audiopulse.io;
+import org.audiopulse.utilities.SignalProcessing;
+
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -167,7 +169,8 @@ public class RecordThreadRunnable implements Runnable
 		}
 		mAudio.stop();
 		record_time = System.currentTimeMillis()-st;
-		Log.v(TAG,"low level recording took: " + record_time/1000);		
+		Log.v(TAG,"low level recording took: " + record_time/1000);
+		Log.v(TAG,"recording RMS= " + SignalProcessing.rms(samples));		
 	}
 
 }
