@@ -54,8 +54,9 @@ public class CalibrationTone {
 
 		//For calibration of the ER10C we will use a 1 kHz
 		//Amplitude in volts, 1V p-to-p -> 69 dB SPL obtained from ER10C spec
-		ER10C(1000,1,"ER10C",69),
-		DUMMY(1000,1,"DUMMY",69); //Dummy device for testing calibration just with phone SD card
+		//Amplitude represents attenuation in dB relative to maximum level 1
+		ER10C(1000,1,"ER10C",50),
+		DUMMY(1000,1,"DUMMY",50); //Dummy device for testing calibration just with phone SD card
 		
 		
 		//ER10C Specs
@@ -70,7 +71,7 @@ public class CalibrationTone {
 		private double spl;
 		device(double f,double A, String deviceName, double spl) {
 			this.f=f;
-			this.A=A;//dBuRef*Math.pow(10,A/20); //Convert amplitude in dBu to intensity
+			this.A=Math.pow(10,-A/20); //Convert amplitude in dBu to intensity
 			this.deviceName=deviceName;
 			this.spl=spl;
 		}

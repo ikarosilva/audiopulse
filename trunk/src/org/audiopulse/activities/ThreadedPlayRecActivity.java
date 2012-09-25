@@ -70,8 +70,8 @@ public class ThreadedPlayRecActivity extends AudioPulseActivity
 	Handler recordStatusBackHandler = null;
 	Thread playThread = null;
 	Thread recordThread = null;
-	public static double playTime=1;
-	public static long playRecDelay=500; //Delay time between beggining of recording and begginin of play in ms
+	public static double playTime=0.250;
+	public static long playRecDelay=250; //Delay time between beginning of recording and begining of play in ms
 										  //The recording will start first, wait playRecDelay ms, and then playback will start
 										  //value should not be set to more than 500 (500 ms).
 	public Bundle audioResultsBundle;
