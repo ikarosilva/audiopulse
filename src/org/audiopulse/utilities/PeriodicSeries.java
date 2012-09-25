@@ -52,7 +52,7 @@ public class PeriodicSeries {
 	private short[] data;
 	public int N;
 	public double Fs; //Sampling frequency in Hz
-	public double windowSize=0.3; //window size in seconds
+	public double windowSize=0.05; //window ramp size in seconds in order to avoid speaker clipping artifact
 	public int windowN;
 
 	public PeriodicSeries(int N,double Fs,double[] frequency){
@@ -118,14 +118,12 @@ public class PeriodicSeries {
 			
 			//At onset/offset apply window in order to avoid non-linear distortions
 			if(i < (windowN/2 - 1) ){
-				tmpSample=tmpSample*1;//SpectralWindows.hamming(i,windowN);
+				tmpSample=tmpSample*SpectralWindows.hamming(i,windowN);
 			}else if(i > windowOffset0){
 				index=windowN/2 + i-windowOffset0;
-				tmpSample=tmpSample*1;//SpectralWindows.hamming(index,windowN);
-			}	
-			
-			//data[i]=(short) ((Short.MAX_VALUE-1)*tmpSample);
-			data[i]=(short) ((Short.MAX_VALUE-1)*Math.random()/2);
+				tmpSample=tmpSample*SpectralWindows.hamming(index,windowN);
+			}		
+			data[i]=(short) ((Short.MAX_VALUE-1)*tmpSample);
 		
 		}
 		Log.v(TAG,"Calculate = " + N + " samples at fs=" + Fs + " array size is=" + data.length);
