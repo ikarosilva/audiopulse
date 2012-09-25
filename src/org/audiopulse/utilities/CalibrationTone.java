@@ -43,7 +43,8 @@ package org.audiopulse.utilities;
 public class CalibrationTone {
 
 	private double[] f;
-	private double[] A; //returned Amplitudes are in intensity
+	private double[] A; //returned Amplitudes are in volts
+	private double spl; //Equivalent expected SPL given device specs
 	private String device;
 	public static final double dBSPLRef= 0.00002; //20 micro Pascal is the physical reference
 	public static final double dBuRef= Math.sqrt(0.6); //20 micro Pascal is the physical reference
@@ -52,7 +53,10 @@ public class CalibrationTone {
 	public static enum device {
 
 		//For calibration of the ER10C we will use a 1 kHz
-		ER10C(1000,0.5,"ER10C");
+		//Amplitude in volts, 1V p-to-p -> 69 dB SPL obtained from ER10C spec
+		ER10C(1000,1,"ER10C",69),
+		DUMMY(1000,1,"DUMMY",69); //Dummy device for testing calibration just with phone SD card
+		
 		
 		//ER10C Specs
 		/*
@@ -63,10 +67,12 @@ public class CalibrationTone {
 		private double f;
 		private double A;	//Amplitudes are in dB
 		private String deviceName;
-		device(double f,double A, String deviceName) {
+		private double spl;
+		device(double f,double A, String deviceName, double spl) {
 			this.f=f;
 			this.A=A;//dBuRef*Math.pow(10,A/20); //Convert amplitude in dBu to intensity
 			this.deviceName=deviceName;
+			this.spl=spl;
 		}
 	}
 
@@ -76,6 +82,7 @@ public class CalibrationTone {
 		double[] A= {caltone.A};
 		this.A=A;
 		device=caltone.deviceName;
+		this.spl=caltone.spl;
 	}
 	public double[] getStimulusFrequency(){
 		return f;
