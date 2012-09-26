@@ -41,6 +41,7 @@ package org.audiopulse.io;
 import org.audiopulse.utilities.SignalProcessing;
 
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -63,30 +64,34 @@ public class RecordThreadRunnable implements Runnable
 	private int minFrameSize=160;
 	private int IN_REC_MODE;
 	final short[] samples ;
+	Double recordRMS;
 	Handler mainThreadHandler = null;
 	private Bundle results;
 	public int clipped;
 	
-	public RecordThreadRunnable(Handler h, double playTime)
+	public RecordThreadRunnable(Handler h, double playTime, double delayTime)
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
-		this.Buffer_Size=(int) (1.2*playTime*sampleRate);
-		this.samples = new short[Buffer_Size];
-		this.initRecord();
-		this.IN_REC_MODE=0;
+		Buffer_Size=(int) (1.2*playTime*sampleRate);
+		samples = new short[Buffer_Size];
+		initRecord();
+		IN_REC_MODE=0;
 	}
 
 	public synchronized void run()
 	{
+		//AudioManager maudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        //float volume = (float) maudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 		informStart();
 
 		//Record Stimulus
 		Log.d(TAG,"Recording stimulus");
 		this.IN_REC_MODE=1;
 		record();
+		informMiddle("Volume is set to: ?");
 		this.IN_REC_MODE=0;
-
+		informMiddle("RMS= " + recordRMS);
 		//Finish up
 		informFinish();
 	}
@@ -108,14 +113,15 @@ public class RecordThreadRunnable implements Runnable
 	{
 		mAudio.release();
 		Message m = this.mainThreadHandler.obtainMessage();
-		this.results= new Bundle();
-		String msg="Released recording in " + this.record_time/1000 + " seconds";
-		this.results.putString("message", msg);
-		this.results.putShortArray("samples",this.samples);
-		this.results.putFloat("recSampleRate",this.sampleRate);
-		this.results.putLong("N",(long) this.samples.length);
-		this.results.putInt("clipped",this.clipped);
-		m.setData(this.results);
+		results= new Bundle();
+		String msg="Released recording in " + record_time/1000 + " seconds. RMS = " + recordRMS;
+		results.putString("message", msg);
+		results.putShortArray("samples",samples);
+		results.putFloat("recSampleRate",sampleRate);
+		results.putLong("N",(long) samples.length);
+		results.putInt("clipped",clipped);
+		results.putDouble("recordRMS",recordRMS);
+		m.setData(results);
 		this.mainThreadHandler.sendMessage(m);
 		if(this.clipped==1){
 			Log.v(TAG,"Recording was clipped!!");
@@ -170,7 +176,8 @@ public class RecordThreadRunnable implements Runnable
 		mAudio.stop();
 		record_time = System.currentTimeMillis()-st;
 		Log.v(TAG,"low level recording took: " + record_time/1000);
-		Log.v(TAG,"recording RMS= " + SignalProcessing.rms(samples));		
+		recordRMS=SignalProcessing.rms(samples);
+		Log.v(TAG,"recording RMS= " + recordRMS);		
 	}
 
 }

@@ -64,12 +64,13 @@ public class PlotSpectralActivity extends Activity {
         super.onCreate(savedInstanceState);
         Bundle audio_bundle = getIntent().getExtras();
         long N=audio_bundle.getLong("N");
+        Double recordRMS=audio_bundle.getDouble("recordRMS");
         short[] audioBuffer;
 		audioBuffer=audio_bundle.getShortArray("samples");
 		float sampleRate=audio_bundle.getFloat("recSampleRate");
 		
 		Log.v(TAG,"Sample rate is " + sampleRate);
-        PlotSpectralView mView = new PlotSpectralView(this,N,audioBuffer,sampleRate);
+        PlotSpectralView mView = new PlotSpectralView(this,N,audioBuffer,sampleRate,recordRMS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(mView);
     }

@@ -172,7 +172,7 @@ public class ThreadedPlayRecActivity extends AudioPulseActivity
 						new PlayThreadRunnable(playStatusBackHandler,playTime));
 		recordThread = 
 				new Thread(
-						new RecordThreadRunnable(recordStatusBackHandler,playTime+2*(playRecDelay/1000)));
+						new RecordThreadRunnable(recordStatusBackHandler,playTime+2*(playRecDelay/1000),2*(playRecDelay/1000)));
 
 		recordThread.setPriority(Thread.MAX_PRIORITY);
 		Log.v(TAG,"Executing thread pool");

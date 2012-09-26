@@ -76,12 +76,14 @@ public class PlotSpectralView extends DemoView {
 	private static short[] audioBuffer;
 	private static float sampleRate;
 	private static final int maxFreq=4000;
+	private static Double recordRMS;
 	
-	public PlotSpectralView(Context context, long N, short[] audioBuffer2, float sampleRate) {
+	public PlotSpectralView(Context context, long N, short[] audioBuffer2, float sampleRate, Double recordRMS) {
 		super(context);
-		PlotSpectralView.N=N;
-		PlotSpectralView.audioBuffer=audioBuffer2;
-		PlotSpectralView.sampleRate=sampleRate;
+		this.N=N;
+		this.audioBuffer=audioBuffer2;
+		this.sampleRate=sampleRate;
+		this.recordRMS=recordRMS;
 		
 		//PlotSpectralView.N=PlayThreadRunnable.samples.length;
 		//PlotSpectralView.audioBuffer=PlayThreadRunnable.samples;
@@ -139,7 +141,7 @@ private static AFreeChart createChart2() {
 	XYDataset dataset = createDataset2();
 	// create the chart...
 	AFreeChart chart = ChartFactory.createXYLineChart(
-			"Power Spectrum", // chart title
+			"RMS = " + recordRMS.toString() + " dB", // chart title
 			"Frequency (Hz)", // x axis label
 			"Amplitude (dB)", // y axis label
 			dataset, // data
