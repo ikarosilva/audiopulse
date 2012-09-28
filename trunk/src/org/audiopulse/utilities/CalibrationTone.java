@@ -55,8 +55,8 @@ public class CalibrationTone {
 		//For calibration of the ER10C we will use a 1 kHz
 		//Amplitude in volts, 1V p-to-p -> 69 dB SPL obtained from ER10C spec
 		//Amplitude represents attenuation in dB relative to maximum level 1
-		ER10C(1000,1,"ER10C",50),
-		DUMMY(1000,1,"DUMMY",50); //Dummy device for testing calibration just with phone SD card
+		ER10C(1000,5,"ER10C",0),
+		DUMMY(1000,5,"DUMMY",0); //Dummy device for testing calibration just with phone SD card
 		
 		
 		//ER10C Specs

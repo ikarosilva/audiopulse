@@ -47,7 +47,9 @@ import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -71,7 +73,7 @@ public class ThreadedPlayRecActivity extends AudioPulseActivity
 	Thread playThread = null;
 	Thread recordThread = null;
 	public static double playTime=0.250;
-	public static long playRecDelay=250; //Delay time between beginning of recording and begining of play in ms
+	public static long playRecDelay=0; //Delay time between beginning of recording and begining of play in ms
 										  //The recording will start first, wait playRecDelay ms, and then playback will start
 										  //value should not be set to more than 500 (500 ms).
 	public Bundle audioResultsBundle;
@@ -166,20 +168,21 @@ public class ThreadedPlayRecActivity extends AudioPulseActivity
 	{
 		playStatusBackHandler = new ReportStatusHandler(this);
 		recordStatusBackHandler = new ReportStatusHandler(this);
+		Context context=this.getApplicationContext();
 		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
 		playThread = 
 				new Thread(
 						new PlayThreadRunnable(playStatusBackHandler,playTime));
 		recordThread = 
 				new Thread(
-						new RecordThreadRunnable(recordStatusBackHandler,playTime+2*(playRecDelay/1000),2*(playRecDelay/1000)));
+						new RecordThreadRunnable(recordStatusBackHandler,playTime+2*playRecDelay,2*playRecDelay, context));
 
 		recordThread.setPriority(Thread.MAX_PRIORITY);
 		Log.v(TAG,"Executing thread pool");
 		execSvc.execute( recordThread );
 
 		try {
-			Thread.sleep(playRecDelay);
+			Thread.sleep(playRecDelay*1000); //playRecDelay is in seconds, convert to ms for sleep
 		} catch(InterruptedException e) {
 		} 
 

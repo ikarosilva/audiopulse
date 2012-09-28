@@ -44,6 +44,7 @@ import org.audiopulse.utilities.ClickTrain;
 import org.audiopulse.utilities.PeriodicSeries;
 import org.audiopulse.utilities.WhiteNoise;
 
+import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -56,7 +57,7 @@ public class PlayThreadRunnable implements Runnable
 	public static String TAG = "PlayThreadRunnable";
 	private int AudioBufferSize;
 	private AudioTrack track;
-	int channelConfig = AudioFormat.CHANNEL_OUT_MONO;
+	int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
 	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int audioMode= AudioManager.STREAM_MUSIC;
 	int trackMode=AudioTrack.MODE_STREAM;
@@ -65,6 +66,8 @@ public class PlayThreadRunnable implements Runnable
 	short[] samples;
 	Handler mainThreadHandler = null;
 	private long real_play_time;
+	String trackConfig;
+	double[] caltoneFreq;
 
 
 	public PlayThreadRunnable(Handler h, double playTime)
@@ -87,6 +90,7 @@ public class PlayThreadRunnable implements Runnable
 	public synchronized void run()
 	{
 		informStart();
+		informMiddle("channel is: " + trackConfig);
 		//Play Stimulus
 		playStimulus();
 		//Finish up
@@ -103,7 +107,8 @@ public class PlayThreadRunnable implements Runnable
 	public void informStart()
 	{
 		Message m = mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Playing sound for "  + samples.length/sampleRate + " seconds"));
+		m.setData(Utils.getStringAsABundle("Playing sound for "  + samples.length/sampleRate 
+				+ " s \n at calibration f= " + caltoneFreq[0] + " Hz"));
 		mainThreadHandler.sendMessage(m);
 	}
 	public void informFinish()
@@ -133,6 +138,7 @@ public class PlayThreadRunnable implements Runnable
 		Log.v(TAG,"Ch count= " + track.getChannelCount() + " Play Fs= " + track.getPlaybackRate() +
 				" Coding= " + track.getAudioFormat() + " Fs= " + track.getSampleRate());
 		Log.v(TAG,"Ch config= " + track.getChannelConfiguration() + " mono is= " + AudioFormat.CHANNEL_OUT_MONO);
+		track.setStereoVolume(AudioTrack.getMaxVolume(),AudioTrack.getMaxVolume());
 		
 		if(track.getState() != AudioTrack.STATE_INITIALIZED) {
 			informMiddle("Error: Audio record was not properly initialized!!");
@@ -147,6 +153,7 @@ public class PlayThreadRunnable implements Runnable
 		CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C);
 		PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRate,caltone);
 		short[] tmpSamples = stimuli.generatePeriodicSeries();
+		caltoneFreq=caltone.getStimulusFrequency();
 		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);
 		//short[] tmpSamples = stimuli.generateClickTrain();
 		//WhiteNoise stimuli = new WhiteNoise(PlayBufferSize,PlayThreadRunnable.sampleRate);
@@ -158,9 +165,11 @@ public class PlayThreadRunnable implements Runnable
 					samples[i]=tmpSamples[i];
 					samples[i+1]=tmpSamples[i];
 			}
+			trackConfig="stereo";
 		}else if(channelConfig == AudioFormat.CHANNEL_OUT_MONO) {
 			//Mono channel
 			samples=tmpSamples;
+			trackConfig="mono";
 		}else {
 			Log.v(TAG,"Unexpected channel configuration: " + channelConfig);
 		}

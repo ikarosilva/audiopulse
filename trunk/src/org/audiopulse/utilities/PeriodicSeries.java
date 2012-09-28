@@ -73,7 +73,7 @@ public class PeriodicSeries {
 		this.Fs=Fs;
 		frequency=caltone.getStimulusFrequency();
 		amplitude=caltone.getStimulusAmplitude(); //in intensity relative to 1
-		Log.v(TAG,"Generating calibration tone of " + N + " samples");
+		Log.v(TAG,"Generating calibration tone of " + N + " samples, amplitude= " + amplitude[0]);
 		//Log.v(TAG," f =" + frequency);
 		data=new short[N];
 		windowN=(int) (windowSize*Fs);

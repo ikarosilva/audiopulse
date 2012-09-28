@@ -40,6 +40,7 @@
 package org.audiopulse.io;
 import org.audiopulse.utilities.SignalProcessing;
 
+import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -68,8 +69,9 @@ public class RecordThreadRunnable implements Runnable
 	Handler mainThreadHandler = null;
 	private Bundle results;
 	public int clipped;
+	Context context;
 	
-	public RecordThreadRunnable(Handler h, double playTime, double delayTime)
+	public RecordThreadRunnable(Handler h, double playTime, double delayTime, Context context)
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
@@ -77,6 +79,7 @@ public class RecordThreadRunnable implements Runnable
 		samples = new short[Buffer_Size];
 		initRecord();
 		IN_REC_MODE=0;
+		this.context=context;
 	}
 
 	public synchronized void run()
@@ -84,12 +87,15 @@ public class RecordThreadRunnable implements Runnable
 		//AudioManager maudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         //float volume = (float) maudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 		informStart();
-
+		
 		//Record Stimulus
 		Log.d(TAG,"Recording stimulus");
 		this.IN_REC_MODE=1;
 		record();
-		informMiddle("Volume is set to: ?");
+		
+		android.media.AudioManager mgr = (android.media.AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
+		int streamVolume = mgr.getStreamVolume(android.media.AudioManager.STREAM_MUSIC); 
+		informMiddle("Volume is set to: " + streamVolume);
 		this.IN_REC_MODE=0;
 		informMiddle("RMS= " + recordRMS);
 		//Finish up
