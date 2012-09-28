@@ -62,7 +62,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ThreadedPlayRecActivity extends AudioPulseActivity 
+public class ThreadedPlayRecActivity extends AudioPulseRootActivity 
 {
 	public static final String TAG="ThreadedPlayRecActivity";
 	

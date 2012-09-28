@@ -162,8 +162,8 @@ public class PlayThreadRunnable implements Runnable
 		if(channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
 			//Interleave the tracks for processing
 			for(int i=0;i<tmpSamples.length;i++){
-					samples[i]=tmpSamples[i];
-					samples[i+1]=tmpSamples[i];
+					samples[2*i]=tmpSamples[i];
+					samples[2*i+1]=tmpSamples[i];
 			}
 			trackConfig="stereo";
 		}else if(channelConfig == AudioFormat.CHANNEL_OUT_MONO) {

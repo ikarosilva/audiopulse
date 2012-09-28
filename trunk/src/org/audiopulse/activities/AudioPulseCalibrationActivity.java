@@ -42,7 +42,7 @@ package org.audiopulse.activities;
 import android.os.Bundle;
 import org.audiopulse.R;
 
-public class AudioPulseCalibrationActivity extends AudioPulseActivity {
+public class AudioPulseCalibrationActivity extends AudioPulseRootActivity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
