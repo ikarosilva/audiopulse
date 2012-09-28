@@ -11,15 +11,13 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity android:name=".activities.PlotWaveformActivity"
-            android:label="Waveform Plot"
             android:configChanges="orientation|keyboardHidden">
         </activity>
         <activity android:name=".activities.PlotSpectralActivity"
-            android:label="Spectral Plot"
             android:configChanges="orientation|keyboardHidden">
         </activity>
         <activity android:name=".activities.ThreadedPlayRecActivity"
-                  android:label="PlayRec">
+                  android:label="Audio Pulse">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
