@@ -50,6 +50,7 @@ import org.audiopulse.io.ReportStatusHandler;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -66,7 +67,7 @@ public class ThreadedPlayRecActivity extends AudioPulseActivity
 	public static final String TAG="ThreadedPlayRecActivity";
 	
 	static final int STIMULUS_DIALOG_ID = 0;
-	
+	AudioManager audioManager;
 	Bundle audio_bundle = new Bundle();
 	Handler playStatusBackHandler = null;
 	Handler recordStatusBackHandler = null;
@@ -169,6 +170,12 @@ public class ThreadedPlayRecActivity extends AudioPulseActivity
 		playStatusBackHandler = new ReportStatusHandler(this);
 		recordStatusBackHandler = new ReportStatusHandler(this);
 		Context context=this.getApplicationContext();
+		
+		//Set the audio properties for play and recording
+		//audioManager = (AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
+		//audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+		//		audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),);
+		
 		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
 		playThread = 
 				new Thread(
