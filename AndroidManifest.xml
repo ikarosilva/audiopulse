@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE manifest [
-    <!ENTITY CATEGORY_NAME "org.afree.chart.demo">
-]>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.audiopulse"
     android:versionCode="1"
@@ -16,18 +13,10 @@
         <activity android:name=".activities.PlotWaveformActivity"
             android:label="Waveform Plot"
             android:configChanges="orientation|keyboardHidden">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="&CATEGORY_NAME;" />
-            </intent-filter>
         </activity>
         <activity android:name=".activities.PlotSpectralActivity"
             android:label="Spectral Plot"
             android:configChanges="orientation|keyboardHidden">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="&CATEGORY_NAME;" />
-            </intent-filter>
         </activity>
         <activity android:name=".activities.ThreadedPlayRecActivity"
                   android:label="PlayRec">
