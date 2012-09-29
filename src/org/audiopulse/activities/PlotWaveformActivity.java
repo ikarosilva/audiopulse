@@ -52,7 +52,7 @@ import android.view.Window;
 /**
  * DeviationRendererDemo02Activity
  */
-public class PlotWaveformActivity extends Activity {
+public class PlotWaveformActivity extends AudioPulseActivity {
 	
 	private static final String TAG="PlotWaveformActivity";
 

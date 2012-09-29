@@ -52,7 +52,7 @@ import android.view.Window;
 /**
  * DeviationRendererDemo02Activity
  */
-public class PlotSpectralActivity extends Activity {
+public class PlotSpectralActivity extends AudioPulseActivity {
 
     /**
      * Called when the activity is starting.
