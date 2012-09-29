@@ -7,7 +7,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-public class AudioPulseRootActivity extends Activity{
+public class AudioPulseRootActivity extends AudioPulseActivity{
 	
 	public static final String TAG = "AudioPulse Activity";
 	public static boolean userAirplaneMode;
