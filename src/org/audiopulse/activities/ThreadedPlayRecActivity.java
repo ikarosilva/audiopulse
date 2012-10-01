@@ -49,7 +49,6 @@ import org.audiopulse.io.ReportStatusHandler;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
 import android.os.Handler;
@@ -67,7 +66,6 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	public static final String TAG="ThreadedPlayRecActivity";
 	
 	static final int STIMULUS_DIALOG_ID = 0;
-	AudioManager audioManager;
 	Bundle audio_bundle = new Bundle();
 	Handler playStatusBackHandler = null;
 	Handler recordStatusBackHandler = null;
@@ -100,9 +98,6 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_clear))) {
         				emptyText();
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_play))) {
-        				setAirplaneMode(true);
-        				//TODO: wait until airplane mode is set?
-        				//TODO: read airplane mode state onCreate of main activity, turn if on, then restore state onDestroy.
         				playRecordThread();
         				
         			}
@@ -167,15 +162,13 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 
 	private void playRecordThread()
 	{
+		Log.v(TAG,"Finished playRecordThread()");
+		beginTest();
+		
 		playStatusBackHandler = new ReportStatusHandler(this);
 		recordStatusBackHandler = new ReportStatusHandler(this);
 		Context context=this.getApplicationContext();
-		
-		//Set the audio properties for play and recording
-		//audioManager = (AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
-		//audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
-		//		audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),);
-		
+				
 		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
 		playThread = 
 				new Thread(
@@ -189,12 +182,15 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 		execSvc.execute( recordThread );
 
 		try {
-			Thread.sleep(playRecDelay*1000); //playRecDelay is in seconds, convert to ms for sleep
+			Thread.sleep(playRecDelay*1000 + 2000); //playRecDelay is in seconds, convert to ms for sleep
 		} catch(InterruptedException e) {
 		} 
 
 		execSvc.execute( playThread );
 		execSvc.shutdown();
+		
+		endTest();
+		Log.v(TAG,"Finished playRecordThread()");
 
 	}
 
