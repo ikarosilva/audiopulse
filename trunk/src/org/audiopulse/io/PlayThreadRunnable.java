@@ -57,7 +57,7 @@ public class PlayThreadRunnable implements Runnable
 	public static String TAG = "PlayThreadRunnable";
 	private int AudioBufferSize;
 	private AudioTrack track;
-	int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
+	int channelConfig = AudioFormat.CHANNEL_OUT_MONO;
 	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int audioMode= AudioManager.STREAM_MUSIC;
 	int trackMode=AudioTrack.MODE_STREAM;
@@ -75,13 +75,6 @@ public class PlayThreadRunnable implements Runnable
 		Log.v(TAG,"constructing playback thread");
 		mainThreadHandler = h;
 		PlayBufferSize=(int) (playTime*sampleRate);
-
-		if(channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
-			//Interleave the tracks for processing
-			samples = new short[2*PlayBufferSize];
-		}else{
-			samples = new short[PlayBufferSize];
-		}
 		this.initPlayTrack();
 		this.generateStimulus();
 
@@ -91,9 +84,7 @@ public class PlayThreadRunnable implements Runnable
 	{
 		informStart();
 		informMiddle("channel is: " + trackConfig);
-		//Play Stimulus
 		playStimulus();
-		//Finish up
 		informFinish();
 	}
 
@@ -107,7 +98,7 @@ public class PlayThreadRunnable implements Runnable
 	public void informStart()
 	{
 		Message m = mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Playing sound for "  + samples.length/sampleRate 
+		m.setData(Utils.getStringAsABundle("Playing sound for "  + PlayBufferSize/sampleRate 
 				+ " s \n at calibration f= " + caltoneFreq[0] + " Hz"));
 		mainThreadHandler.sendMessage(m);
 	}
@@ -137,7 +128,6 @@ public class PlayThreadRunnable implements Runnable
 		}	
 		Log.v(TAG,"Ch count= " + track.getChannelCount() + " Play Fs= " + track.getPlaybackRate() +
 				" Coding= " + track.getAudioFormat() + " Fs= " + track.getSampleRate());
-		Log.v(TAG,"Ch config= " + track.getChannelConfiguration() + " mono is= " + AudioFormat.CHANNEL_OUT_MONO);
 		track.setStereoVolume(AudioTrack.getMaxVolume(),AudioTrack.getMaxVolume());
 		
 		if(track.getState() != AudioTrack.STATE_INITIALIZED) {
@@ -150,7 +140,7 @@ public class PlayThreadRunnable implements Runnable
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
-		CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C);
+		CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C,channelConfig);
 		PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRate,caltone);
 		short[] tmpSamples = stimuli.generatePeriodicSeries();
 		caltoneFreq=caltone.getStimulusFrequency();
@@ -158,21 +148,14 @@ public class PlayThreadRunnable implements Runnable
 		//short[] tmpSamples = stimuli.generateClickTrain();
 		//WhiteNoise stimuli = new WhiteNoise(PlayBufferSize,PlayThreadRunnable.sampleRate);
 	    //short[] tmpSamples = stimuli.generateWhiteNoise();
-		Log.v(TAG,"Generate stimulus of length " + tmpSamples.length + " ,seconds= " + tmpSamples.length/(double) sampleRate);
-		if(channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
-			//Interleave the tracks for processing
-			for(int i=0;i<tmpSamples.length;i++){
-					samples[2*i]=tmpSamples[i];
-					samples[2*i+1]=tmpSamples[i];
-			}
+		if(stimuli.channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
 			trackConfig="stereo";
-		}else if(channelConfig == AudioFormat.CHANNEL_OUT_MONO) {
-			//Mono channel
-			samples=tmpSamples;
+		}else if(stimuli.channelConfig == AudioFormat.CHANNEL_OUT_MONO) {
 			trackConfig="mono";
 		}else {
-			Log.v(TAG,"Unexpected channel configuration: " + channelConfig);
+			trackConfig="Unexpected channel configuration!!";
 		}
+		samples=tmpSamples;
 	}
 
 
@@ -184,7 +167,7 @@ public class PlayThreadRunnable implements Runnable
 		int nWrite=1;
 		int total=0;
 		Log.v(TAG,"frame size is: " + frameSize + " card size is: " + AudioBufferSize);
-		Log.v(TAG, "samples.length= " + samples.length + " frameSize=" + frameSize + " expected time is: " + samples.length/sampleRate);
+		Log.v(TAG, "samples.length= " + samples.length + " frameSize=" + frameSize );
 		track.play();
 		long st = System.currentTimeMillis();
 		while(dataLeft>0){

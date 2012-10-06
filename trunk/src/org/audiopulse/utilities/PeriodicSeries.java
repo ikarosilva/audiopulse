@@ -41,6 +41,8 @@ package org.audiopulse.utilities;
 
 import org.audiopulse.graphics.SpectralWindows;
 
+
+import android.media.AudioFormat;
 import android.util.Log;
 
 public class PeriodicSeries {
@@ -54,19 +56,21 @@ public class PeriodicSeries {
 	public double Fs; //Sampling frequency in Hz
 	public double windowSize=0.05; //window ramp size in seconds in order to avoid speaker clipping artifact
 	public int windowN;
+	public int channelConfig;	
 
-	public PeriodicSeries(int N,double Fs,double[] frequency){
+	public PeriodicSeries(int N,double Fs,double[] frequency,int channelConfig){
 		this.N=N;
 		this.Fs=Fs;
 		this.frequency=frequency;
 		data=new short[N];
 		amplitude= new double[frequency.length];
+		this.channelConfig=channelConfig;
 		for (int i=0;i<frequency.length;i++){
 			amplitude[i]=1; //Set default amplitudes in intensity
 		}
 		windowN=(int) (windowSize*Fs);
 	}
-	
+
 	//Constructor for Calibration signals
 	public PeriodicSeries(int N,double Fs,CalibrationTone caltone){
 		this.N=N;
@@ -74,11 +78,15 @@ public class PeriodicSeries {
 		frequency=caltone.getStimulusFrequency();
 		amplitude=caltone.getStimulusAmplitude(); //in intensity relative to 1
 		Log.v(TAG,"Generating calibration tone of " + N + " samples, amplitude= " + amplitude[0]);
-		//Log.v(TAG," f =" + frequency);
-		data=new short[N];
 		windowN=(int) (windowSize*Fs);
+		channelConfig=caltone.channelConfig;
+		if(channelConfig ==AudioFormat.CHANNEL_OUT_MONO){
+			data=new short[N];
+		}else{
+			data=new short[2*N]; //stereo mode
+		}
 	}
-		
+
 	//Constructor for DPOAE signals, which is a Periodic Series
 	public PeriodicSeries(int N,double Fs,DPOAESignal dpoae){
 		this.N=N;
@@ -89,11 +97,13 @@ public class PeriodicSeries {
 		windowN=(int) (windowSize*Fs);
 	}
 
-	public PeriodicSeries(int N,double Fs,double[] frequency,double[] amplitude){
+	public PeriodicSeries(int N,double Fs,double[] frequency,
+			double[] amplitude,int channelConfig ){
 		this.N=N;
 		this.Fs=Fs;
 		this.frequency=frequency;
 		data=new short[N];
+		this.channelConfig=channelConfig;
 		this.amplitude=amplitude; //Amplitudes are in intensity!!
 		windowN=(int) (windowSize*Fs);
 	}
@@ -115,19 +125,25 @@ public class PeriodicSeries {
 			{
 				tmpSample += amplitude[k]*Math.sin(increment[k]*i);
 			}
-			
 			//At onset/offset apply window in order to avoid non-linear distortions
 			if(i < (windowN/2 - 1) ){
 				tmpSample=tmpSample*SpectralWindows.hamming(i,windowN);
 			}else if(i > windowOffset0){
 				index=windowN/2 + i-windowOffset0;
 				tmpSample=tmpSample*SpectralWindows.hamming(index,windowN);
-			}		
-			data[i]=(short) ((Short.MAX_VALUE-1)*tmpSample);
-		
+			}	
+			if(channelConfig == AudioFormat.CHANNEL_OUT_MONO){
+				data[i]=(short) ((Short.MAX_VALUE-1)*tmpSample);
+
+			}else{
+				//Stereo case
+				data[2*i]=(short) ((Short.MAX_VALUE-1)*tmpSample);
+				data[2*i+1]=(short) ((Short.MAX_VALUE-1)*tmpSample);
+			}
+
 		}
 		Log.v(TAG,"Calculate = " + N + " samples at fs=" + Fs + " array size is=" + data.length);
 		return data;
 	}
-	
+
 } //of Class definition
