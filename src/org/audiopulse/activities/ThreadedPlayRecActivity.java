@@ -71,8 +71,8 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	Handler recordStatusBackHandler = null;
 	Thread playThread = null;
 	Thread recordThread = null;
-	public static double playTime=0.250;
-	public static long playRecDelay=0; //Delay time between beginning of recording and begining of play in ms
+	public static double playTime=1;
+	public static long playRecDelay=0; //Delay time between beginning of recording and beginning of play in ms
 										  //The recording will start first, wait playRecDelay ms, and then playback will start
 										  //value should not be set to more than 500 (500 ms).
 	public Bundle audioResultsBundle;
@@ -177,15 +177,10 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 				new Thread(
 						new RecordThreadRunnable(recordStatusBackHandler,playTime+2*playRecDelay,2*playRecDelay, context));
 
+		playThread.setPriority(Thread.MAX_PRIORITY);
 		recordThread.setPriority(Thread.MAX_PRIORITY);
 		Log.v(TAG,"Executing thread pool");
 		execSvc.execute( recordThread );
-
-		try {
-			Thread.sleep(playRecDelay*1000 + 2000); //playRecDelay is in seconds, convert to ms for sleep
-		} catch(InterruptedException e) {
-		} 
-
 		execSvc.execute( playThread );
 		execSvc.shutdown();
 		

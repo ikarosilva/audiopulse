@@ -75,11 +75,12 @@ public class RecordThreadRunnable implements Runnable
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
-		Buffer_Size=(int) (1.2*playTime*sampleRate);
+		Buffer_Size=(int) (playTime*(double)sampleRate);
 		samples = new short[Buffer_Size];
 		initRecord();
 		IN_REC_MODE=0;
 		this.context=context;
+		Log.d(TAG,"Buffe_Size= " + Buffer_Size);
 	}
 
 	public synchronized void run()
@@ -112,7 +113,7 @@ public class RecordThreadRunnable implements Runnable
 	public void informStart()
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Starting recording"));
+		m.setData(Utils.getStringAsABundle("Recording for: " + (double) Buffer_Size/sampleRate +" s"));
 		this.mainThreadHandler.sendMessage(m);
 	}
 	public void informFinish()
@@ -142,7 +143,7 @@ public class RecordThreadRunnable implements Runnable
 	}
 
 	private void initRecord(){
-		Log.v(TAG,"Initialized record track");
+		//Log.v(TAG,"Initialized record track");
 		try {
 			soundCardBufferSize=AudioRecord.getMinBufferSize(sampleRate,channelConfig,audioFormat);
 			mAudio = new AudioRecord(recSource,sampleRate,channelConfig,
@@ -165,7 +166,7 @@ public class RecordThreadRunnable implements Runnable
 		int nRead=1;
 		int frameSize=minFrameSize*4;
 		//Log.v(TAG,"frame size is: " + frameSize + " card size is" + soundCardBufferSize + " play time is: " + playTime);
-		int dataLeft=this.samples.length;
+		int dataLeft=samples.length;
 		while(dataLeft>0){
 			endbuffer=(frameSize<dataLeft) ? frameSize: dataLeft;
 			//Log.v(TAG, "lthis.samples.length=" + this.samples.length+ " index: " + ind*frameSize + " size:" + frameSize);

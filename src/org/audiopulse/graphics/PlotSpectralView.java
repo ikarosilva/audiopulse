@@ -75,20 +75,19 @@ public class PlotSpectralView extends DemoView {
 	private static long N;
 	private static short[] audioBuffer;
 	private static float sampleRate;
-	private static final int maxFreq=4000;
+	//private static final int maxFreq=4000;
 	private static Double recordRMS;
 	
-	public PlotSpectralView(Context context, long N, short[] audioBuffer2, float sampleRate, Double recordRMS) {
+	public PlotSpectralView(Context context, long N, short[] audioBuffer, float sampleRate, Double recordRMS) {
 		super(context);
 		this.N=N;
-		this.audioBuffer=audioBuffer2;
+		this.audioBuffer=audioBuffer;
 		this.sampleRate=sampleRate;
 		this.recordRMS=recordRMS;
 		
 		//PlotSpectralView.N=PlayThreadRunnable.samples.length;
 		//PlotSpectralView.audioBuffer=PlayThreadRunnable.samples;
-		//PlotSpectralView.sampleRate=PlayThreadRunnable.sampleRatePlay;
-				
+		//PlotSpectralView.sampleRate=PlayThreadRunnable.sampleRatePlay;			
 		//Log.v(TAG,"Constructor: N= " + N +  " sampleRate= " + sampleRate );
 		
 		final AFreeChart chart = createChart2();
@@ -101,8 +100,7 @@ public class PlotSpectralView extends DemoView {
 
         	//Calculate the size of averaged waveform
         	//based on the maximum desired frequency for FFT analysis
-        	int SPEC_N=(int) N;//(N*maxFreq/sampleRate ); 
-        	SPEC_N=(int) Math.pow(2,Math.round(Math.log(SPEC_N)/Math.log(2)));
+        	int SPEC_N=(int) Math.pow(2,Math.floor(Math.log((int) N)/Math.log(2)));
         	double fres= (double) sampleRate/SPEC_N;
         	double[] winData=new double[SPEC_N];
         	Complex[] tmpFFT=new Complex[SPEC_N];
@@ -122,7 +120,6 @@ public class PlotSpectralView extends DemoView {
         			winData[k]= (double) audioBuffer[i*SPEC_N + k]*SpectralWindows.hamming(k,SPEC_N);
         		}
         		tmpFFT=FFT.transform(winData,TransformType.FORWARD);
-        		//Calculate the average only  about maxFreq
         		for(int k=0;k<(SPEC_N/2);k++){
         			tmpPxx = tmpFFT[k].abs()/(double)SPEC_N;
         			tmpPxx*=tmpPxx; //Not accurate for the DC & Nyquist, but we are not using it!
