@@ -41,57 +41,35 @@ package org.audiopulse.utilities;
 
 
 
-public class CalibrationTone {
-
-	private double[] f;
-	private double[] A; //returned Amplitudes are in volts
-	private double spl; //Equivalent expected SPL given device specs
+public class CalibrationTone extends PeriodicSeries {
 	private String device;
-	public static final double dBSPLRef= 0.00002; //20 micro Pascal is the physical reference
-	public static final double dBuRef= Math.sqrt(0.6); //20 micro Pascal is the physical reference
-	public int channelConfig;
-	
-	//err=20*log10(data_rms/ref_rms);
+		
 	public static enum device {
 
-		//For calibration of the ER10C we will use a 1 kHz
-		//Amplitude in volts, 1V p-to-p -> 69 dB SPL obtained from ER10C spec
-		//Amplitude represents attenuation in dB relative to maximum level 1
-		ER10C(1000,5,"ER10C"),
-		DUMMY(1000,5,"DUMMY"); //Dummy device for testing calibration just with phone SD card
-		
-		
 		//ER10C Specs
-		/*
-		private double sensitivity1kHzSPL=72; 
-		private double sensitivity1kHzVRMS=1; 
-		private double output0SPLtodBuV=0; 
-		*/
-		private double f;
-		private double A;	//Amplitudes are in dB
+				/*
+				private double sensitivity1kHzSPL=72; 
+				private double sensitivity1kHzVRMS=1; 
+				private double output0SPLtodBuV=0; 
+				*/
+		ER10C((double) 1000,(double) 5,"ER10C");
+		
+		private double[] f=new double[1];
+		private double[] A=new double[1];	//Amplitudes are in dB
 		private String deviceName;
 		
-		device(double f,double A, String deviceName) {
-			this.f=f;
-			this.A=Math.pow(10,-A/20); //Convert amplitude in dBu to intensity
+		device(Double f,Double A, String deviceName) {
+			this.f[0]=f;
+			this.A[0]=Math.pow(10,-A/20); //Convert amplitude in dBu to intensity
 			this.deviceName=deviceName;
 		}
 	}
 
-	public CalibrationTone(device caltone, int channelConfig){
-		double[] f={caltone.f};
-		this.f=f;
-		double[] A= {caltone.A};
-		this.A=A;
+	public CalibrationTone(int N, double Fs, device caltone, int channelConfig){	
+		super(N,Fs, caltone.f,caltone.A,channelConfig);
 		device=caltone.deviceName;
-		this.channelConfig=channelConfig ;
 	}
-	public double[] getStimulusFrequency(){
-		return f;
-	}
-	public double[] getStimulusAmplitude(){
-		return A;
-	}
+	
 	public String getProtocol(){
 		return device;
 	}

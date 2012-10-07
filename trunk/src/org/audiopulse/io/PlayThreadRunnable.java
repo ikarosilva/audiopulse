@@ -43,6 +43,7 @@ import org.audiopulse.utilities.CalibrationTone;
 import org.audiopulse.utilities.ClickTrain;
 import org.audiopulse.utilities.PeriodicSeries;
 import org.audiopulse.utilities.WhiteNoise;
+import org.audiopulse.utilities.CalibrationTone.device;
 
 import android.content.Context;
 import android.media.AudioFormat;
@@ -57,10 +58,11 @@ public class PlayThreadRunnable implements Runnable
 	public static String TAG = "PlayThreadRunnable";
 	private int AudioBufferSize;
 	private AudioTrack track;
-	int channelConfig = AudioFormat.CHANNEL_OUT_MONO;
+	int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
 	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int audioMode= AudioManager.STREAM_MUSIC;
 	int trackMode=AudioTrack.MODE_STREAM;
+	float trackVolume=AudioTrack.getMaxVolume()/2;
 	public final static int sampleRate=44100;
 	int PlayBufferSize;
 	short[] samples;
@@ -83,7 +85,7 @@ public class PlayThreadRunnable implements Runnable
 	public synchronized void run()
 	{
 		informStart();
-		informMiddle("channel is: " + trackConfig);
+		informMiddle("channel is: " + trackConfig + " volume= " + trackVolume);
 		playStimulus();
 		informFinish();
 	}
@@ -120,7 +122,7 @@ public class PlayThreadRunnable implements Runnable
 			assert ( track.getChannelConfiguration() == channelConfig ) : "Incorrect channel configuration: " +
 					track.getChannelConfiguration() + " expected: " + channelConfig ;
 			if(channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
-				track.setStereoVolume(AudioTrack.getMaxVolume()/2,AudioTrack.getMaxVolume()/2);
+				track.setStereoVolume(trackVolume,trackVolume);
 			}
 			track.setPlaybackRate(sampleRate);
 		} catch (IllegalArgumentException e) {
@@ -128,8 +130,6 @@ public class PlayThreadRunnable implements Runnable
 		}	
 		Log.v(TAG,"Ch count= " + track.getChannelCount() + " Play Fs= " + track.getPlaybackRate() +
 				" Coding= " + track.getAudioFormat() + " Fs= " + track.getSampleRate());
-		track.setStereoVolume(AudioTrack.getMaxVolume(),AudioTrack.getMaxVolume());
-		
 		if(track.getState() != AudioTrack.STATE_INITIALIZED) {
 			informMiddle("Error: Audio record was not properly initialized!!");
 			Log.e(TAG,"Error: Audio record was not properly initialized!!");
@@ -140,17 +140,17 @@ public class PlayThreadRunnable implements Runnable
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
-		CalibrationTone caltone = new CalibrationTone(CalibrationTone.device.ER10C,channelConfig);
-		PeriodicSeries stimuli=new PeriodicSeries(PlayBufferSize,sampleRate,caltone);
-		short[] tmpSamples = stimuli.generatePeriodicSeries();
-		caltoneFreq=caltone.getStimulusFrequency();
+		CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
+													CalibrationTone.device.ER10C,channelConfig);
+		short[] tmpSamples = caltone.generateSignal();
+		caltoneFreq=caltone.getSignalFrequency();
 		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);
 		//short[] tmpSamples = stimuli.generateClickTrain();
 		//WhiteNoise stimuli = new WhiteNoise(PlayBufferSize,PlayThreadRunnable.sampleRate);
 	    //short[] tmpSamples = stimuli.generateWhiteNoise();
-		if(stimuli.channelConfig == AudioFormat.CHANNEL_OUT_STEREO){
+		if(caltone.getChannelConfig() == AudioFormat.CHANNEL_OUT_STEREO){
 			trackConfig="stereo";
-		}else if(stimuli.channelConfig == AudioFormat.CHANNEL_OUT_MONO) {
+		}else if(caltone.getChannelConfig() == AudioFormat.CHANNEL_OUT_MONO) {
 			trackConfig="mono";
 		}else {
 			trackConfig="Unexpected channel configuration!!";

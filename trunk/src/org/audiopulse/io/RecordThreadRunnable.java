@@ -42,7 +42,6 @@ import org.audiopulse.utilities.SignalProcessing;
 
 import android.content.Context;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -71,7 +70,7 @@ public class RecordThreadRunnable implements Runnable
 	public int clipped;
 	Context context;
 	
-	public RecordThreadRunnable(Handler h, double playTime, double delayTime, Context context)
+	public RecordThreadRunnable(Handler h, double playTime,Context context)
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
