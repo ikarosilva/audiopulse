@@ -74,7 +74,7 @@ public class RecordThreadRunnable implements Runnable
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
-		Buffer_Size=(int) (playTime*(double)sampleRate);
+		Buffer_Size=(int) (playTime*sampleRate);
 		samples = new short[Buffer_Size];
 		initRecord();
 		IN_REC_MODE=0;

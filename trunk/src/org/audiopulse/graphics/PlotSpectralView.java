@@ -83,8 +83,7 @@ public class PlotSpectralView extends DemoView {
 		this.N=N;
 		this.audioBuffer=audioBuffer;
 		this.sampleRate=sampleRate;
-		this.recordRMS=recordRMS;
-		
+		this.recordRMS=recordRMS;	
 		//PlotSpectralView.N=PlayThreadRunnable.samples.length;
 		//PlotSpectralView.audioBuffer=PlayThreadRunnable.samples;
 		//PlotSpectralView.sampleRate=PlayThreadRunnable.sampleRatePlay;			
