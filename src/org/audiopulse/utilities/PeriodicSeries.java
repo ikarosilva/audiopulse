@@ -59,7 +59,7 @@ public class PeriodicSeries {
 	private int channelConfig;	
 	
 	public PeriodicSeries(int N,double Fs,double[] frequency,
-			double[] amplitude,int channelConfig ){
+			double[] amplitude,int channelConfig){
 		this.N=N;
 		this.Fs=Fs;
 		this.frequency=frequency;
@@ -114,12 +114,12 @@ public class PeriodicSeries {
 				tmpSample=tmpSample*SpectralWindows.hamming(index,windowN);
 			}	
 			if(channelConfig == AudioFormat.CHANNEL_OUT_MONO){
-				data[i]=(short) ((Short.MAX_VALUE-1)*tmpSample);
+				data[i]=(short) tmpSample;
 
 			}else{
 				//Stereo case
-				data[2*i]=(short) ((Short.MAX_VALUE-1)*tmpSample);
-				data[2*i+1]=(short) ((Short.MAX_VALUE-1)*tmpSample);
+				data[2*i]=(short) tmpSample;
+				data[2*i+1]=(short) tmpSample;
 			}
 
 		}

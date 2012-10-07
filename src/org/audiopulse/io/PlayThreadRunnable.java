@@ -40,12 +40,6 @@
 package org.audiopulse.io;
 
 import org.audiopulse.utilities.CalibrationTone;
-import org.audiopulse.utilities.ClickTrain;
-import org.audiopulse.utilities.PeriodicSeries;
-import org.audiopulse.utilities.WhiteNoise;
-import org.audiopulse.utilities.CalibrationTone.device;
-
-import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -62,7 +56,10 @@ public class PlayThreadRunnable implements Runnable
 	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int audioMode= AudioManager.STREAM_MUSIC;
 	int trackMode=AudioTrack.MODE_STREAM;
-	float trackVolume=AudioTrack.getMaxVolume()/2;
+	
+	//The track volume should be held fixed always at the maximum!!
+	//if the signal is being clipped than attenuation the signal relative to this value!!
+	public static final float trackVolume=AudioTrack.getMaxVolume();
 	public final static int sampleRate=44100;
 	int PlayBufferSize;
 	short[] samples;
@@ -79,7 +76,6 @@ public class PlayThreadRunnable implements Runnable
 		PlayBufferSize=(int) (playTime*sampleRate);
 		this.initPlayTrack();
 		this.generateStimulus();
-
 	}
 
 	public synchronized void run()
@@ -140,8 +136,10 @@ public class PlayThreadRunnable implements Runnable
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
+		//CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
+		//											CalibrationTone.device.ER10C,channelConfig);
 		CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
-													CalibrationTone.device.ER10C,channelConfig);
+				CalibrationTone.device.DUMMY_LGVM670,channelConfig);
 		short[] tmpSamples = caltone.generateSignal();
 		caltoneFreq=caltone.getSignalFrequency();
 		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);

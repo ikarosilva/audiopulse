@@ -39,10 +39,12 @@
 
 package org.audiopulse.utilities;
 
+import android.util.Log;
 
 
 public class CalibrationTone extends PeriodicSeries {
 	private String device;
+	private static String TAG="CalibrationTone";
 		
 	public static enum device {
 
@@ -52,20 +54,25 @@ public class CalibrationTone extends PeriodicSeries {
 				private double sensitivity1kHzVRMS=1; 
 				private double output0SPLtodBuV=0; 
 				*/
-		ER10C((double) 1000,(double) 5,"ER10C");
+		ER10C((double) 1000,5,"ER10C"),
+		DUMMY_LGVM670((double) 1000,20,"DUMMY_LGVM670"); //used for debugging in free field mode
+		
 		
 		private double[] f=new double[1];
-		private double[] A=new double[1];	//Amplitudes are in dB
+		private double[] A=new double[1];	//Attenuation in dB relative to AudioTrack.getMaxVolume()
 		private String deviceName;
 		
-		device(Double f,Double A, String deviceName) {
+		device(Double f,int attenuation, String deviceName) {
 			this.f[0]=f;
-			this.A[0]=Math.pow(10,-A/20); //Convert amplitude in dBu to intensity
+			//Convert attenuation in dB relative to the maximum track level
+			this.A[0]=Short.MAX_VALUE*Math.pow(10,(double)(-attenuation)/20); 
 			this.deviceName=deviceName;
+			Log.v(TAG,"Amplitude =" + this.A[0]);
 		}
 	}
 
-	public CalibrationTone(int N, double Fs, device caltone, int channelConfig){	
+	public CalibrationTone(int N, double Fs, device caltone, int channelConfig){
+		//Call constructor on PeriodicSeries
 		super(N,Fs, caltone.f,caltone.A,channelConfig);
 		device=caltone.deviceName;
 	}
