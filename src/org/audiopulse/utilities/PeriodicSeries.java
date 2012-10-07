@@ -49,66 +49,46 @@ public class PeriodicSeries {
 
 
 	public static final String TAG="PeriodicSeries";
-	public double[] frequency;
-	public double[] amplitude;
+	private double[] frequency;
+	private double[] amplitude;
 	private short[] data;
-	public int N;
-	public double Fs; //Sampling frequency in Hz
-	public double windowSize=0.05; //window ramp size in seconds in order to avoid speaker clipping artifact
-	public int windowN;
-	public int channelConfig;	
-
-	public PeriodicSeries(int N,double Fs,double[] frequency,int channelConfig){
-		this.N=N;
-		this.Fs=Fs;
-		this.frequency=frequency;
-		data=new short[N];
-		amplitude= new double[frequency.length];
-		this.channelConfig=channelConfig;
-		for (int i=0;i<frequency.length;i++){
-			amplitude[i]=1; //Set default amplitudes in intensity
-		}
-		windowN=(int) (windowSize*Fs);
-	}
-
-	//Constructor for Calibration signals
-	public PeriodicSeries(int N,double Fs,CalibrationTone caltone){
-		this.N=N;
-		this.Fs=Fs;
-		frequency=caltone.getStimulusFrequency();
-		amplitude=caltone.getStimulusAmplitude(); //in intensity relative to 1
-		Log.v(TAG,"Generating calibration tone of " + N + " samples, amplitude= " + amplitude[0]);
-		windowN=(int) (windowSize*Fs);
-		channelConfig=caltone.channelConfig;
-		if(channelConfig ==AudioFormat.CHANNEL_OUT_MONO){
-			data=new short[N];
-		}else{
-			data=new short[2*N]; //stereo mode
-		}
-	}
-
-	//Constructor for DPOAE signals, which is a Periodic Series
-	public PeriodicSeries(int N,double Fs,DPOAESignal dpoae){
-		this.N=N;
-		this.Fs=Fs;
-		frequency=dpoae.getStimulusFrequency();
-		amplitude=dpoae.getStimulusAmplitude();
-		data=new short[N];
-		windowN=(int) (windowSize*Fs);
-	}
-
+	private int N;
+	private double Fs; //Sampling frequency in Hz
+	private double windowSize=0.05; //window ramp size in seconds in order to avoid speaker clipping artifact
+	private int windowN;
+	private int channelConfig;	
+	
 	public PeriodicSeries(int N,double Fs,double[] frequency,
 			double[] amplitude,int channelConfig ){
 		this.N=N;
 		this.Fs=Fs;
 		this.frequency=frequency;
-		data=new short[N];
 		this.channelConfig=channelConfig;
 		this.amplitude=amplitude; //Amplitudes are in intensity!!
 		windowN=(int) (windowSize*Fs);
+		if(channelConfig == AudioFormat.CHANNEL_OUT_MONO){
+			data=new short[N];
+		}else if (channelConfig == AudioFormat.CHANNEL_OUT_STEREO) {
+			data=new short[2*N];
+		}
+		
+		assert ( windowSize < N ) : "Window size: " + windowSize
+		+ " is larget than number of samples: "+ N;
 	}
-
-	public short[] generatePeriodicSeries(){
+	
+	public double[] getSignalFrequency(){
+		return frequency;
+	}
+	
+	public double[] getSignalAmplitude(){
+		return amplitude;
+	}
+	
+	public int getChannelConfig(){
+		return channelConfig;
+	}
+	
+	public short[] generateSignal(){
 
 		double tmpSample;
 		double PI2=2*Math.PI;
@@ -118,6 +98,7 @@ public class PeriodicSeries {
 		for (int i=0;i<frequency.length;i++){
 			increment[i] = PI2 * frequency[i] /Fs; // angular increment for each sample
 		}
+		Log.v(TAG,"Calculating = " + N + " samples at fs=" + Fs + " array size is=" + data.length);
 		for( int i = 0; i < N; i++ )
 		{
 			tmpSample=0;
@@ -142,7 +123,6 @@ public class PeriodicSeries {
 			}
 
 		}
-		Log.v(TAG,"Calculate = " + N + " samples at fs=" + Fs + " array size is=" + data.length);
 		return data;
 	}
 
