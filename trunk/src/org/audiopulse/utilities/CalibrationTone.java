@@ -54,7 +54,9 @@ public class CalibrationTone extends PeriodicSeries {
 				private double sensitivity1kHzVRMS=1; 
 				private double output0SPLtodBuV=0; 
 				*/
-		ER10C((double) 1000,5,"ER10C"),
+		ER10C_LGVM670((double) 1000,40,"ER10C"), //using ER10C with +40dB gain
+												//for this phone the audio jack needs to have a really
+												//tight connection in order to works
 		DUMMY_LGVM670((double) 1000,20,"DUMMY_LGVM670"); //used for debugging in free field mode
 		
 		

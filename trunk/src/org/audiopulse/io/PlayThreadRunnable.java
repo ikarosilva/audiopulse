@@ -138,8 +138,10 @@ public class PlayThreadRunnable implements Runnable
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
 		//CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
 		//											CalibrationTone.device.ER10C,channelConfig);
+		//CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
+		//		CalibrationTone.device.DUMMY_LGVM670,channelConfig);
 		CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
-				CalibrationTone.device.DUMMY_LGVM670,channelConfig);
+				CalibrationTone.device.ER10C_LGVM670,channelConfig);
 		short[] tmpSamples = caltone.generateSignal();
 		caltoneFreq=caltone.getSignalFrequency();
 		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);
