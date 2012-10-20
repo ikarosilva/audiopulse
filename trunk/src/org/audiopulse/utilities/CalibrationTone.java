@@ -39,47 +39,26 @@
 
 package org.audiopulse.utilities;
 
-import android.util.Log;
+import org.audiopulse.io.MobilePhone;
+
+/*
+ * CALIBRATION ONLY CLASS, USED FOR INITIAL MEASUREMENTS.
+ * 
+ * This class should be used only to calibrate phones for the first time.
+ * The calibration should be done by modifying the minimum attenuation value
+ * on the class that inherits from MobilePhone. This minimum attenuation value
+ * is also device specific and should be modified in the ENUM type for that device (deviceAttn).
+ * 
+ * For an example or template to modify to your own phone see the class LGVM670.
+ * 
+ */
 
 
 public class CalibrationTone extends PeriodicSeries {
-	private String device;
-	private static String TAG="CalibrationTone";
-		
-	public static enum device {
 
-		//ER10C Specs
-				/*
-				private double sensitivity1kHzSPL=72; 
-				private double sensitivity1kHzVRMS=1; 
-				private double output0SPLtodBuV=0; 
-				*/
-		ER10C_LGVM670((double) 1000,40,"ER10C"), //using ER10C with +40dB gain
-												//for this phone the audio jack needs to have a really
-												//tight connection in order to works
-		DUMMY_LGVM670((double) 1000,20,"DUMMY_LGVM670"); //used for debugging in free field mode
-		
-		
-		private double[] f=new double[1];
-		private double[] A=new double[1];	//Attenuation in dB relative to AudioTrack.getMaxVolume()
-		private String deviceName;
-		
-		device(Double f,int attenuation, String deviceName) {
-			this.f[0]=f;
-			//Convert attenuation in dB relative to the maximum track level
-			this.A[0]=Short.MAX_VALUE*Math.pow(10,(double)(-attenuation)/20); 
-			this.deviceName=deviceName;
-			Log.v(TAG,"Amplitude =" + this.A[0]);
-		}
-	}
-
-	public CalibrationTone(int N, double Fs, device caltone, int channelConfig){
+	public CalibrationTone(int N, double Fs, MobilePhone phone, int channelConfig){
 		//Call constructor on PeriodicSeries
-		super(N,Fs, caltone.f,caltone.A,channelConfig);
-		device=caltone.deviceName;
+		super(N,Fs,phone.getCalFreq(),phone.getMaxAmplitude(),channelConfig);
 	}
 	
-	public String getProtocol(){
-		return device;
-	}
 }

@@ -76,6 +76,29 @@ public class PeriodicSeries {
 		+ " is larget than number of samples: "+ N;
 	}
 	
+	public PeriodicSeries(int N,double Fs,double frequency,
+			double amplitude,int channelConfig) {
+		
+		double[] freq={frequency};
+		double[] amp={amplitude};
+		
+		this.N=N;
+		this.Fs=Fs;
+		this.frequency=freq;
+		this.channelConfig=channelConfig;
+		this.amplitude=amp; 
+		windowN=(int) (windowSize*Fs);
+		if(channelConfig == AudioFormat.CHANNEL_OUT_MONO){
+			data=new short[N];
+		}else if (channelConfig == AudioFormat.CHANNEL_OUT_STEREO) {
+			data=new short[2*N];
+		}
+		
+		assert ( windowSize < N ) : "Window size: " + windowSize
+		+ " is larget than number of samples: "+ N;
+		
+	}
+
 	public double[] getSignalFrequency(){
 		return frequency;
 	}

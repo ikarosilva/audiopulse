@@ -140,8 +140,11 @@ public class PlayThreadRunnable implements Runnable
 		//											CalibrationTone.device.ER10C,channelConfig);
 		//CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
 		//		CalibrationTone.device.DUMMY_LGVM670,channelConfig);
+		MobilePhone phone = new LGVM670(LGVM670.deviceAttn.DUMMY,
+				AcousticDevice.ioDevice.Dummy);
+		
 		CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
-				CalibrationTone.device.ER10C_LGVM670,channelConfig);
+				phone,channelConfig);
 		short[] tmpSamples = caltone.generateSignal();
 		caltoneFreq=caltone.getSignalFrequency();
 		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);
