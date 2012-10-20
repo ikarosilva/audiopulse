@@ -40,6 +40,8 @@
 package org.audiopulse.io;
 
 import org.audiopulse.utilities.CalibrationTone;
+import org.audiopulse.utilities.DPOAESimulationSignal;
+
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -140,10 +142,10 @@ public class PlayThreadRunnable implements Runnable
 		//											CalibrationTone.device.ER10C,channelConfig);
 		//CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
 		//		CalibrationTone.device.DUMMY_LGVM670,channelConfig);
-		MobilePhone phone = new LGVM670(LGVM670.deviceAttn.DUMMY,
+		MobilePhone phone = new SamsungGalaxyNexus(SamsungGalaxyNexus.deviceAttn.DUMMY,
 				AcousticDevice.ioDevice.Dummy);
 		
-		CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
+		DPOAESimulationSignal caltone = new DPOAESimulationSignal(PlayBufferSize,sampleRate,
 				phone,channelConfig);
 		short[] tmpSamples = caltone.generateSignal();
 		caltoneFreq=caltone.getSignalFrequency();

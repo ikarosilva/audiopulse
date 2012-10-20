@@ -74,7 +74,7 @@ public class RecordThreadRunnable implements Runnable
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
-		Buffer_Size=(int) (playTime*sampleRate);
+		Buffer_Size=(int) (1.2*playTime*sampleRate);  //TODO: remove this manual 1.2 factor magic!
 		samples = new short[Buffer_Size];
 		initRecord();
 		IN_REC_MODE=0;
@@ -182,6 +182,21 @@ public class RecordThreadRunnable implements Runnable
 		mAudio.stop();
 		record_time = System.currentTimeMillis()-st;
 		Log.v(TAG,"low level recording took: " + record_time/1000);
+		
+//		//Simulate nonlinearity
+//		double [] env = new double[samples.length]; 
+//		int filterLength = (int) Math.round(0.010 * sampleRate);
+//		double sum = 0;
+//		
+//		for (int ii=0;ii<samples.length;ii++){
+//			sum = sum + Math.abs((double)(samples[ii])/filterLength)
+//					- ((ii>=filterLength)?Math.abs((double)(samples[ii-filterLength])/filterLength):0);
+//			
+//			
+//			env[ii] = sum;
+//			samples[ii] = (short) env[ii];
+//		}
+		
 		recordRMS=SignalProcessing.rms(samples);
 		Log.v(TAG,"recording RMS= " + recordRMS);		
 	}
