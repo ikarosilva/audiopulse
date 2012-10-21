@@ -142,20 +142,17 @@ public class PlayThreadRunnable implements Runnable
 		//											CalibrationTone.device.ER10C,channelConfig);
 		//CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
 		//		CalibrationTone.device.DUMMY_LGVM670,channelConfig);
-		MobilePhone phone = new SamsungGalaxyNexus(SamsungGalaxyNexus.deviceAttn.DUMMY,
+		MobilePhone phone = new LGVM670(LGVM670.deviceAttn.DUMMY,
 				AcousticDevice.ioDevice.Dummy);
 		
-		DPOAESimulationSignal caltone = new DPOAESimulationSignal(PlayBufferSize,sampleRate,
-				phone,channelConfig);
-		short[] tmpSamples = caltone.generateSignal();
-		caltoneFreq=caltone.getSignalFrequency();
-		//ClickTrain stimuli = new ClickTrain(PlayBufferSize,PlayThreadRunnable.sampleRate,0.1,0.1);
-		//short[] tmpSamples = stimuli.generateClickTrain();
-		//WhiteNoise stimuli = new WhiteNoise(PlayBufferSize,PlayThreadRunnable.sampleRate);
-	    //short[] tmpSamples = stimuli.generateWhiteNoise();
-		if(caltone.getChannelConfig() == AudioFormat.CHANNEL_OUT_STEREO){
+		//CalibrationTone stimulus = new CalibrationTone(PlayBufferSize,sampleRate,
+		//		phone,channelConfig);
+		DPOAESimulationSignal stimulus = new DPOAESimulationSignal(PlayBufferSize,sampleRate,phone,channelConfig);
+		caltoneFreq=stimulus.getSignalFrequency();	
+		short[] tmpSamples = stimulus.generateSignal();
+		if(stimulus.getChannelConfig() == AudioFormat.CHANNEL_OUT_STEREO){
 			trackConfig="stereo";
-		}else if(caltone.getChannelConfig() == AudioFormat.CHANNEL_OUT_MONO) {
+		}else if(stimulus.getChannelConfig() == AudioFormat.CHANNEL_OUT_MONO) {
 			trackConfig="mono";
 		}else {
 			trackConfig="Unexpected channel configuration!!";

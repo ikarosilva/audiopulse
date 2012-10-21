@@ -1,4 +1,5 @@
 package org.audiopulse.io;
+
 import org.audiopulse.io.AcousticDevice.ioDevice;
 
 public class HTCOne extends MobilePhone {
@@ -9,20 +10,20 @@ private final int calFreq=1000;
 private final String name="HTCOne";
 private AcousticDevice.ioDevice acousticDevice;
 	
-public enum deviceAttn{
+public enum deviceCalParameters{
 	//Only include devices that were measured for attn 
 	DUMMY(20),
 	ER10C(40);
 	
 	public int attn;
-	deviceAttn(int atten){
+	deviceCalParameters(int atten){
 		this.attn=atten;
 	}	
 }
 
-	public HTCOne(HTCOne.deviceAttn deviceAttn, AcousticDevice.ioDevice acousticDevice){
+	public HTCOne(deviceCalParameters deviceParam, AcousticDevice.ioDevice acousticDevice){
 	
-		this.minAttenuation=deviceAttn.attn;
+		this.minAttenuation=deviceParam.attn;
 		this.maxAmplitude=getMaxAmp(minAttenuation);
 		this.acousticDevice= acousticDevice;
 	}

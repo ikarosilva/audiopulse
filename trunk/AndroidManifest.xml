@@ -17,7 +17,7 @@
             android:configChanges="orientation|keyboardHidden">
         </activity>
         <activity android:name=".activities.ThreadedPlayRecActivity"
-                  android:label="Audio Pulse">
+                  android:label="DPOAE Demo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
