@@ -98,10 +98,7 @@ public class PlotSpectralView extends DemoView {
         	XYSeries series = new XYSeries(1);
         	FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
 
-        	//Parameters for the frequency-domain smoothing of the periodogram
-        	//set firLength =1  for no smoothing at all.
-        	int firLength=20;
-        	double ave =0, flt_ind;
+        	
         	
         	//Calculate the size of averaged waveform
         	//based on the maximum desired frequency for FFT analysis
@@ -133,12 +130,17 @@ public class PlotSpectralView extends DemoView {
      		}
         	
         	//Insert data and apply FIR smoothing to the spectral display
+        	//Parameters for the frequency-domain smoothing of the periodogram
+        	//set firLength =1  for no smoothing at all.
+        	//int firLength=20;
+        	int firLength=20;
+        	double ave =0, flt_ind;
     		for(int k=0;k<(SPEC_N/2);k++){
     			flt_ind=(k>=firLength)?firLength:(k+1);
-    			ave = ave + Pxx[k] -((k>=firLength)?Pxx[k-firLength]:0);
+    			ave = ave + 10*Math.log10(Pxx[k]) -((k>=firLength)?10*Math.log10(Pxx[k-firLength]):0);
     			
     			series.add(((double) 0) + k*fres,
-    					Math.log10(ave/flt_ind));
+    					ave/flt_ind);
     		}
         	result.addSeries(series);
             return result;
