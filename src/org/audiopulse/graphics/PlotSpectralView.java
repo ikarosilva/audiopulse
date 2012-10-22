@@ -92,11 +92,17 @@ public class PlotSpectralView extends DemoView {
 		final AFreeChart chart = createChart2();
 		setChart(chart);
 	}
-    private static XYSeriesCollection createDataset2() {	
+    private static XYSeriesCollection createDataset2() {
+    	
     		XYSeriesCollection result = new XYSeriesCollection();
         	XYSeries series = new XYSeries(1);
         	FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
 
+        	//Parameters for the frequency-domain smoothing of the periodogram
+        	//set firLength =1  for no smoothing at all.
+        	int firLength=20;
+        	double ave =0, flt_ind;
+        	
         	//Calculate the size of averaged waveform
         	//based on the maximum desired frequency for FFT analysis
         	int SPEC_N=(int) Math.pow(2,Math.floor(Math.log((int) N)/Math.log(2)));
@@ -125,8 +131,14 @@ public class PlotSpectralView extends DemoView {
         			Pxx[k]=( (i*Pxx[k]) + tmpPxx )/((double) i+1);
         		}
      		}
+        	
+        	//Insert data and apply FIR smoothing to the spectral display
     		for(int k=0;k<(SPEC_N/2);k++){
-    			series.add(((double) 0) + k*fres, 10*Math.log10(Pxx[k]));
+    			flt_ind=(k>=firLength)?firLength:(k+1);
+    			ave = ave + Pxx[k] -((k>=firLength)?Pxx[k-firLength]:0);
+    			
+    			series.add(((double) 0) + k*fres,
+    					Math.log10(ave/flt_ind));
     		}
         	result.addSeries(series);
             return result;
@@ -152,6 +164,8 @@ private static AFreeChart createChart2() {
     plot.getDomainAxis().setUpperMargin(0.0);
     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 	renderer.setSeriesPaintType(0, new SolidColor(Color.rgb(0, 255, 0)));
+	
+	renderer.setSeriesStroke(0,3.0f);
 	plot.setRenderer(renderer);
     return chart;
 }
