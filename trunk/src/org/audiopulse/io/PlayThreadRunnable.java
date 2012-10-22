@@ -140,9 +140,9 @@ public class PlayThreadRunnable implements Runnable
 		MobilePhone phone = new HTCOne(HTCOne.deviceCalParam.ER10C,
 				AcousticDevice.ioDevice.ER10C);
 		
-		CalibrationTone stimulus = new CalibrationTone(PlayBufferSize,sampleRate,
-				phone,channelConfig);
-		//DPOAESimulationSignal stimulus = new DPOAESimulationSignal(PlayBufferSize,sampleRate,phone,channelConfig);
+		//CalibrationTone stimulus = new CalibrationTone(PlayBufferSize,sampleRate,
+		//		phone,channelConfig);
+		DPOAESimulationSignal stimulus = new DPOAESimulationSignal(PlayBufferSize,sampleRate,phone,channelConfig);
 	
 		short[] tmpSamples = stimulus.generateSignal();
 		if(stimulus.getStereoFlag() == AudioFormat.CHANNEL_OUT_STEREO){
