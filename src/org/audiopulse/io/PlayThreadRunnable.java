@@ -68,7 +68,7 @@ public class PlayThreadRunnable implements Runnable
 	Handler mainThreadHandler = null;
 	private long real_play_time;
 	String trackConfig;
-	double[] caltoneFreq;
+	
 
 
 	public PlayThreadRunnable(Handler h, double playTime)
@@ -98,8 +98,7 @@ public class PlayThreadRunnable implements Runnable
 	public void informStart()
 	{
 		Message m = mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Playing sound for "  + PlayBufferSize/sampleRate 
-				+ " s \n at calibration f= " + caltoneFreq[0] + " Hz"));
+		m.setData(Utils.getStringAsABundle("Playing sound for "  + PlayBufferSize/sampleRate));
 		mainThreadHandler.sendMessage(m);
 	}
 	public void informFinish()
@@ -148,7 +147,7 @@ public class PlayThreadRunnable implements Runnable
 		//CalibrationTone stimulus = new CalibrationTone(PlayBufferSize,sampleRate,
 		//		phone,channelConfig);
 		DPOAESimulationSignal stimulus = new DPOAESimulationSignal(PlayBufferSize,sampleRate,phone,channelConfig);
-		caltoneFreq=stimulus.getSignalFrequency();	
+	
 		short[] tmpSamples = stimulus.generateSignal();
 		if(stimulus.getChannelConfig() == AudioFormat.CHANNEL_OUT_STEREO){
 			trackConfig="stereo";
