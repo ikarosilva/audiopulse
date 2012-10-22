@@ -63,12 +63,15 @@ public class DPOAESignal extends PeriodicSeries{
 		private double[] A=new double[2];	//Amplitudes are in dB
 		private double f12; //Expected response frequency
 		private String protocol="BioLogic";
+		private int[] stimPresentation=new int[2]; //Right and Left order in which to present stimulus
 		protocolBioLogic(double f1,double f2, double A1, double A2) {
 			f[0]=f1;
 			f[1]=f2;
 			A[0]=A1; 
 			A[1]=A2;
 			f12=2*f[0]-f[1];
+			stimPresentation[0]=0;
+			stimPresentation[1]=1;
 		}
 	}
 
@@ -83,6 +86,7 @@ public class DPOAESignal extends PeriodicSeries{
 		F2k(2000);
 		private double[] f=new double[2];
 		private double[] A=new double[2]; //Amplitudes are in dB
+		private int[] stimPresentation=new int[2]; //Right and Left order in which to present stimulus
 		private double f12; //Expected response frequency
 		private String protocol="HOAE";
 		protocolHOAE(double f2) {
@@ -91,17 +95,19 @@ public class DPOAESignal extends PeriodicSeries{
 			A[0]=65; 
 			A[1]=65;
 			f12=2*f[0]-f[1];
+			stimPresentation[0]=0;
+			stimPresentation[1]=1;
 		}
 	}
 
 	public DPOAESignal(protocolBioLogic dpoae,int N, double Fs, MobilePhone phone, int chConf){
 	
-		super(N,Fs,dpoae.f,dpoae.A,chConf);
+		super(N,Fs,dpoae.f,dpoae.A,chConf,dpoae.stimPresentation);
 		f12=dpoae.f12;
 		protocol=dpoae.protocol;
 	}
 	public DPOAESignal(protocolHOAE dpoae,int N, double Fs, MobilePhone phone, int chConf){
-		super(N,Fs,dpoae.f,dpoae.A,chConf);
+		super(N,Fs,dpoae.f,dpoae.A,chConf,dpoae.stimPresentation);
 		f12=dpoae.f12;
 		protocol=dpoae.protocol;
 	}
