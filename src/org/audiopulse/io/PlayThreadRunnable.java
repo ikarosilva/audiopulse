@@ -137,21 +137,17 @@ public class PlayThreadRunnable implements Runnable
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
-		//CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
-		//											CalibrationTone.device.ER10C,channelConfig);
-		//CalibrationTone caltone = new CalibrationTone(PlayBufferSize,sampleRate,
-		//		CalibrationTone.device.DUMMY_LGVM670,channelConfig);
-		MobilePhone phone = new LGVM670(LGVM670.deviceAttn.DUMMY,
-				AcousticDevice.ioDevice.Dummy);
+		MobilePhone phone = new HTCOne(HTCOne.deviceCalParam.ER10C,
+				AcousticDevice.ioDevice.ER10C);
 		
-		//CalibrationTone stimulus = new CalibrationTone(PlayBufferSize,sampleRate,
-		//		phone,channelConfig);
-		DPOAESimulationSignal stimulus = new DPOAESimulationSignal(PlayBufferSize,sampleRate,phone,channelConfig);
+		CalibrationTone stimulus = new CalibrationTone(PlayBufferSize,sampleRate,
+				phone,channelConfig);
+		//DPOAESimulationSignal stimulus = new DPOAESimulationSignal(PlayBufferSize,sampleRate,phone,channelConfig);
 	
 		short[] tmpSamples = stimulus.generateSignal();
-		if(stimulus.getChannelConfig() == AudioFormat.CHANNEL_OUT_STEREO){
+		if(stimulus.getStereoFlag() == AudioFormat.CHANNEL_OUT_STEREO){
 			trackConfig="stereo";
-		}else if(stimulus.getChannelConfig() == AudioFormat.CHANNEL_OUT_MONO) {
+		}else if(stimulus.getStereoFlag() == AudioFormat.CHANNEL_OUT_MONO) {
 			trackConfig="mono";
 		}else {
 			trackConfig="Unexpected channel configuration!!";

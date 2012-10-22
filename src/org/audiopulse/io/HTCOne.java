@@ -10,18 +10,18 @@ private final int calFreq=1000;
 private final String name="HTCOne";
 private AcousticDevice.ioDevice acousticDevice;
 	
-public enum deviceCalParameters{
+public enum deviceCalParam{
 	//Only include devices that were measured for attn 
 	DUMMY(20),
 	ER10C(40);
 	
 	public int attn;
-	deviceCalParameters(int atten){
+	deviceCalParam(int atten){
 		this.attn=atten;
 	}	
 }
 
-	public HTCOne(deviceCalParameters deviceParam, AcousticDevice.ioDevice acousticDevice){
+	public HTCOne(deviceCalParam deviceParam, AcousticDevice.ioDevice acousticDevice){
 	
 		this.minAttenuation=deviceParam.attn;
 		this.maxAmplitude=getMaxAmp(minAttenuation);

@@ -57,11 +57,12 @@ import org.audiopulse.io.MobilePhone;
 public class DPOAESimulationSignal extends PeriodicSeries {
 	//F2k(1641,2016,64.4,53.4);
 	private static double[] frequency = {1641,2016};
+	private static int[] stimPresentation={0,1};
 	private static double[] amplitude = {(double)(Short.MAX_VALUE)*.1,(double)(Short.MAX_VALUE)*.1};
 
 	public DPOAESimulationSignal(int N, double Fs, MobilePhone phone, int channelConfig){
 		//Call constructor on PeriodicSeries
-		super(N,Fs,frequency,amplitude,channelConfig);
+		super(N,Fs,frequency,amplitude,channelConfig,stimPresentation);
 	}
 	
 }

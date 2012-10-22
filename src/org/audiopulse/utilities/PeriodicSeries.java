@@ -56,19 +56,39 @@ public class PeriodicSeries {
 	private double Fs; //Sampling frequency in Hz
 	private double windowSize=0.05; //window ramp size in seconds in order to avoid speaker clipping artifact
 	private int windowN;
-	private int channelConfig;	
+	private int[] channelConfig;
+	private int stereoFlag;
 	
 	public PeriodicSeries(int N,double Fs,double[] frequency,
-			double[] amplitude,int channelConfig){
+			double[] amplitude,int stereoFlag){
+		this.N=N;
+		this.Fs=Fs;
+		this.frequency=frequency;
+		this.stereoFlag=stereoFlag;
+		this.amplitude=amplitude; //Amplitudes are in intensity!!
+		windowN=(int) (windowSize*Fs);
+		this.channelConfig=null; //If stereo, plays same signal in both left and right channels
+		if(stereoFlag == AudioFormat.CHANNEL_OUT_MONO){
+			data=new short[N];
+		}else if (stereoFlag == AudioFormat.CHANNEL_OUT_STEREO) {
+			data=new short[2*N];
+		}
+		assert ( windowSize < N ) : "Window size: " + windowSize
+		+ " is larget than number of samples: "+ N;
+	}
+	
+	public PeriodicSeries(int N,double Fs,double[] frequency,
+			double[] amplitude,int stereoFlag, int[] channelConfig){
 		this.N=N;
 		this.Fs=Fs;
 		this.frequency=frequency;
 		this.channelConfig=channelConfig;
 		this.amplitude=amplitude; //Amplitudes are in intensity!!
 		windowN=(int) (windowSize*Fs);
-		if(channelConfig == AudioFormat.CHANNEL_OUT_MONO){
+		this.stereoFlag=stereoFlag;
+		if(stereoFlag == AudioFormat.CHANNEL_OUT_MONO){
 			data=new short[N];
-		}else if (channelConfig == AudioFormat.CHANNEL_OUT_STEREO) {
+		}else if (stereoFlag == AudioFormat.CHANNEL_OUT_STEREO) {
 			data=new short[2*N];
 		}
 		
@@ -77,7 +97,7 @@ public class PeriodicSeries {
 	}
 	
 	public PeriodicSeries(int N,double Fs,double frequency,
-			double amplitude,int channelConfig) {
+			double amplitude,int stereoFlag) {
 		
 		double[] freq={frequency};
 		double[] amp={amplitude};
@@ -85,12 +105,13 @@ public class PeriodicSeries {
 		this.N=N;
 		this.Fs=Fs;
 		this.frequency=freq;
-		this.channelConfig=channelConfig;
+		this.stereoFlag=stereoFlag;
+		this.channelConfig=null;
 		this.amplitude=amp; 
 		windowN=(int) (windowSize*Fs);
-		if(channelConfig == AudioFormat.CHANNEL_OUT_MONO){
+		if(stereoFlag == AudioFormat.CHANNEL_OUT_MONO){
 			data=new short[N];
-		}else if (channelConfig == AudioFormat.CHANNEL_OUT_STEREO) {
+		}else if (stereoFlag == AudioFormat.CHANNEL_OUT_STEREO) {
 			data=new short[2*N];
 		}
 		
@@ -107,13 +128,17 @@ public class PeriodicSeries {
 		return amplitude;
 	}
 	
-	public int getChannelConfig(){
+	public int[] getChannelConfig(){
 		return channelConfig;
+	}
+	
+	public int getStereoFlag(){
+		return stereoFlag;
 	}
 	
 	public short[] generateSignal(){
 
-		double tmpSample;
+		double[] tmpSample= new double[2]; //One sample, left and right channels
 		double PI2=2*Math.PI;
 		double[] increment= new double[frequency.length];
 		int index;
@@ -124,25 +149,40 @@ public class PeriodicSeries {
 		Log.v(TAG,"Calculating = " + N + " samples at fs=" + Fs + " array size is=" + data.length);
 		for( int i = 0; i < N; i++ )
 		{
-			tmpSample=0;
+			tmpSample[0]=0;
+			tmpSample[1]=0;
 			for( int k = 0; k < frequency.length; k++ )
 			{
-				tmpSample += amplitude[k]*Math.sin(increment[k]*i);
+				if(stereoFlag == AudioFormat.CHANNEL_OUT_MONO){
+					//Using left channel as if it is a single channgel
+					tmpSample[0] += amplitude[k]*Math.sin(increment[k]*i);
+				}else if (stereoFlag == AudioFormat.CHANNEL_OUT_STEREO){
+					if(this.channelConfig == null){
+						//Playing same signal in both left and right channels
+						tmpSample[0] += amplitude[k]*Math.sin(increment[k]*i);
+						tmpSample[1]= tmpSample[0];
+					}else {
+						//Set the desired channel according to values in channelConfig
+						tmpSample[channelConfig[k]]+= amplitude[k]*Math.sin(increment[k]*i);
+					}
+				}
 			}
 			//At onset/offset apply window in order to avoid non-linear distortions
 			if(i < (windowN/2 - 1) ){
-				tmpSample=tmpSample*SpectralWindows.hamming(i,windowN);
+				tmpSample[0]=tmpSample[0]*SpectralWindows.hamming(i,windowN);
+				tmpSample[1]=tmpSample[1]*SpectralWindows.hamming(i,windowN);
 			}else if(i > windowOffset0){
 				index=windowN/2 + i-windowOffset0;
-				tmpSample=tmpSample*SpectralWindows.hamming(index,windowN);
+				tmpSample[0]=tmpSample[0]*SpectralWindows.hamming(index,windowN);
+				tmpSample[1]=tmpSample[1]*SpectralWindows.hamming(index,windowN);
 			}	
-			if(channelConfig == AudioFormat.CHANNEL_OUT_MONO){
-				data[i]=(short) tmpSample;
+			if(stereoFlag == AudioFormat.CHANNEL_OUT_MONO){
+				data[i]=(short) tmpSample[0];
 
 			}else{
 				//Stereo case
-				data[2*i]=(short) tmpSample;
-				data[2*i+1]=(short) tmpSample;
+				data[2*i]=(short) tmpSample[0];
+				data[2*i+1]=(short) tmpSample[1];
 			}
 
 		}
