@@ -53,7 +53,6 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
-import org.audiopulse.io.PlayThreadRunnable;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -78,16 +77,13 @@ public class PlotSpectralView extends DemoView {
 	//private static final int maxFreq=4000;
 	private static Double recordRMS;
 	
-	public PlotSpectralView(Context context, long N, short[] audioBuffer, float sampleRate, Double recordRMS) {
+	public PlotSpectralView(Context context, long M, short[] aBuffer, float Fs, Double recRMS) {
 		super(context);
-		this.N=N;
-		this.audioBuffer=audioBuffer;
-		this.sampleRate=sampleRate;
-		this.recordRMS=recordRMS;	
-		//PlotSpectralView.N=PlayThreadRunnable.samples.length;
-		//PlotSpectralView.audioBuffer=PlayThreadRunnable.samples;
-		//PlotSpectralView.sampleRate=PlayThreadRunnable.sampleRatePlay;			
-		//Log.v(TAG,"Constructor: N= " + N +  " sampleRate= " + sampleRate );
+		N=M;
+		audioBuffer=aBuffer;
+		sampleRate=Fs;
+		recordRMS=recRMS;	
+		
 		
 		final AFreeChart chart = createChart2();
 		setChart(chart);
@@ -109,8 +105,7 @@ public class PlotSpectralView extends DemoView {
     		double[] Pxx = new double[SPEC_N];
     		double tmpPxx;
         	//Break FFT averaging into SPEC_N segments for averaging
-        	//Calculate spectrum 
-        	//Variation based only
+        	//Calculate spectrum, variation based on
         	//http://www.mathworks.com/support/tech-notes/1700/1702.html
     		
     		//Perform windowing and averaging on the power spectrum
@@ -132,7 +127,7 @@ public class PlotSpectralView extends DemoView {
         	//Insert data and apply FIR smoothing to the spectral display
         	//Parameters for the frequency-domain smoothing of the periodogram
         	//set firLength =1  for no smoothing at all.
-        	//int firLength=20;
+        	//int firLength=20 is a good choice;
         	int firLength=20;
         	double ave =0, flt_ind;
     		for(int k=0;k<(SPEC_N/2);k++){

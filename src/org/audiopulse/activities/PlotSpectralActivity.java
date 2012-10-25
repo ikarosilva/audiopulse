@@ -44,7 +44,6 @@ package org.audiopulse.activities;
 
 import org.audiopulse.graphics.PlotSpectralView;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
