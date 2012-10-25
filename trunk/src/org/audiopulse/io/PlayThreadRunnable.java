@@ -39,7 +39,6 @@
 
 package org.audiopulse.io;
 
-import org.audiopulse.utilities.CalibrationTone;
 import org.audiopulse.utilities.DPOAESimulationSignal;
 
 import android.media.AudioFormat;

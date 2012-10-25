@@ -73,6 +73,26 @@ public class AcousticDevice {
 			this.ioDeviceName=ioDeviceName;
 			
 		}		
+		
+		public String getioDeviceName(){
+			return ioDeviceName;
+		}
+		
+		public double getin0dBSPLToVolt(){
+			return in0dBSPLToVolt;
+		}
+		
+		public double getout16bitToVolt(){
+			return out16bitToVolt;
+		}
+		
+		public double getin10MilliVoltTobit(){
+			return in10MilliVoltTobit;
+		}
+		
+		public double getout1VTodBSPL(){
+			return out1VTodBSPL;
+		}
 	}
 	
 	public AcousticDevice(AcousticDevice.ioDevice device,int minAttenuation){
@@ -85,6 +105,10 @@ public class AcousticDevice {
 	
 	public double getMaxBitPeak(){
 		return Short.MAX_VALUE*Math.pow(10,(double)(-minAttenuation)/20); 
+	}
+	
+	public AcousticDevice.ioDevice getioDevcie(){
+		return this.device;
 	}
 	
 }

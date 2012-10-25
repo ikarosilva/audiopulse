@@ -30,31 +30,26 @@ public enum deviceCalParam{
 
 	@Override
 	public double getMaxAmplitude() {
-		// TODO Auto-generated method stub
 		return this.maxAmplitude;
 	}
 
 	@Override
 	public int getMinAttenuation() {
-		// TODO Auto-generated method stub
 		return this.minAttenuation;
 	}
 
 	@Override
 	public int getCalFreq() {
-		// TODO Auto-generated method stub
 		return this.calFreq;
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return this.name;
 	}
 
 	@Override
 	public ioDevice getAcousticDevice() {
-		// TODO Auto-generated method stub
 		return this.acousticDevice;
 	}
 

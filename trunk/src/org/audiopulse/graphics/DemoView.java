@@ -98,7 +98,8 @@ public class DemoView extends View
     /**
      * initialize parameters
      */
-    private void initialize() {
+    @SuppressWarnings("rawtypes")
+	private void initialize() {
         this.chartMotionListeners = new CopyOnWriteArrayList<ChartTouchListener>();
         this.info = new ChartRenderingInfo();
         this.minimumDrawWidth = DEFAULT_MINIMUM_DRAW_WIDTH;
@@ -726,91 +727,11 @@ public class DemoView extends View
         RectShape chartArea = new RectShape(0.0, 0.0, drawWidth,
                 drawHeight);
 
-        // are we using the chart buffer?
-//        if (this.useBuffer) {
-//
-//            // do we need to resize the buffer?
-//            if ((this.chartBuffer == null)
-//                    || (this.chartBufferWidth != available.getWidth())
-//                    || (this.chartBufferHeight != available.getHeight())) {
-//                this.chartBufferWidth = (int) available.getWidth();
-//                this.chartBufferHeight = (int) available.getHeight();
-//                GraphicsConfiguration gc = canvas.getDeviceConfiguration();
-//                this.chartBuffer = gc.createCompatibleImage(
-//                        this.chartBufferWidth, this.chartBufferHeight,
-//                        Transparency.TRANSLUCENT);
-//                this.refreshBuffer = true;
-//            }
-//
-//            // do we need to redraw the buffer?
-//            if (this.refreshBuffer) {
-//
-//                this.refreshBuffer = false; // clear the flag
-//
-//                RectShape bufferArea = new RectShape(
-//                        0, 0, this.chartBufferWidth, this.chartBufferHeight);
-//
-//                Graphics2D bufferG2 = (Graphics2D)
-//                        this.chartBuffer.getGraphics();
-//                RectShape r = new RectShape(0, 0, this.chartBufferWidth,
-//                        this.chartBufferHeight);
-//                bufferG2.setPaint(getBackground());
-//                bufferG2.fill(r);
-//                if (scale) {
-//                    AffineTransform saved = bufferG2.getTransform();
-//                    AffineTransform st = AffineTransform.getScaleInstance(
-//                            this.scaleX, this.scaleY);
-//                    bufferG2.transform(st);
-//                    this.chart.draw(bufferG2, chartArea, this.anchor,
-//                            this.info);
-//                    bufferG2.setTransform(saved);
-//                }
-//                else {
-//                    this.chart.draw(bufferG2, bufferArea, this.anchor,
-//                            this.info);
-//                }
-//
-//            }
-//
-//            // zap the buffer onto the panel...
-//            canvas.drawImage(this.chartBuffer, insets.left, insets.top, this);
-//
-//        }
 
-        // TODO:AffineTransform
-        // or redrawing the chart every time...
-//        else {
-
-//            AffineTransform saved = canvas.getTransform();
-//            canvas.translate(insets.left, insets.top);
-//            if (scale) {
-//                AffineTransform st = AffineTransform.getScaleInstance(
-//                        this.scaleX, this.scaleY);
-//                canvas.transform(st);
-//            }
-//            this.chart.draw(canvas, chartArea, this.anchor, this.info);
-//            canvas.setTransform(saved);
-
-//        }
         this.chart.draw(canvas, chartArea, this.anchor, this.info);
         
 
-//        Iterator iterator = this.overlays.iterator();
-//        while (iterator.hasNext()) {
-//            Overlay overlay = (Overlay) iterator.next();
-//            overlay.paintOverlay(canvas, this);
-//        }
-
-        // redraw the zoom RectShape (if present) - if useBuffer is false,
-        // we use XOR so we can XOR the RectShape away again without redrawing
-        // the chart
-        //drawZoomRectShape(canvas, !this.useBuffer);
-
-        //canvas.dispose();
-
         this.anchor = null;
-//        this.verticalTraceLine = null;
-//        this.horizontalTraceLine = null;
 
     }
 
