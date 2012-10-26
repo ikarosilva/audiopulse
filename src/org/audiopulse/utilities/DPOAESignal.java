@@ -45,7 +45,7 @@ public class DPOAESignal extends PeriodicSeries{
 
 	public double[] f;
 	public double[] A; 
-	public double f12; //Expected response frequency
+	public double expectedResponse; //Expected response frequency
 	public String protocol;
 	
 	public static enum protocolBioLogic {
@@ -61,15 +61,15 @@ public class DPOAESignal extends PeriodicSeries{
 
 		private double[] f=new double[2];
 		private double[] A=new double[2];	//Amplitudes are in dB
-		private double f12; //Expected response frequency
+		private double expectedResponse; //Expected response frequency
 		private String protocol="BioLogic";
 		private int[] stimPresentation=new int[2]; //Right and Left order in which to present stimulus
 		protocolBioLogic(double f1,double f2, double A1, double A2) {
 			f[0]=f1;
 			f[1]=f2;
-			A[0]=A1; 
-			A[1]=A2;
-			f12=2*f[0]-f[1];
+			A[0]=(double)(Short.MAX_VALUE)*.1; 
+			A[1]=(double)(Short.MAX_VALUE)*.1;
+			expectedResponse=2*f[0]-f[1];
 			stimPresentation[0]=0;
 			stimPresentation[1]=1;
 		}
@@ -87,14 +87,14 @@ public class DPOAESignal extends PeriodicSeries{
 		private double[] f=new double[2];
 		private double[] A=new double[2]; //Amplitudes are in dB
 		private int[] stimPresentation=new int[2]; //Right and Left order in which to present stimulus
-		private double f12; //Expected response frequency
+		private double expectedResponse; //Expected response frequency
 		private String protocol="HOAE";
 		protocolHOAE(double f2) {
 			f[0]=f2/1.2;
 			f[1]=f2;
-			A[0]=65; 
-			A[1]=65;
-			f12=2*f[0]-f[1];
+			A[0]=(double)(Short.MAX_VALUE)*.1;//65; 
+			A[1]=(double)(Short.MAX_VALUE)*.1;//65;
+			expectedResponse=2*f[0]-f[1];
 			stimPresentation[0]=0;
 			stimPresentation[1]=1;
 		}
@@ -103,12 +103,12 @@ public class DPOAESignal extends PeriodicSeries{
 	public DPOAESignal(protocolBioLogic dpoae,int N, double Fs, MobilePhone phone, int chConf){
 	
 		super(N,Fs,dpoae.f,dpoae.A,chConf,dpoae.stimPresentation);
-		f12=dpoae.f12;
+		expectedResponse=dpoae.expectedResponse;
 		protocol=dpoae.protocol;
 	}
 	public DPOAESignal(protocolHOAE dpoae,int N, double Fs, MobilePhone phone, int chConf){
 		super(N,Fs,dpoae.f,dpoae.A,chConf,dpoae.stimPresentation);
-		f12=dpoae.f12;
+		expectedResponse=dpoae.expectedResponse;
 		protocol=dpoae.protocol;
 	}
 	
