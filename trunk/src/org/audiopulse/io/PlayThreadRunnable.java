@@ -39,6 +39,7 @@
 
 package org.audiopulse.io;
 
+import org.audiopulse.utilities.DPOAESignal;
 import org.audiopulse.utilities.DPOAESimulationSignal;
 
 import android.media.AudioFormat;
@@ -57,6 +58,7 @@ public class PlayThreadRunnable implements Runnable
 	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int audioMode= AudioManager.STREAM_MUSIC;
 	int trackMode=AudioTrack.MODE_STREAM;
+	double expectedResponse=0; //Results of where to expect a response, such as DPOAE
 	
 	//The track volume should be held fixed always at the maximum!!
 	//if the signal is being clipped than attenuation the signal relative to this value!!
@@ -139,10 +141,10 @@ public class PlayThreadRunnable implements Runnable
 		MobilePhone phone = new HTCOne(HTCOne.deviceCalParam.ER10C,
 				AcousticDevice.ioDevice.ER10C);
 		
-		//CalibrationTone stimulus = new CalibrationTone(PlayBufferSize,sampleRate,
-		//		phone,channelConfig);
-		DPOAESimulationSignal stimulus = new DPOAESimulationSignal(PlayBufferSize,sampleRate,phone,channelConfig);
-	
+		DPOAESignal stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
+				sampleRate,phone,channelConfig);
+		expectedResponse=stimulus.expectedResponse;
+		
 		short[] tmpSamples = stimulus.generateSignal();
 		if(stimulus.getStereoFlag() == AudioFormat.CHANNEL_OUT_STEREO){
 			trackConfig="stereo";
