@@ -165,13 +165,10 @@ public class PlayThreadRunnable implements Runnable
 		int endbuffer;
 		int nWrite=1;
 		int total=0;
-		Log.v(TAG,"frame size is: " + frameSize + " card size is: " + AudioBufferSize);
-		Log.v(TAG, "samples.length= " + samples.length + " frameSize=" + frameSize );
 		track.play();
 		long st = System.currentTimeMillis();
 		while(dataLeft>0){
 			endbuffer=(frameSize<dataLeft) ? frameSize: dataLeft;	
-			Log.v(TAG, "Index: " + ind*frameSize + " size: " + endbuffer);
 			nWrite=track.write( samples,ind*frameSize,endbuffer);
 			if (nWrite == AudioTrack.ERROR_INVALID_OPERATION || nWrite == AudioTrack.ERROR_BAD_VALUE) {
 				Log.e(TAG, "Audio read failed: " + nWrite);
@@ -187,6 +184,9 @@ public class PlayThreadRunnable implements Runnable
 		Log.v(TAG,"play time " + real_play_time/1000 + " seconds" + " total samples: " + total);
 	}
 
+	public double getExpectedFrequency(){
+		return this.expectedResponse;
+	}
 }
 
 

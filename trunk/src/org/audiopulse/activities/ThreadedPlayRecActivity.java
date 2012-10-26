@@ -97,9 +97,6 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         				playRecordThread();
         				
         			}
-        			
-        			Log.v(TAG,"Clicked item ID: " + Integer.toString(itemId));
-
         		}
         	}
 		);
@@ -158,35 +155,30 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 
 	private void playRecordThread()
 	{
-		Log.v(TAG,"Finished playRecordThread()");
-		beginTest();
 		
+		beginTest();	
 		playStatusBackHandler = new ReportStatusHandler(this);
 		recordStatusBackHandler = new ReportStatusHandler(this);
-		Context context=this.getApplicationContext();
-				
+		Context context=this.getApplicationContext();		
 		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
-		playThread = 
-				new Thread(
-						new PlayThreadRunnable(playStatusBackHandler,playTime));
-		recordThread = 
-				new Thread(
-						new RecordThreadRunnable(recordStatusBackHandler,playTime,context));
+		PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
+		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
+		
+		playThread = new Thread(pRun);
+		rRun.setExpectedFrequency(pRun.getExpectedFrequency());
+		recordThread = new Thread(rRun);
 
+		
 		playThread.setPriority(Thread.MAX_PRIORITY);
 		recordThread.setPriority(Thread.MAX_PRIORITY);
-		Log.v(TAG,"Executing thread pool");
 		execSvc.execute( recordThread );
 		execSvc.execute( playThread );
 		execSvc.shutdown();
-		
 		endTest();
-		Log.v(TAG,"Finished playRecordThread()");
 
 	}
 
 	public void plotSpectrum() {
-		Log.v(TAG,"Sample rate is " + audioResultsBundle.getFloat("recSampleRate"));
 		Intent intent = new Intent(this.getApplicationContext(), PlotSpectralActivity.class);
 		intent.putExtras(audioResultsBundle);
 		startActivity(intent);
@@ -199,6 +191,8 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	}
 	
 	public void editStimulusSettings() {
+		//TODO Change this so that the menu has a limited set of stimulus avaiable from
+		//which the clinician can operate the app
 		Log.v(TAG,"Calling view to edit stimulus settings");
 		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
 		intent.putExtras(audioResultsBundle);
