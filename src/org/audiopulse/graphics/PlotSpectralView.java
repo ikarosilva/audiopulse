@@ -42,13 +42,18 @@ package org.audiopulse.graphics;
 
 import org.afree.chart.ChartFactory;
 import org.afree.chart.AFreeChart;
+import org.afree.chart.plot.IntervalMarker;
+import org.afree.chart.plot.Marker;
 import org.afree.chart.plot.PlotOrientation;
+import org.afree.chart.plot.ValueMarker;
 import org.afree.chart.plot.XYPlot;
 import org.afree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.afree.data.xy.XYDataset;
 import org.afree.data.xy.XYSeries;
 import org.afree.data.xy.XYSeriesCollection;
 import org.afree.graphics.SolidColor;
+import org.afree.ui.Layer;
+import org.afree.ui.LengthAdjustmentType;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
@@ -74,16 +79,23 @@ public class PlotSpectralView extends DemoView {
 	private static long N;
 	private static short[] audioBuffer;
 	private static float sampleRate;
-	//private static final int maxFreq=4000;
 	private static Double recordRMS;
+	private static double frange=100; //Range for highlighting where the expected response should 
+							   		  //occur (in Hz)
+	private static double expectedFrequency;
+	static double fRangeStart;
+	static double fRangeEnd;
 	
-	public PlotSpectralView(Context context, long M, short[] aBuffer, float Fs, Double recRMS) {
+	public PlotSpectralView(Context context, long M, short[] aBuffer, float Fs, 
+			Double recRMS, double eFrequency) {
 		super(context);
 		N=M;
 		audioBuffer=aBuffer;
 		sampleRate=Fs;
 		recordRMS=recRMS;	
-		
+		expectedFrequency=eFrequency;
+		fRangeStart=expectedFrequency-frange;
+		fRangeEnd=expectedFrequency+frange;
 		
 		final AFreeChart chart = createChart2();
 		setChart(chart);
@@ -164,6 +176,17 @@ private static AFreeChart createChart2() {
 	
 	renderer.setSeriesStroke(0,3.0f);
 	plot.setRenderer(renderer);
+	
+	//Plot expected range
+	Marker marker_V = new IntervalMarker(fRangeStart, fRangeEnd);
+    marker_V.setLabelOffsetType(LengthAdjustmentType.EXPAND);
+    marker_V.setPaintType(new SolidColor(Color.rgb(150, 150, 255)));
+    plot.addDomainMarker(marker_V, Layer.BACKGROUND);
+	Marker marker_V_Start = new ValueMarker(fRangeStart, Color.BLUE, 2.0f);
+    Marker marker_V_End = new ValueMarker(fRangeEnd, Color.BLUE, 2.0f);
+    plot.addDomainMarker(marker_V_Start, Layer.BACKGROUND);
+    plot.addDomainMarker(marker_V_End, Layer.BACKGROUND);
+	
     return chart;
 }
 }

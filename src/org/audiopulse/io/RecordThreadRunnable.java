@@ -62,6 +62,7 @@ public class RecordThreadRunnable implements Runnable
 	private int sampleRate=8000;
 	private int Buffer_Size;
 	private int minFrameSize=160;
+	private double expectedFrequency; 
 	private int IN_REC_MODE;
 	final short[] samples ;
 	Double recordRMS;
@@ -74,14 +75,18 @@ public class RecordThreadRunnable implements Runnable
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
-		Buffer_Size=(int) (1.2*playTime*sampleRate);  //TODO: remove this manual 1.2 factor magic!
+		Buffer_Size=(int) (1.1*playTime*sampleRate);  //TODO: remove this manual 1.2 factor magic!
 		samples = new short[Buffer_Size];
 		initRecord();
 		IN_REC_MODE=0;
 		this.context=context;
-		Log.d(TAG,"Buffe_Size= " + Buffer_Size);
+		
 	}
 
+	public void setExpectedFrequency(double eFrequency){
+		expectedFrequency=eFrequency;
+	}
+	
 	public synchronized void run()
 	{
 		//AudioManager maudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -120,17 +125,18 @@ public class RecordThreadRunnable implements Runnable
 		mAudio.release();
 		Message m = this.mainThreadHandler.obtainMessage();
 		results= new Bundle();
-		String msg="Released recording in " + record_time/1000 + " seconds. RMS = " + recordRMS;
+		String msg="Release time= " + record_time/1000 + " seconds. RMS = " + recordRMS +
+				" eFrequency= "+ expectedFrequency;
 		results.putString("message", msg);
 		results.putShortArray("samples",samples);
 		results.putFloat("recSampleRate",sampleRate);
 		results.putLong("N",(long) samples.length);
 		results.putInt("clipped",clipped);
 		results.putDouble("recordRMS",recordRMS);
+		results.putDouble("expectedFrequency",expectedFrequency);
 		m.setData(results);
 		this.mainThreadHandler.sendMessage(m);
 		if(this.clipped==1){
-			Log.v(TAG,"Recording was clipped!!");
 			Message m2 = this.mainThreadHandler.obtainMessage();
 			m2.setData(Utils.getStringAsABundle("Recording was clipped!!"));
 			this.mainThreadHandler.sendMessage(m2);
