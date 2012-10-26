@@ -39,7 +39,7 @@
 
 package org.audiopulse.utilities;
 
-import org.audiopulse.io.MobilePhone;
+import org.audiopulse.hardware.MobilePhone;
 
 public class DPOAESignal extends PeriodicSeries{
 
@@ -100,7 +100,7 @@ public class DPOAESignal extends PeriodicSeries{
 		}
 	}
 
-	public DPOAESignal(protocolBioLogic dpoae,int N, double Fs, MobilePhone phone, int chConf){
+	public DPOAESignal(protocolBioLogic dpoae,int N, double Fs, org.audiopulse.hardware.MobilePhone phone, int chConf){
 	
 		super(N,Fs,dpoae.f,dpoae.A,chConf,dpoae.stimPresentation);
 		expectedResponse=dpoae.expectedResponse;

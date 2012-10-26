@@ -1,29 +1,29 @@
-package org.audiopulse.io;
+package org.audiopulse.hardware;
 
-import org.audiopulse.io.AcousticDevice.ioDevice;
+import org.audiopulse.hardware.AcousticDevice.ioDevice;
 
-public class HTCOne extends MobilePhone {
+public class SamsungGalaxyNexus extends MobilePhone {
 
 private double maxAmplitude; //Max amplitude of a 1 kHz that does not clip speaker
 private int minAttenuation;
 private final int calFreq=1000;
-private final String name="HTCOne";
+private final String name="SamsungGalaxyNexus";
 private AcousticDevice.ioDevice acousticDevice;
 	
-public enum deviceCalParam{
+public enum deviceAttn{
 	//Only include devices that were measured for attn 
-	DUMMY(20),
+	DUMMY(40),
 	ER10C(40);
 	
 	public int attn;
-	deviceCalParam(int atten){
+	deviceAttn(int atten){
 		this.attn=atten;
 	}	
 }
 
-	public HTCOne(deviceCalParam deviceParam, AcousticDevice.ioDevice acousticDevice){
+	public SamsungGalaxyNexus(SamsungGalaxyNexus.deviceAttn deviceAttn, AcousticDevice.ioDevice acousticDevice){
 	
-		this.minAttenuation=deviceParam.attn;
+		this.minAttenuation=deviceAttn.attn;
 		this.maxAmplitude=getMaxAmp(minAttenuation);
 		this.acousticDevice= acousticDevice;
 	}

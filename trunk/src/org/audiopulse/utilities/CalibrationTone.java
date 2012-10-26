@@ -39,7 +39,7 @@
 
 package org.audiopulse.utilities;
 
-import org.audiopulse.io.MobilePhone;
+import org.audiopulse.hardware.MobilePhone;
 
 /*
  * CALIBRATION ONLY CLASS, USED FOR INITIAL MEASUREMENTS.
