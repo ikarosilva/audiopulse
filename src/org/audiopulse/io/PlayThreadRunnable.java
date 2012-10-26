@@ -39,8 +39,10 @@
 
 package org.audiopulse.io;
 
+import org.audiopulse.hardware.HTCOne;
+import org.audiopulse.hardware.MobilePhone;
 import org.audiopulse.utilities.DPOAESignal;
-import org.audiopulse.utilities.DPOAESimulationSignal;
+import org.audiopulse.hardware.AcousticDevice;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -134,7 +136,6 @@ public class PlayThreadRunnable implements Runnable
 			return;
 		}
 	}
-
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);

@@ -1,29 +1,29 @@
-package org.audiopulse.io;
+package org.audiopulse.hardware;
 
-import org.audiopulse.io.AcousticDevice.ioDevice;
+import org.audiopulse.hardware.AcousticDevice.ioDevice;
 
-public class LGVM670 extends MobilePhone {
+public class HTCOne extends MobilePhone {
 
 private double maxAmplitude; //Max amplitude of a 1 kHz that does not clip speaker
 private int minAttenuation;
 private final int calFreq=1000;
-private final String name="LGVM670";
+private final String name="HTCOne";
 private AcousticDevice.ioDevice acousticDevice;
 	
-public enum deviceAttn{
+public enum deviceCalParam{
 	//Only include devices that were measured for attn 
 	DUMMY(20),
 	ER10C(40);
 	
 	public int attn;
-	deviceAttn(int atten){
+	deviceCalParam(int atten){
 		this.attn=atten;
 	}	
 }
 
-	public LGVM670(LGVM670.deviceAttn deviceAttn, AcousticDevice.ioDevice acousticDevice){
+	public HTCOne(deviceCalParam deviceParam, AcousticDevice.ioDevice acousticDevice){
 	
-		this.minAttenuation=deviceAttn.attn;
+		this.minAttenuation=deviceParam.attn;
 		this.maxAmplitude=getMaxAmp(minAttenuation);
 		this.acousticDevice= acousticDevice;
 	}

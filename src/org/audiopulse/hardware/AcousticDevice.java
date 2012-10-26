@@ -42,7 +42,7 @@
  * 
  */
 
-package org.audiopulse.io;
+package org.audiopulse.hardware;
 
 public class AcousticDevice {
 
