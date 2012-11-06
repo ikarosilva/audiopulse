@@ -2,17 +2,25 @@
 <resources>
     <array name="main_menu">
         <item>@string/menu_plot</item>
-        <item>@string/menu_clear</item>
-        <item>@string/menu_play</item>
-    </array>
-    
-    <string name="menu_plot">Plot waveform</string>
-    <string name="menu_clear">Clear</string>
-    <string name="menu_play">Play thread</string>
-    
+        <item>@string/menu_all</item>
+        <item>@string/menu_8k</item>
+        <item>@string/menu_6k</item>
+        <item>@string/menu_4k</item>
+        <item>@string/menu_3k</item>
+        <item>@string/menu_2k</item>
+        <item>@string/menu_spontaneous</item>
+    </array>   
+    <string name="menu_plot">Plot Waveform</string>
+    <string name="menu_all">Test All</string>
+    <string name="menu_8k">DPOAE 8kHz</string>
+    <string name="menu_6k">DPOAE 6kHz</string>
+    <string name="menu_4k">DPOAE 4kHz</string>
+    <string name="menu_3k">DPOAE 3kHz</string>
+    <string name="menu_2k">DPOAE 2kHz</string>
+    <string name="menu_spontaneous">Spontaneous</string>  
     <style name="menu_style">
         <item name="android:textColor">@color/foreground</item>
-        <item name="android:textSize">12dp</item>
+        <item name="android:textSize">24dp</item>
         <item name="android:divider">@color/lowlight</item>
         <item name="android:dividerHeight">1dp</item>
         <item name="android:listSelector">@color/highlight</item>            
