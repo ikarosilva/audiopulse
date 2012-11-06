@@ -87,20 +87,36 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         			
         			TextView item = (TextView) itemClicked;
         			String itemText = item.getText().toString();
-        			int itemId = item.getId();
         			
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				plotWaveform();
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_clear))) {
-        				emptyText();
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_play))) {
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all))) {
+        				emptyText(); //Clear text for new Test
+        				playRecordThread();	
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_8k))) {
+        				emptyText(); //Clear text for new Test
+        				playRecordThread();	
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_6k))) {
+        				emptyText(); //Clear text for new Test
         				playRecordThread();
-        				
-        			}
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_4k))) {
+        				emptyText(); //Clear text for new Test
+        				playRecordThread();
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_3k))) {
+        				emptyText(); //Clear text for new Test
+        				playRecordThread();
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_2k))) {
+        				emptyText(); //Clear text for new Test
+        				playRecordThread();
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous))) {
+        				emptyText(); //Clear text for new Test
+        				playRecordThread();
+        			} 
         		}
         	}
 		);
 	}
+    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) 
 	{
@@ -113,23 +129,27 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	public boolean onOptionsItemSelected(MenuItem item) 
 	{
 		appendMenuItemText(item);
-		if (item.getItemId() == R.id.menu_clear)
+		int selected_id=item.getItemId();
+		if (selected_id == R.id.menu_clear)
 		{
+			//TODO: Item id menu_clear not being used anymore. Consider removing in future versions
 			emptyText();
 			return true;
 		}
-		if (item.getItemId() == R.id.menu_play_thread)
+		if (selected_id == R.id.menu_all || selected_id == R.id.menu_8k ||
+			selected_id == R.id.menu_6k || selected_id == R.id.menu_4k ||
+			selected_id == R.id.menu_3k || selected_id == R.id.menu_2k ||
+		    selected_id == R.id.menu_spontaneous)
 		{
-			Log.v(TAG,"Starting execution of thread pool");
 			playRecordThread();
 			return true;
 		}
-		if(item.getItemId() == R.id.plot_waveform)
+		if(selected_id == R.id.plot_waveform)
 		{
 			plotWaveform();
 			return true;
 		}
-		if(item.getItemId() == R.id.menu_stimulus) {
+		if(selected_id == R.id.menu_stimulus) {
 			editStimulusSettings();
 			return true;
 		}

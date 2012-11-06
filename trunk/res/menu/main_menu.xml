@@ -5,8 +5,20 @@
             android:title="Plot Waveform" />            
         <item android:id="@+id/menu_clear"
 	     android:title="clear" />     
-        <item android:id="@+id/menu_play_thread"
-            android:title="Play Thread" />
+        <item android:id="@+id/menu_all"
+            android:title="Test All" />
+        <item android:id="@+id/menu_8k"
+            android:title="DPOAE 8k" />
+        <item android:id="@+id/menu_6k"
+            android:title="DPOAE 6k" />
+        <item android:id="@+id/menu_4k"
+            android:title="DPOAE 4k" />
+        <item android:id="@+id/menu_3k"
+            android:title="DPOAE 3k" />
+        <item android:id="@+id/menu_2k"
+            android:title="DPOAE 2k" />
+        <item android:id="@+id/menu_spontaneous"
+            android:title="Spontaneous" />
         <item android:id="@+id/menu_stimulus"
             android:title="Stimulus settings" />
     </group>
