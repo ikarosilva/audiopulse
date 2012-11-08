@@ -16,6 +16,9 @@
         <activity android:name=".activities.PlotSpectralActivity"
             android:configChanges="orientation|keyboardHidden">
         </activity>
+        <activity android:name=".activities.PlotAudiogramActivity"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
         <activity android:name=".activities.ThreadedPlayRecActivity"
                   android:label="DPOAE Demo">
             <intent-filter>

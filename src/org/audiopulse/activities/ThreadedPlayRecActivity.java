@@ -92,10 +92,10 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         				plotWaveform();
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right))) {
         				emptyText(); //Clear text for new Test
-        				playRecordThread();	
+        				plotAudiogram();	
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_left))) {
         				emptyText(); //Clear text for new Test
-        				playRecordThread();
+        				plotAudiogram();
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_4k))) {
         				emptyText(); //Clear text for new Test
         				playRecordThread();
@@ -133,11 +133,15 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 			emptyText();
 			return true;
 		}
-		if (selected_id == R.id.menu_all_right || selected_id == R.id.menu_all_left ||
-			selected_id == R.id.menu_3k || selected_id == R.id.menu_2k ||
+		if (selected_id == R.id.menu_3k || selected_id == R.id.menu_2k ||
 			selected_id == R.id.menu_4k || selected_id == R.id.menu_spontaneous)
 		{
 			playRecordThread();
+			return true;
+		}
+		if(selected_id == R.id.menu_all_right || selected_id == R.id.menu_all_left )
+		{
+			plotAudiogram();
 			return true;
 		}
 		if(selected_id == R.id.plot_waveform)
@@ -203,6 +207,11 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	public void plotWaveform() {
 		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
 		intent.putExtras(audioResultsBundle);
+		startActivity(intent);
+	}
+	
+	public void plotAudiogram() {
+		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
 		startActivity(intent);
 	}
 	
