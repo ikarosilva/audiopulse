@@ -90,13 +90,10 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         			
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				plotWaveform();
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all))) {
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right))) {
         				emptyText(); //Clear text for new Test
         				playRecordThread();	
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_8k))) {
-        				emptyText(); //Clear text for new Test
-        				playRecordThread();	
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_6k))) {
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_left))) {
         				emptyText(); //Clear text for new Test
         				playRecordThread();
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_4k))) {
@@ -136,10 +133,9 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 			emptyText();
 			return true;
 		}
-		if (selected_id == R.id.menu_all || selected_id == R.id.menu_8k ||
-			selected_id == R.id.menu_6k || selected_id == R.id.menu_4k ||
+		if (selected_id == R.id.menu_all_right || selected_id == R.id.menu_all_left ||
 			selected_id == R.id.menu_3k || selected_id == R.id.menu_2k ||
-		    selected_id == R.id.menu_spontaneous)
+			selected_id == R.id.menu_4k || selected_id == R.id.menu_spontaneous)
 		{
 			playRecordThread();
 			return true;

@@ -2,18 +2,16 @@
 <resources>
     <array name="main_menu">
         <item>@string/menu_plot</item>
-        <item>@string/menu_all</item>
-        <item>@string/menu_8k</item>
-        <item>@string/menu_6k</item>
+        <item>@string/menu_all_right</item>
+        <item>@string/menu_all_left</item>
         <item>@string/menu_4k</item>
         <item>@string/menu_3k</item>
         <item>@string/menu_2k</item>
         <item>@string/menu_spontaneous</item>
     </array>   
     <string name="menu_plot">Plot Waveform</string>
-    <string name="menu_all">Test All</string>
-    <string name="menu_8k">DPOAE 8kHz</string>
-    <string name="menu_6k">DPOAE 6kHz</string>
+    <string name="menu_all_right">Test All Right Ear (Audiogram)</string>
+    <string name="menu_all_left">Test All Left Ear (Audiogram)</string>
     <string name="menu_4k">DPOAE 4kHz</string>
     <string name="menu_3k">DPOAE 3kHz</string>
     <string name="menu_2k">DPOAE 2kHz</string>

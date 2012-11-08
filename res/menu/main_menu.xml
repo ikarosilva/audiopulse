@@ -5,12 +5,10 @@
             android:title="Plot Waveform" />            
         <item android:id="@+id/menu_clear"
 	     android:title="clear" />     
-        <item android:id="@+id/menu_all"
-            android:title="Test All" />
-        <item android:id="@+id/menu_8k"
-            android:title="DPOAE 8k" />
-        <item android:id="@+id/menu_6k"
-            android:title="DPOAE 6k" />
+        <item android:id="@+id/menu_all_right"
+            android:title="Test Right Ear (DPOAE Audiogram)" />
+        <item android:id="@+id/menu_all_left"
+            android:title="Test Right Left (DPOAE Audiogram)" />
         <item android:id="@+id/menu_4k"
             android:title="DPOAE 4k" />
         <item android:id="@+id/menu_3k"
