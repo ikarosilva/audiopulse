@@ -47,6 +47,8 @@ import org.afree.chart.plot.PlotOrientation;
 import org.afree.chart.plot.XYPlot;
 import org.afree.chart.renderer.xy.DeviationRenderer;
 import org.afree.data.xy.XYDataset;
+import org.afree.data.xy.XYSeries;
+import org.afree.data.xy.XYSeriesCollection;
 import org.afree.data.xy.YIntervalSeries;
 import org.afree.data.xy.YIntervalSeriesCollection;
 import org.afree.graphics.SolidColor;
@@ -95,6 +97,45 @@ public class PlotAudiogramView extends DemoView {
 		return dataset;
     }
 
+private static XYSeriesCollection createDataset() {
+    	
+    	
+		XYSeries series1 = new XYSeries("DPOAE");
+		XYSeries series2 = new XYSeries("Noise Floor");
+		XYSeries series3 = new XYSeries("F1");
+		XYSeries series4 = new XYSeries("F2");
+    	
+		series1.add(7.206, -7);
+		series1.add(5.083, 13.1);
+		series1.add(3.616, 17.9);
+		series1.add(2.542, 11.5);
+		series1.add(1.818, 17.1);
+		
+		series2.add(7.206, -7-10);
+		series2.add(5.083, 13.1-10);
+		series2.add(3.616, 17.9-10);
+		series2.add(2.542, 11.5-10);
+		series2.add(1.818, 17.1-10);
+		
+		series3.add(7.206, 64);
+		series3.add(5.083, 64);
+		series3.add(3.616, 64);
+		series3.add(2.542, 64);
+		series3.add(1.818, 64);
+		
+		series4.add(7.206, 54.9);
+		series4.add(5.083, 56.6);
+		series4.add(3.616, 55.6);
+		series4.add(2.542, 55.1);
+		series4.add(1.818, 55.1);
+		
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		dataset.addSeries(series1);
+		dataset.addSeries(series2);
+		dataset.addSeries(series3);
+		dataset.addSeries(series4);
+		return dataset;
+    }
 	/**
 	 * Creates a chart.
 	 * @param dataset the data for the chart.
@@ -102,13 +143,14 @@ public class PlotAudiogramView extends DemoView {
 	 */
 
 private static AFreeChart createChart2() {
-	XYDataset dataset = createDataset2();
+	//XYDataset dataset = createDataset2();
+	XYDataset data = createDataset();
 	// create the chart...
 	AFreeChart chart = ChartFactory.createXYLineChart(
 			"RE DPOAE Test", // chart title
 			"Frequency (kHz)", // x axis label
 			"DPOAE Level (dB SPL)", // y axis label
-			dataset, // data
+			data, // data
 			PlotOrientation.VERTICAL,
 			true, // include legend
 			true, // tooltips
@@ -123,9 +165,12 @@ private static AFreeChart createChart2() {
 	
 	renderer.setSeriesPaintType(0, new SolidColor(Color.rgb(0, 0, 255)));
 	renderer.setSeriesFillPaintType(0, new SolidColor(Color.rgb(250, 100, 100)));
-	//renderer.setSeriesFillPaintType(1, new SolidColor(Color.rgb(0, 0, 0)));
-	//renderer.setSeriesFillPaintType(2, new SolidColor(Color.rgb(0, 0, 0)));
-	//renderer.setSeriesFillPaintType(3, new SolidColor(Color.rgb(0, 0, 0)));
+	renderer.setSeriesPaintType(1, new SolidColor(Color.rgb(150, 150, 150)));
+	renderer.setSeriesFillPaintType(1, new SolidColor(Color.rgb(150, 150, 150)));
+	renderer.setSeriesPaintType(2, new SolidColor(Color.rgb(100, 100, 250)));
+	renderer.setSeriesFillPaintType(2, new SolidColor(Color.rgb(100, 100, 250)));
+	renderer.setSeriesPaintType(3, new SolidColor(Color.rgb(100, 250, 100)));
+	renderer.setSeriesFillPaintType(3, new SolidColor(Color.rgb(100, 250, 100)));
 	plot.setRenderer(renderer);
 
 	return chart;
