@@ -98,16 +98,16 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         				plotAudiogram();
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_4k))) {
         				emptyText(); //Clear text for new Test
-        				playRecordThread();
+        				playRecordThread(getResources().getString(R.string.menu_4k));
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_3k))) {
         				emptyText(); //Clear text for new Test
-        				playRecordThread();
+        				playRecordThread(getResources().getString(R.string.menu_3k));
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_2k))) {
         				emptyText(); //Clear text for new Test
-        				playRecordThread();
+        				playRecordThread(getResources().getString(R.string.menu_2k));
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous))) {
         				emptyText(); //Clear text for new Test
-        				playRecordThread();
+        				playRecordThread(getResources().getString(R.string.menu_spontaneous));
         			} 
         		}
         	}
@@ -136,7 +136,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 		if (selected_id == R.id.menu_3k || selected_id == R.id.menu_2k ||
 			selected_id == R.id.menu_4k || selected_id == R.id.menu_spontaneous)
 		{
-			playRecordThread();
+			playRecordThread("spontaneous");
 			return true;
 		}
 		if(selected_id == R.id.menu_all_right || selected_id == R.id.menu_all_left )
@@ -173,29 +173,39 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 		tv.setText("");
 	}
 
-	private void playRecordThread()
+	private void playRecordThread(String menu_selected)
 	{
 		
+		//Ignore playing thread when obtaining SOAEs
+		
 		beginTest();	
-		playStatusBackHandler = new ReportStatusHandler(this);
-		recordStatusBackHandler = new ReportStatusHandler(this);
 		Context context=this.getApplicationContext();		
-		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
-		PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
+		
+		
+		recordStatusBackHandler = new ReportStatusHandler(this);
 		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
 		
-		playThread = new Thread(pRun);
-		rRun.setExpectedFrequency(pRun.getExpectedFrequency());
-		recordThread = new Thread(rRun);
-
-		
-		playThread.setPriority(Thread.MAX_PRIORITY);
-		recordThread.setPriority(Thread.MAX_PRIORITY);
-		execSvc.execute( recordThread );
-		execSvc.execute( playThread );
-		execSvc.shutdown();
+		if(menu_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
+			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
+			rRun.setExpectedFrequency(0);
+			recordThread = new Thread(rRun);	
+			recordThread.setPriority(Thread.MAX_PRIORITY);
+			execSvc.execute( recordThread );
+			execSvc.shutdown();
+		}else{
+			playStatusBackHandler = new ReportStatusHandler(this);
+			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
+			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
+			playThread = new Thread(pRun);
+			rRun.setExpectedFrequency(pRun.getExpectedFrequency());
+			recordThread = new Thread(rRun);	
+			playThread.setPriority(Thread.MAX_PRIORITY);
+			recordThread.setPriority(Thread.MAX_PRIORITY);
+			execSvc.execute( recordThread );
+			execSvc.execute( playThread );
+			execSvc.shutdown();
+		}
 		endTest();
-
 	}
 
 	public void plotSpectrum() {

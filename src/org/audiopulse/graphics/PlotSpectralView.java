@@ -81,11 +81,11 @@ public class PlotSpectralView extends DemoView {
 	private static float sampleRate;
 	private static Double recordRMS;
 	private static double frange=100; //Range for highlighting where the expected response should 
-							   		  //occur (in Hz)
+	//occur (in Hz)
 	private static double expectedFrequency;
 	static double fRangeStart;
 	static double fRangeEnd;
-	
+
 	public PlotSpectralView(Context context, long M, short[] aBuffer, float Fs, 
 			Double recRMS, double eFrequency) {
 		super(context);
@@ -96,99 +96,101 @@ public class PlotSpectralView extends DemoView {
 		expectedFrequency=eFrequency;
 		fRangeStart=expectedFrequency-frange;
 		fRangeEnd=expectedFrequency+frange;
-		
+
 		final AFreeChart chart = createChart2();
 		setChart(chart);
 	}
-    private static XYSeriesCollection createDataset2() {
-    	
-    		XYSeriesCollection result = new XYSeriesCollection();
-        	XYSeries series = new XYSeries(1);
-        	FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
+	private static XYSeriesCollection createDataset2() {
 
-        	
-        	
-        	//Calculate the size of averaged waveform
-        	//based on the maximum desired frequency for FFT analysis
-        	int SPEC_N=(int) Math.pow(2,Math.floor(Math.log((int) N)/Math.log(2)));
-        	double fres= (double) sampleRate/SPEC_N;
-        	double[] winData=new double[SPEC_N];
-        	Complex[] tmpFFT=new Complex[SPEC_N];
-    		double[] Pxx = new double[SPEC_N];
-    		double tmpPxx;
-        	//Break FFT averaging into SPEC_N segments for averaging
-        	//Calculate spectrum, variation based on
-        	//http://www.mathworks.com/support/tech-notes/1700/1702.html
-    		
-    		//Perform windowing and averaging on the power spectrum
-    		Log.v(TAG,"SPEC_N= " + SPEC_N + " fres= " + fres+ " N=" +N);
-        	for (int i=0; i < N; i++){
-        		if(i*SPEC_N+SPEC_N > N)
-        			break;
-        		for (int k=0;k<SPEC_N;k++){
-        			winData[k]= (double) audioBuffer[i*SPEC_N + k]*SpectralWindows.hamming(k,SPEC_N);
-        		}
-        		tmpFFT=FFT.transform(winData,TransformType.FORWARD);
-        		for(int k=0;k<(SPEC_N/2);k++){
-        			tmpPxx = tmpFFT[k].abs()/(double)SPEC_N;
-        			tmpPxx*=tmpPxx; //Not accurate for the DC & Nyquist, but we are not using it!
-        			Pxx[k]=( (i*Pxx[k]) + tmpPxx )/((double) i+1);
-        		}
-     		}
-        	
-        	//Insert data and apply FIR smoothing to the spectral display
-        	//Parameters for the frequency-domain smoothing of the periodogram
-        	//set firLength =1  for no smoothing at all.
-        	//int firLength=20 is a good choice;
-        	int firLength=20;
-        	double ave =0, flt_ind;
-    		for(int k=0;k<(SPEC_N/2);k++){
-    			flt_ind=(k>=firLength)?firLength:(k+1);
-    			ave = ave + 10*Math.log10(Pxx[k]) -((k>=firLength)?10*Math.log10(Pxx[k-firLength]):0);
-    			
-    			series.add(((double) 0) + k*fres,
-    					ave/flt_ind);
-    		}
-        	result.addSeries(series);
-            return result;
-    }
+		XYSeriesCollection result = new XYSeriesCollection();
+		XYSeries series = new XYSeries(1);
+		FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
 
 
-private static AFreeChart createChart2() {
-	XYDataset dataset = createDataset2();
-	// create the chart...
-	AFreeChart chart = ChartFactory.createXYLineChart(
-			"RMS = " + recordRMS.toString() + " dB", // chart title
-			"Frequency (Hz)", // x axis label
-			"Amplitude (dB)", // y axis label
-			dataset, // data
-			PlotOrientation.VERTICAL,
-			false, // include legend
-			true, // tooltips
-			false // urls
-			);
-	XYPlot plot = (XYPlot) chart.getPlot();
-	plot.setBackgroundPaintType(new SolidColor(Color.rgb(0, 0, 0)));
-    plot.getDomainAxis().setLowerMargin(0.0);
-    plot.getDomainAxis().setUpperMargin(0.0);
-    XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
-	renderer.setSeriesPaintType(0, new SolidColor(Color.rgb(0, 255, 0)));
-	
-	renderer.setSeriesStroke(0,3.0f);
-	plot.setRenderer(renderer);
-	
-	//Plot expected range
-	Marker marker_V = new IntervalMarker(fRangeStart, fRangeEnd);
-    marker_V.setLabelOffsetType(LengthAdjustmentType.EXPAND);
-    marker_V.setPaintType(new SolidColor(Color.rgb(150, 150, 255)));
-    plot.addDomainMarker(marker_V, Layer.BACKGROUND);
-	Marker marker_V_Start = new ValueMarker(fRangeStart, Color.BLUE, 2.0f);
-    Marker marker_V_End = new ValueMarker(fRangeEnd, Color.BLUE, 2.0f);
-    plot.addDomainMarker(marker_V_Start, Layer.BACKGROUND);
-    plot.addDomainMarker(marker_V_End, Layer.BACKGROUND);
-	
-    return chart;
-}
+
+		//Calculate the size of averaged waveform
+		//based on the maximum desired frequency for FFT analysis
+		int SPEC_N=(int) Math.pow(2,Math.floor(Math.log((int) N)/Math.log(2)));
+		double fres= (double) sampleRate/SPEC_N;
+		double[] winData=new double[SPEC_N];
+		Complex[] tmpFFT=new Complex[SPEC_N];
+		double[] Pxx = new double[SPEC_N];
+		double tmpPxx;
+		//Break FFT averaging into SPEC_N segments for averaging
+		//Calculate spectrum, variation based on
+		//http://www.mathworks.com/support/tech-notes/1700/1702.html
+
+		//Perform windowing and averaging on the power spectrum
+		Log.v(TAG,"SPEC_N= " + SPEC_N + " fres= " + fres+ " N=" +N);
+		for (int i=0; i < N; i++){
+			if(i*SPEC_N+SPEC_N > N)
+				break;
+			for (int k=0;k<SPEC_N;k++){
+				winData[k]= (double) audioBuffer[i*SPEC_N + k]*SpectralWindows.hamming(k,SPEC_N);
+			}
+			tmpFFT=FFT.transform(winData,TransformType.FORWARD);
+			for(int k=0;k<(SPEC_N/2);k++){
+				tmpPxx = tmpFFT[k].abs()/(double)SPEC_N;
+				tmpPxx*=tmpPxx; //Not accurate for the DC & Nyquist, but we are not using it!
+				Pxx[k]=( (i*Pxx[k]) + tmpPxx )/((double) i+1);
+			}
+		}
+
+		//Insert data and apply FIR smoothing to the spectral display
+		//Parameters for the frequency-domain smoothing of the periodogram
+		//set firLength =1  for no smoothing at all.
+		//int firLength=20 is a good choice;
+		int firLength=20;
+		double ave =0, flt_ind;
+		for(int k=0;k<(SPEC_N/2);k++){
+			flt_ind=(k>=firLength)?firLength:(k+1);
+			ave = ave + 10*Math.log10(Pxx[k]) -((k>=firLength)?10*Math.log10(Pxx[k-firLength]):0);
+
+			series.add(((double) 0) + k*fres,
+					ave/flt_ind);
+		}
+		result.addSeries(series);
+		return result;
+	}
+
+
+	private static AFreeChart createChart2() {
+		XYDataset dataset = createDataset2();
+		// create the chart...
+		AFreeChart chart = ChartFactory.createXYLineChart(
+				"RMS = " + recordRMS.toString() + " dB", // chart title
+				"Frequency (Hz)", // x axis label
+				"Amplitude (dB)", // y axis label
+				dataset, // data
+				PlotOrientation.VERTICAL,
+				false, // include legend
+				true, // tooltips
+				false // urls
+				);
+		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setBackgroundPaintType(new SolidColor(Color.rgb(0, 0, 0)));
+		plot.getDomainAxis().setLowerMargin(0.0);
+		plot.getDomainAxis().setUpperMargin(0.0);
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
+		renderer.setSeriesPaintType(0, new SolidColor(Color.rgb(0, 255, 0)));
+
+		renderer.setSeriesStroke(0,3.0f);
+		plot.setRenderer(renderer);
+
+		//Plot expected range
+		if(expectedFrequency != 0){
+			Marker marker_V = new IntervalMarker(fRangeStart, fRangeEnd);
+			marker_V.setLabelOffsetType(LengthAdjustmentType.EXPAND);
+			marker_V.setPaintType(new SolidColor(Color.rgb(150, 150, 255)));
+			plot.addDomainMarker(marker_V, Layer.BACKGROUND);
+			Marker marker_V_Start = new ValueMarker(fRangeStart, Color.BLUE, 2.0f);
+			Marker marker_V_End = new ValueMarker(fRangeEnd, Color.BLUE, 2.0f);
+			plot.addDomainMarker(marker_V_Start, Layer.BACKGROUND);
+			plot.addDomainMarker(marker_V_End, Layer.BACKGROUND);
+		}
+
+		return chart;
+	}
 }
 
 
