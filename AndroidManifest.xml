@@ -20,11 +20,14 @@
             android:configChanges="orientation|keyboardHidden">
         </activity>
         <activity android:name=".activities.ThreadedPlayRecActivity"
-                  android:label="DPOAE Demo">
+                  android:label="Specific Tests">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".activities.DPgramActivity"
+                  android:label="DPgram">
         </activity>
     </application>
 </manifest>

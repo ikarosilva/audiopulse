@@ -39,8 +39,7 @@
 
 package org.audiopulse.io;
 
-import org.audiopulse.activities.ThreadedPlayRecActivity;
-
+import org.audiopulse.activities.AudioPulseRootActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -49,9 +48,9 @@ import android.util.Log;
 public class ReportStatusHandler extends Handler
 {
 	public static final String TAG = "ReportStatusHandler";
-	private ThreadedPlayRecActivity parentActivity = null; 
+	private AudioPulseRootActivity parentActivity = null;
 	
-	public ReportStatusHandler(ThreadedPlayRecActivity inParentActivity)
+	public ReportStatusHandler(AudioPulseRootActivity inParentActivity)
 	{
 		//Registering handler in parent activity 
 		parentActivity = inParentActivity;
@@ -84,8 +83,7 @@ public class ReportStatusHandler extends Handler
 	{
 		//Printing status
 		Log.v(TAG,"Plotting data from bundle");
-		parentActivity.audioResultsBundle=b;
-		parentActivity.plotSpectrum();
-		//parentActivity.plotWaveform();
+		//parentActivity.audioResultsBundle=b;
+		parentActivity.plotSpectrum(b);
 	}
 }

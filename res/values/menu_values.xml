@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="main_menu">
-        <item>@string/menu_plot</item>
         <item>@string/menu_all_right</item>
         <item>@string/menu_all_left</item>
+        <item>@string/menu_single_test</item>
+    </array>
+    <array name="single_test_menu">
         <item>@string/menu_4k</item>
         <item>@string/menu_3k</item>
         <item>@string/menu_2k</item>
         <item>@string/menu_spontaneous</item>
+        <item>@string/menu_plot</item>
     </array>   
-    <string name="menu_plot">Plot Waveform</string>
     <string name="menu_all_right">Test All Right Ear (Audiogram)</string>
     <string name="menu_all_left">Test All Left Ear (Audiogram)</string>
+    <string name="menu_single_test">Test All Left Ear (Audiogram)</string>
     <string name="menu_4k">DPOAE 4kHz</string>
     <string name="menu_3k">DPOAE 3kHz</string>
     <string name="menu_2k">DPOAE 2kHz</string>
     <string name="menu_spontaneous">Spontaneous</string>  
+    <string name="menu_plot">Plot Waveform</string>
     <style name="menu_style">
         <item name="android:textColor">@color/foreground</item>
         <item name="android:textSize">24dp</item>

@@ -48,14 +48,17 @@ import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ThreadedPlayRecActivity extends AudioPulseRootActivity 
+public class DPgramActivity extends AudioPulseRootActivity 
 {
 	public static final String TAG="ThreadedPlayRecActivity";
 	
@@ -66,7 +69,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	Thread playThread = null;
 	Thread recordThread = null;
 	public static double playTime=0.5;
-	//public Bundle audioResultsBundle;
+	public Bundle audioResultsBundle;
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 
 	@Override
@@ -74,8 +77,8 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.thread);
 		
-		// set listener for menu items
-		ListView menuList = (ListView) findViewById(R.id.single_test_menu_list);
+		// set listener for main menu items
+		ListView menuList = (ListView) findViewById(R.id.menu_list);
         menuList.setOnItemClickListener(
         	new AdapterView.OnItemClickListener() {
         		public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
@@ -83,40 +86,79 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         			TextView item = (TextView) itemClicked;
         			String itemText = item.getText().toString();
         			
-        			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_4k))) {
+        			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right))) {
         				emptyText(); //Clear text for new Test
-        				playRecordThread(getResources().getString(R.string.menu_4k));
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_3k))) {
-        				emptyText(); //Clear text for new Test
-        				playRecordThread(getResources().getString(R.string.menu_3k));
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_2k))) {
-        				emptyText(); //Clear text for new Test
-        				playRecordThread(getResources().getString(R.string.menu_2k));
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous))) {
-        				emptyText(); //Clear text for new Test
-        				playRecordThread(getResources().getString(R.string.menu_spontaneous));
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
-        				plotWaveform();
+        				plotAudiogram();	
         			}
-        			
+        			else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_left))) {
+        				emptyText(); //Clear text for new Test
+        				plotAudiogram();
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_single_test))) {
+        				emptyText(); //Clear text for new Test
+        				playRecordThread(getResources().getString(R.string.menu_single_test));
+        			} 
         		}
         	}
 		);
 	}
     
-	
-	private void playRecordThread(String item_selected)
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) 
+	{
+		super.onCreateOptionsMenu(menu);
+		MenuInflater inflater = getMenuInflater(); //from activity
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
+	/*
+	//TODO: Menu is not being used anymore. Edit it so future versions prompt user to save data to disk and/or exit.
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) 
+	{
+		appendMenuItemText(item);
+		int selected_id=item.getItemId();
+		if (selected_id == R.id.menu_clear)
+		{
+			emptyText();
+			return true;
+		}
+		if (selected_id == R.id.menu_3k || selected_id == R.id.menu_2k ||
+			selected_id == R.id.menu_4k || selected_id == R.id.menu_spontaneous)
+		{
+			playRecordThread("spontaneous");
+			return true;
+		}
+		if(selected_id == R.id.menu_all_right || selected_id == R.id.menu_all_left )
+		{
+			plotAudiogram();
+			return true;
+		}
+		if(selected_id == R.id.plot_waveform)
+		{
+			plotWaveform();
+			return true;
+		}
+		if(selected_id == R.id.menu_stimulus) {
+			editStimulusSettings();
+			return true;
+		}
+		return false;
+	}
+	*/
+	private TextView getTextView(){
+		return (TextView)this.findViewById(R.id.text1);
+	}
+
+	private void playRecordThread(String menu_selected)
 	{
 		
 		//Ignore playing thread when obtaining SOAEs
+		
 		beginTest();	
 		Context context=this.getApplicationContext();		
-		
-		
 		recordStatusBackHandler = new ReportStatusHandler(this);
 		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
-		
-		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
+		if(menu_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
 			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
 			rRun.setExpectedFrequency(0);
 			recordThread = new Thread(rRun);	
@@ -137,6 +179,12 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 			execSvc.shutdown();
 		}
 		endTest();
+	}
+
+	
+	public void plotAudiogram() {
+		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
+		startActivity(intent);
 	}
 
 }

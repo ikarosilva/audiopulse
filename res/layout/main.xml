@@ -7,6 +7,10 @@
 	<ListView android:id="@+id/menu_list"
 	    style="@style/menu_style"
 	    android:entries="@array/main_menu" />
+	
+	<ListView android:id="@+id/single_test_menu_list"
+	    style="@style/menu_style"
+	    android:entries="@array/single_test_menu" />
         
     
 </LinearLayout>
