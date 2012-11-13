@@ -60,7 +60,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	public static final String TAG="ThreadedPlayRecActivity";
 	
 	static final int STIMULUS_DIALOG_ID = 0;
-	Bundle audio_bundle = new Bundle();
+	Bundle audioBundle = new Bundle();
 	Handler playStatusBackHandler = null;
 	Handler recordStatusBackHandler = null;
 	Thread playThread = null;
@@ -83,21 +83,12 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         			TextView item = (TextView) itemClicked;
         			String itemText = item.getText().toString();
         			
-        			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_4k))) {
-        				emptyText(); //Clear text for new Test
-        				playRecordThread(getResources().getString(R.string.menu_4k));
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_3k))) {
-        				emptyText(); //Clear text for new Test
-        				playRecordThread(getResources().getString(R.string.menu_3k));
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_2k))) {
-        				emptyText(); //Clear text for new Test
-        				playRecordThread(getResources().getString(R.string.menu_2k));
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous))) {
-        				emptyText(); //Clear text for new Test
-        				playRecordThread(getResources().getString(R.string.menu_spontaneous));
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
+        			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				plotWaveform();
-        			}
+        			} else {
+        				emptyText(); //Clear text for new stimuli test and spectral plotting
+        				playRecordThread(itemText);
+        			} 
         			
         		}
         	}
