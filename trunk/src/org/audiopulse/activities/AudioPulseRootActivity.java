@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 public class AudioPulseRootActivity extends AudioPulseActivity{
 
-	private Intent audioResultsBundle;
+	private Bundle audioResultsBundle;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -33,6 +33,7 @@ public class AudioPulseRootActivity extends AudioPulseActivity{
 	public void plotSpectrum(Bundle audioResultsBundle) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotSpectralActivity.class);
 		intent.putExtras(audioResultsBundle);
+		this.audioResultsBundle=audioResultsBundle;
 		startActivity(intent);
 	}
 
