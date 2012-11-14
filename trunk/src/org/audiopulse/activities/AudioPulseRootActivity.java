@@ -38,6 +38,7 @@ public class AudioPulseRootActivity extends AudioPulseActivity{
 	}
 
 	public void plotWaveform() {
+		//TODO: Add check for not null audioResultsBundle (notify user that to run stimulus if they press this option before running anything).
 		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
 		intent.putExtras(audioResultsBundle);
 		startActivity(intent);

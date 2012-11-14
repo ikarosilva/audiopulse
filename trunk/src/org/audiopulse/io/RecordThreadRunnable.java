@@ -38,6 +38,11 @@
  */ 
 
 package org.audiopulse.io;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.audiopulse.utilities.SignalProcessing;
 
 import android.content.Context;
@@ -45,6 +50,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -69,13 +75,14 @@ public class RecordThreadRunnable implements Runnable
 	Handler mainThreadHandler = null;
 	private Bundle results;
 	public int clipped;
+	private static File root = Environment.getExternalStorageDirectory();
 	Context context;
 	
 	public RecordThreadRunnable(Handler h, double playTime,Context context)
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
-		Buffer_Size=(int) (1.1*playTime*sampleRate);  //TODO: remove this manual 1.2 factor magic!
+		Buffer_Size=(int) (playTime*sampleRate); 
 		samples = new short[Buffer_Size];
 		initRecord();
 		IN_REC_MODE=0;
@@ -94,17 +101,39 @@ public class RecordThreadRunnable implements Runnable
 		informStart();
 		
 		//Record Stimulus
-		Log.d(TAG,"Recording stimulus");
 		this.IN_REC_MODE=1;
-		record();
-		
 		android.media.AudioManager mgr = (android.media.AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
 		int streamVolume = mgr.getStreamVolume(android.media.AudioManager.STREAM_MUSIC); 
 		informMiddle("Volume is set to: " + streamVolume);
+		informMiddle("Recording response, please wait...");
+		record();
 		this.IN_REC_MODE=0;
 		informMiddle("RMS= " + recordRMS);
 		//Finish up
 		informFinish();
+		
+		//Write file to disk
+		String fileName="AudioPulseData.raw";
+		informMiddle("Saving data at: "+ root+ fileName);
+		File dataFile = new File(root, fileName);
+		BufferedWriter outData = null;
+		try {
+			outData = new BufferedWriter(new FileWriter(dataFile));
+			for(int i=0;i<samples.length;i++){
+				outData.write(samples[i]);
+			}
+			outData.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+			informMiddle("Could not generate data file:" + e.getLocalizedMessage());
+		}
+		try {
+			outData.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		informMiddle("Finished!");
+		
 	}
 
 	public void informMiddle(String str)
@@ -136,11 +165,6 @@ public class RecordThreadRunnable implements Runnable
 		results.putDouble("expectedFrequency",expectedFrequency);
 		m.setData(results);
 		this.mainThreadHandler.sendMessage(m);
-		if(this.clipped==1){
-			Message m2 = this.mainThreadHandler.obtainMessage();
-			m2.setData(Utils.getStringAsABundle("Recording was clipped!!"));
-			this.mainThreadHandler.sendMessage(m2);
-		}
 	}
 
 	public int getRecMode(){
@@ -170,6 +194,7 @@ public class RecordThreadRunnable implements Runnable
 		int endbuffer;
 		int nRead=1;
 		int frameSize=minFrameSize*4;
+		//TODO: Should we flush the buffer before recording? 
 		//Log.v(TAG,"frame size is: " + frameSize + " card size is" + soundCardBufferSize + " play time is: " + playTime);
 		int dataLeft=samples.length;
 		while(dataLeft>0){
