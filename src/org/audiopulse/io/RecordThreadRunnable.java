@@ -40,8 +40,11 @@
 package org.audiopulse.io;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 import org.audiopulse.utilities.SignalProcessing;
 
@@ -65,6 +68,7 @@ public class RecordThreadRunnable implements Runnable
 	final static int channelConfig = AudioFormat.CHANNEL_IN_MONO;
 	final static int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	final static int recSource=MediaRecorder.AudioSource.MIC;
+	String fileName="AP_SpontaneousData.raw";
 	private int sampleRate=8000;
 	private int Buffer_Size;
 	private int minFrameSize=160;
@@ -113,25 +117,45 @@ public class RecordThreadRunnable implements Runnable
 		informFinish();
 		
 		//Write file to disk
-		String fileName="AudioPulseData.raw";
-		informMiddle("Saving data at: "+ root+ fileName);
-		File dataFile = new File(root, fileName);
-		BufferedWriter outData = null;
+		
+		
+		File outFile = new File(root, fileName);
+		informMiddle("Saving data at: "+ outFile.getAbsolutePath());
 		try {
-			outData = new BufferedWriter(new FileWriter(dataFile));
-			for(int i=0;i<samples.length;i++){
-				outData.write(samples[i]);
+			ShortFile.writeFile(outFile,samples);
+		} catch (IOException e) {	
+			informMiddle("Error in saving file: ");
+			informMiddle(e.getLocalizedMessage());
+		}
+		/*
+		FileOutputStream fos = null;
+		ObjectOutputStream out = null;
+		try {
+			fos = new FileOutputStream(outFile);
+			try {
+				out = new ObjectOutputStream(fos);
+				try {
+					out.writeObject(samples);
+				} catch (IOException e1) {
+					informMiddle(e1.getLocalizedMessage());
+				}
+				try {
+					out.flush();
+				} catch (IOException e) {
+					informMiddle(e.getLocalizedMessage());
+				}
+				try {
+					out.close();
+				} catch (IOException e) {
+					informMiddle(e.getLocalizedMessage());
+				}
+			} catch (IOException e2) {
+				informMiddle(e2.getLocalizedMessage());
 			}
-			outData.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-			informMiddle("Could not generate data file:" + e.getLocalizedMessage());
+		} catch (FileNotFoundException e3) {
+			informMiddle(e3.getLocalizedMessage());
 		}
-		try {
-			outData.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		*/
 		informMiddle("Finished!");
 		
 	}
@@ -210,6 +234,7 @@ public class RecordThreadRunnable implements Runnable
 			ind++;	
 			//Log.v(TAG,"Read : " + nRead + " short from " + endbuffer + " " +  100*(float)nRead/endbuffer + " %");			
 		}
+		
 		mAudio.stop();
 		record_time = System.currentTimeMillis()-st;
 		Log.v(TAG,"low level recording took: " + record_time/1000);
