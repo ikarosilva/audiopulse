@@ -38,13 +38,9 @@
  */ 
 
 package org.audiopulse.io;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+
 
 import org.audiopulse.utilities.SignalProcessing;
 
@@ -71,7 +67,6 @@ public class RecordThreadRunnable implements Runnable
 	String fileName="AP_SpontaneousData.raw";
 	private int sampleRate=8000;
 	private int Buffer_Size;
-	private int minFrameSize=160;
 	private double expectedFrequency; 
 	private int IN_REC_MODE;
 	final short[] samples ;
@@ -81,7 +76,7 @@ public class RecordThreadRunnable implements Runnable
 	public int clipped;
 	private static File root = Environment.getExternalStorageDirectory();
 	Context context;
-	
+
 	public RecordThreadRunnable(Handler h, double playTime,Context context)
 	{
 		Log.v(TAG,"constructing record thread");
@@ -91,19 +86,19 @@ public class RecordThreadRunnable implements Runnable
 		initRecord();
 		IN_REC_MODE=0;
 		this.context=context;
-		
+
 	}
 
 	public void setExpectedFrequency(double eFrequency){
 		expectedFrequency=eFrequency;
 	}
-	
+
 	public synchronized void run()
 	{
 		//AudioManager maudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        //float volume = (float) maudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+		//float volume = (float) maudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 		informStart();
-		
+
 		//Record Stimulus
 		this.IN_REC_MODE=1;
 		android.media.AudioManager mgr = (android.media.AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
@@ -115,10 +110,8 @@ public class RecordThreadRunnable implements Runnable
 		informMiddle("RMS= " + recordRMS);
 		//Finish up
 		informFinish();
-		
+
 		//Write file to disk
-		
-		
 		File outFile = new File(root, fileName);
 		informMiddle("Saving data at: "+ outFile.getAbsolutePath());
 		try {
@@ -127,37 +120,8 @@ public class RecordThreadRunnable implements Runnable
 			informMiddle("Error in saving file: ");
 			informMiddle(e.getLocalizedMessage());
 		}
-		/*
-		FileOutputStream fos = null;
-		ObjectOutputStream out = null;
-		try {
-			fos = new FileOutputStream(outFile);
-			try {
-				out = new ObjectOutputStream(fos);
-				try {
-					out.writeObject(samples);
-				} catch (IOException e1) {
-					informMiddle(e1.getLocalizedMessage());
-				}
-				try {
-					out.flush();
-				} catch (IOException e) {
-					informMiddle(e.getLocalizedMessage());
-				}
-				try {
-					out.close();
-				} catch (IOException e) {
-					informMiddle(e.getLocalizedMessage());
-				}
-			} catch (IOException e2) {
-				informMiddle(e2.getLocalizedMessage());
-			}
-		} catch (FileNotFoundException e3) {
-			informMiddle(e3.getLocalizedMessage());
-		}
-		*/
 		informMiddle("Finished!");
-		
+
 	}
 
 	public void informMiddle(String str)
@@ -205,36 +169,57 @@ public class RecordThreadRunnable implements Runnable
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}	
-		
+
 	}
 
 
 
 	private synchronized void record() {
 		//Log.v(TAG,"Starting recording of "+ this.samples.length +" samples through mAudio");
+		int ind=0;
+		boolean isActive=false;
+		int endbuffer;
+		int nRead=0;
+		int minFrameSize=160;
+		int frameSize=minFrameSize*4;
+		int dataLeft=samples.length;
+		//TODO: Implement a getNotificationMarkerPosition() to read 
 		long st = System.currentTimeMillis();
 		mAudio.startRecording();
-		int ind=0;
-		int endbuffer;
-		int nRead=1;
-		int frameSize=minFrameSize*4;
-		//TODO: Should we flush the buffer before recording? 
-		//Log.v(TAG,"frame size is: " + frameSize + " card size is" + soundCardBufferSize + " play time is: " + playTime);
-		int dataLeft=samples.length;
 		while(dataLeft>0){
 			endbuffer=(frameSize<dataLeft) ? frameSize: dataLeft;
-			//Log.v(TAG, "lthis.samples.length=" + this.samples.length+ " index: " + ind*frameSize + " size:" + frameSize);
-			nRead=mAudio.read(this.samples,ind*frameSize,endbuffer);
-            if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
-                Log.e(TAG, "Audio read failed: " + nRead);
-                break;
-            }
-            dataLeft -= endbuffer;
-            //Log.v(TAG, "dataleft: " + dataLeft);
-			ind++;	
-			//Log.v(TAG,"Read : " + nRead + " short from " + endbuffer + " " +  100*(float)nRead/endbuffer + " %");			
+			//nRead=mAudio.read(this.samples,ind*frameSize,endbuffer);
+			nRead=mAudio.read(samples,ind,endbuffer);
+			if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
+				Log.e(TAG, "Audio read failed: " + nRead);
+				break;
+			}
+
+			//TODO: There is an initial zeroing in the data 
+			//this is likely due to reading the initial soundcard buffer  that is not fullly filled.
+			//FIXME: Should try to set a   a method using getPositionNotificationPeriod () to get  a cleaner working solution
+			//for now just check until the first nonzero sample is achieved
+			if(!isActive){
+				for(int k=0;k<endbuffer;k++){
+					//ind should be 0 ! This only runs in the initial stage
+					if(samples[k] >0){
+						isActive=true;
+						//Shift data and set index
+						for(int j=k;j<endbuffer;j++){
+							samples[j-k]=samples[j];
+						}
+						ind=nRead-k-nRead; //the last term is needed in because of "ind +=nRead"; below
+						dataLeft=dataLeft-(nRead-k)+nRead; 
+						break;
+					}
+				}
+			}
+			if(isActive){
+				dataLeft -= nRead;
+				ind +=nRead;
+			}
 		}
-		
+
 		mAudio.stop();
 		record_time = System.currentTimeMillis()-st;
 		Log.v(TAG,"low level recording took: " + record_time/1000);
