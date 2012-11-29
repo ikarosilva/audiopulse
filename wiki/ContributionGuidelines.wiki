@@ -7,19 +7,10 @@ This is a brief description of minimal guidelines you should follow when contrib
 1. Creating a new Java file
     A. Follow the general Android coding syntax (ie, general class name should have first letters capitalized, and an instance should have first letter lowercase: eg: general class name: MyClass, instance: myClass).
 
-    B. Add the license file template [LicenseTemplate] to your code. 
+    B. Add the license file template [License] to your code. 
 
 2. Modifying Existing Code
    A. Make sure your project is up-to-date with the head revision
    B. Make your changes and make sure your project runs without errors and warnings
    C. If this is a very significant change to the code (ie, API changes, modifying how a function returns, adding functions/constructors), add your name to the list of contributors. Make sure one of the contributors (listed in the code's license file) revises and accepts your changes.
    D. Commit
-
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
