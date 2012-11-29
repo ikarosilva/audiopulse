@@ -1,4 +1,4 @@
-#LicenseTemplate Header for code contribution.
+#License Header for code contribution.
 
 {{{
 /* ===========================================================
