@@ -5,7 +5,7 @@
 This is a brief description of minimal guidelines you should follow when contributing to this project.
 
 1. Creating a new Java file
-    A. Follow the general Android coding syntax (ie, general class name should have first letters capitalized, and an instance should have first letter lowercase: eg: general class name: MyClass, instance: myClass).
+    A. Follow the general Android coding syntax (ie, general class name should have first letters capitalized, and an instance should have first letter lowercase: eg: general class name: {{{MyClass}}}, instance: {{{myClass}}}).
 
     B. Add the license file template [License] to your code. 
 
