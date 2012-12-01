@@ -64,7 +64,6 @@ public class RecordThreadRunnable implements Runnable
 	final static int channelConfig = AudioFormat.CHANNEL_IN_MONO;
 	final static int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	final static int recSource=MediaRecorder.AudioSource.MIC;
-	String fileName="AP_SpontaneousData.raw";
 	private int sampleRate=8000;
 	private int Buffer_Size;
 	private double expectedFrequency; 
@@ -112,6 +111,7 @@ public class RecordThreadRunnable implements Runnable
 		informFinish();
 
 		//Write file to disk
+		String fileName="AP" + Math.round(System.currentTimeMillis()/1000) +".raw";
 		File outFile = new File(root, fileName);
 		informMiddle("Saving data at: "+ outFile.getAbsolutePath());
 		try {
