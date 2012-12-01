@@ -71,6 +71,11 @@ public abstract class MobilePhone {
 	public abstract int getMinAttenuation();  //Minium attenuation necessary to avoid clipping in dB
 	public abstract int getCalFreq(); //Frequency used for calibratio, in Hz
 	public abstract String getName(); 
+	
+	public abstract double AudioInputDASignal2SPL(); //Mapping of recorded signal from MIC to SPL
+	public abstract double DASignal2AudioOutputVoltage(); //Mapping of digital signal to analog voltage on audio output
+	
+	
 	//Acoustic device apparatus supported by the phone
 	public abstract AcousticDevice.ioDevice getAcousticDevice();
 	

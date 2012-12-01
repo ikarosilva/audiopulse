@@ -13,7 +13,7 @@ private AcousticDevice.ioDevice acousticDevice;
 public enum deviceAttn{
 	//Only include devices that were measured for attn 
 	DUMMY(40),
-	ER10C(40);
+	ER10C_40dBGain(40);
 	
 	public int attn;
 	deviceAttn(int atten){
@@ -51,6 +51,18 @@ public enum deviceAttn{
 	@Override
 	public ioDevice getAcousticDevice() {
 		return this.acousticDevice;
+	}
+
+	@Override
+	public double AudioInputDASignal2SPL() {
+		// TODO Find out from specs on the phone/calibration
+		return 0;
+	}
+
+	@Override
+	public double DASignal2AudioOutputVoltage() {
+		// TODO Find out from specs on the phone/calibration
+		return 0;
 	}
 
 }

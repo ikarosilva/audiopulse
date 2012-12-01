@@ -54,22 +54,17 @@ public class AcousticDevice {
 	
 	public static enum ioDevice {
 		
-		ER10C(1,32767,69,0.000001,"ER10C"), // Short.MAX_VALUE (int16) = 32767
-		Dummy(1,32767,69,0.000001,"Dummy");
+		ER10C_40dBGain(72,0.000001,"ER10C_40dBGain"),
+		Dummy(69,0.000001,"Dummy");
 		
-		private double out16bitToVolt; //maps 16bit output to physical voltage (peak-to-peak)
-		private double in10MilliVoltTobit;  //maps input voltage to bit depth (peak-to-peak)
-		private double out1VTodBSPL;  //maps a 1V pp to dB SPL
-		private double in0dBSPLToVolt;  //maps 0 dBSPL to a recorded voltage (with device set 0 dB gain!!)
+		private double out1Volt2SPL; //maps driving voltage (1V peak-to-peak) to SPL at transducer
+		private double in0SPL2Volt;  //maps 0 dB SLP to voltage at the recording 
 		private String ioDeviceName;
 		
-		ioDevice(double out16bitToVolt,double in10MilliVoltTobit,
-				double out1VTodBSPL, double in0dBSPLToVolt, String ioDeviceName ) {
+		ioDevice(double out1Volt2SPL,double in0SPL2Volt, String ioDeviceName ) {
 			//Convert attenuation in dB relative to the maximum track level
-			this.out16bitToVolt=out16bitToVolt; 
-			this.in10MilliVoltTobit=in10MilliVoltTobit;
-			this.out1VTodBSPL=out1VTodBSPL;
-			this.in0dBSPLToVolt=in0dBSPLToVolt;
+			this.out1Volt2SPL=out1Volt2SPL; 
+			this.in0SPL2Volt=in0SPL2Volt;
 			this.ioDeviceName=ioDeviceName;
 			
 		}		
@@ -78,21 +73,14 @@ public class AcousticDevice {
 			return ioDeviceName;
 		}
 		
-		public double getin0dBSPLToVolt(){
-			return in0dBSPLToVolt;
+		public double getin0SPL2Volt(){
+			return in0SPL2Volt;
 		}
 		
-		public double getout16bitToVolt(){
-			return out16bitToVolt;
+		public double getoutout1Volt2SPL(){
+			return out1Volt2SPL;
 		}
 		
-		public double getin10MilliVoltTobit(){
-			return in10MilliVoltTobit;
-		}
-		
-		public double getout1VTodBSPL(){
-			return out1VTodBSPL;
-		}
 	}
 	
 	public AcousticDevice(AcousticDevice.ioDevice device,int minAttenuation){

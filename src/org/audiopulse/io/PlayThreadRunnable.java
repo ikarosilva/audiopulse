@@ -139,8 +139,8 @@ public class PlayThreadRunnable implements Runnable
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
-		MobilePhone phone = new HTCOne(HTCOne.deviceCalParam.ER10C,
-				AcousticDevice.ioDevice.ER10C);
+		MobilePhone phone = new HTCOne(HTCOne.deviceCalParam.ER10C_40dBGain,
+				AcousticDevice.ioDevice.ER10C_40dBGain);
 		
 		DPOAESignal stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
 				sampleRate,phone,channelConfig);
