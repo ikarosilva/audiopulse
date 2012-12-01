@@ -37,7 +37,7 @@
  * Check: http://code.google.com/p/audiopulse/source/list
  */ 
 
-package org.audiopulse.graphics;
+package org.audiopulse.utilities;
 
 public class SpectralWindows {
 

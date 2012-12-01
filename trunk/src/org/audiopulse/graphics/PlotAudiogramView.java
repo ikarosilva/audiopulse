@@ -81,7 +81,8 @@ public class PlotAudiogramView extends DemoView {
 	
     private static YIntervalSeriesCollection createDataset2() {
     	
-    	
+    	//TODO: These are normative values. Maybe be best to move these values
+    	//into an resource folder where they can be easily modified in the future.
     	YIntervalSeries series1 = new YIntervalSeries("RE DPOAE");
     	int[] NUB={-10, -5, -5, -5, -4};
     	int[] NLB={-15, -10, -13, -15, -13};

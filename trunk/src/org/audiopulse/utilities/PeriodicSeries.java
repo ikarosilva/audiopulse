@@ -39,9 +39,6 @@
 
 package org.audiopulse.utilities;
 
-import org.audiopulse.graphics.SpectralWindows;
-
-
 import android.media.AudioFormat;
 import android.util.Log;
 
