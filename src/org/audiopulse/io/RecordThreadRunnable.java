@@ -54,6 +54,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+
+//TODO: Translate all message (informMiddle informEnd) Strings into the Resource folder for easy changes to other languages
 public class RecordThreadRunnable implements Runnable
 {
 	private static final String TAG="RecordThreadRunnable";
@@ -67,7 +69,6 @@ public class RecordThreadRunnable implements Runnable
 	private int sampleRate=8000;
 	private int Buffer_Size;
 	private double expectedFrequency; 
-	private int IN_REC_MODE;
 	final short[] samples ;
 	Double recordRMS;
 	Handler mainThreadHandler = null;
@@ -75,15 +76,18 @@ public class RecordThreadRunnable implements Runnable
 	public int clipped;
 	private static File root = Environment.getExternalStorageDirectory();
 	Context context;
+	private String testType;
+	private boolean showSpectrum;
 
-	public RecordThreadRunnable(Handler h, double playTime,Context context)
+	public RecordThreadRunnable(Handler h, double playTime,Context context, String itemSelected, boolean showSpectrum)
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
 		Buffer_Size=(int) (playTime*sampleRate); 
 		samples = new short[Buffer_Size];
+		testType=itemSelected;
+		this.showSpectrum=showSpectrum;
 		initRecord();
-		IN_REC_MODE=0;
 		this.context=context;
 
 	}
@@ -94,26 +98,22 @@ public class RecordThreadRunnable implements Runnable
 
 	public synchronized void run()
 	{
-		//AudioManager maudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		//float volume = (float) maudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 		informStart();
-
 		//Record Stimulus
-		this.IN_REC_MODE=1;
 		android.media.AudioManager mgr = (android.media.AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
 		int streamVolume = mgr.getStreamVolume(android.media.AudioManager.STREAM_MUSIC); 
-		informMiddle("Volume is set to: " + streamVolume);
-		informMiddle("Recording response, please wait...");
+		if(streamVolume != 15){
+		informMiddle("Warning: volume is set to: " + streamVolume);
+		}
+		informMiddle("Recording, please wait...");
 		record();
-		this.IN_REC_MODE=0;
-		informMiddle("RMS= " + recordRMS);
 		//Finish up
 		informFinish();
 
 		//Write file to disk
-		String fileName="AP" + Math.round(System.currentTimeMillis()/1000) +".raw";
+		String fileName="AP_" + testType + Math.round(System.currentTimeMillis()/100) +".raw";
 		File outFile = new File(root, fileName);
-		informMiddle("Saving data at: "+ outFile.getAbsolutePath());
+		informMiddle("Saving file: "+ outFile.getAbsolutePath());
 		try {
 			ShortFile.writeFile(outFile,samples);
 		} catch (IOException e) {	
@@ -151,12 +151,9 @@ public class RecordThreadRunnable implements Runnable
 		results.putInt("clipped",clipped);
 		results.putDouble("recordRMS",recordRMS);
 		results.putDouble("expectedFrequency",expectedFrequency);
+		results.putBoolean("showSpectrum",showSpectrum);
 		m.setData(results);
 		this.mainThreadHandler.sendMessage(m);
-	}
-
-	public int getRecMode(){
-		return this.IN_REC_MODE;
 	}
 
 	private void initRecord(){

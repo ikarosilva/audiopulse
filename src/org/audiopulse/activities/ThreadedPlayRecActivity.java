@@ -86,19 +86,19 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         			
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				plotWaveform();
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right))) {
-        				//TODO: generate file name to save, play all tests, plot audiogram results
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right)) ||
+        					itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_left))) {
+        				//TODO: plot audiogram results
         				//Generate list of tests to run
         				List<String> RunTest= new ArrayList<String>();
         				RunTest.add(getResources().getString(R.string.menu_2k));
-        				RunTest.add(getResources().getString(R.string.menu_3k));
-        				RunTest.add(getResources().getString(R.string.menu_4k));
+        				//RunTest.add(getResources().getString(R.string.menu_3k));
+        				//RunTest.add(getResources().getString(R.string.menu_4k));
         				for(String runme: RunTest){
         					emptyText(); //Clear text for new stimuli test and spectral plotting
-            				playRecordThread(runme,false);
+        					playRecordThread(runme,false);
+            				//TODO: Implement a Hold between playing thread
         				}
-        				
-        				
         			}
         			else {
         				emptyText(); //Clear text for new stimuli test and spectral plotting
@@ -120,7 +120,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 		
 		
 		recordStatusBackHandler = new ReportStatusHandler(this);
-		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
+		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected,showSpectrum);
 		
 		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
 			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
@@ -144,4 +144,5 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 		}
 		endTest();
 	}
+	
 }
