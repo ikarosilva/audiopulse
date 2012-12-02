@@ -49,7 +49,7 @@ public class ReportStatusHandler extends Handler
 {
 	public static final String TAG = "ReportStatusHandler";
 	private AudioPulseRootActivity parentActivity = null;
-	
+
 	public ReportStatusHandler(AudioPulseRootActivity inParentActivity)
 	{
 		//Registering handler in parent activity 
@@ -65,10 +65,12 @@ public class ReportStatusHandler extends Handler
 		if(b.getLong("N") == 0L){
 			this.printMessage(pm);
 		}else{
-			this.plotAudioSpectrum(b);
+			if(b.getBoolean("showSpectrum") ==true){
+				this.plotAudioSpectrum(b);
+			}
 		}
-				
-		
+
+
 	}
 
 	private void printMessage(String str)
@@ -77,7 +79,7 @@ public class ReportStatusHandler extends Handler
 		Log.v(TAG,"printing message");
 		parentActivity.appendText(str);
 	}
-	
+
 	private void plotAudioSpectrum(Bundle b)
 	{
 		//Printing status
