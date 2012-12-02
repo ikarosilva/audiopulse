@@ -27,8 +27,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.DPgramActivity"
-                  android:label="DPgram">
-        </activity>
     </application>
 </manifest>
