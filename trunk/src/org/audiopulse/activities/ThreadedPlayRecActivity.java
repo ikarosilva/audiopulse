@@ -66,7 +66,6 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	Thread playThread = null;
 	Thread recordThread = null;
 	public static double playTime=0.5;
-	//public Bundle audioResultsBundle;
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 
 	@Override
