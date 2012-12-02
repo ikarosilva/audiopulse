@@ -63,10 +63,9 @@ public class ReportStatusHandler extends Handler
 		String pm = Utils.getStringFromABundle(msg.getData());		
 		Bundle b=msg.getData();
 		if(b.getLong("N") == 0L){
-			Log.v(TAG,"Extracting further data");
 			this.printMessage(pm);
 		}else{
-			this.plotData(b);
+			this.plotAudioSpectrum(b);
 		}
 				
 		
@@ -79,7 +78,7 @@ public class ReportStatusHandler extends Handler
 		parentActivity.appendText(str);
 	}
 	
-	private void plotData(Bundle b)
+	private void plotAudioSpectrum(Bundle b)
 	{
 		//Printing status
 		Log.v(TAG,"Plotting data from bundle");

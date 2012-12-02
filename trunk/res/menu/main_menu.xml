@@ -1,5 +1,4 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- This group uses the default category. -->
     <group android:id="@+id/menuGroup_Main">
         <item android:id="@+id/save"
 	     android:title="Save and Exit" />     
