@@ -38,6 +38,8 @@
  */ 
 
 package org.audiopulse.activities;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -74,7 +76,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 		setContentView(R.layout.thread);
 		
 		// set listener for menu items
-		ListView menuList = (ListView) findViewById(R.id.single_test_menu_list);
+		ListView menuList = (ListView) findViewById(R.id.menu_list);
         menuList.setOnItemClickListener(
         	new AdapterView.OnItemClickListener() {
         		public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
@@ -84,9 +86,23 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         			
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				plotWaveform();
-        			} else {
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right))) {
+        				//TODO: generate file name to save, play all tests, plot audiogram results
+        				//Generate list of tests to run
+        				List<String> RunTest= new ArrayList<String>();
+        				RunTest.add(getResources().getString(R.string.menu_2k));
+        				RunTest.add(getResources().getString(R.string.menu_3k));
+        				RunTest.add(getResources().getString(R.string.menu_4k));
+        				for(String runme: RunTest){
+        					emptyText(); //Clear text for new stimuli test and spectral plotting
+            				playRecordThread(runme,false);
+        				}
+        				
+        				
+        			}
+        			else {
         				emptyText(); //Clear text for new stimuli test and spectral plotting
-        				playRecordThread(itemText);
+        				playRecordThread(itemText,true);
         			} 
         			
         		}
@@ -95,7 +111,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	}
     
 	
-	private void playRecordThread(String item_selected)
+	private void playRecordThread(String item_selected, boolean showSpectrum)
 	{
 		
 		//Ignore playing thread when obtaining SOAEs
@@ -128,5 +144,4 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 		}
 		endTest();
 	}
-
 }

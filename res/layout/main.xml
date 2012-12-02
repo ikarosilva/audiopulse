@@ -3,14 +3,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-    
+    	
 	<ListView android:id="@+id/menu_list"
 	    style="@style/menu_style"
-	    android:entries="@array/main_menu" />
-	
-	<ListView android:id="@+id/single_test_menu_list"
-	    style="@style/menu_style"
-	    android:entries="@array/single_test_menu" />
-        
-    
+	    android:entries="@array/main_menu" />    
 </LinearLayout>
