@@ -62,43 +62,57 @@ import android.graphics.Color;
  */
 public class PlotAudiogramView extends DemoView {
 
+	public String title;
+	public double[] DPOAEData;
+	public double[] noiseFloor;
+	public double[] f1Data;
+	public double[] f2Data;
 	/**
 	 * constructor
 	 * @param context
+	 * @param f2Data2 
+	 * @param f1Data2 
+	 * @param noiseFloor2 
+	 * @param dPOAEData2 
+	 * @param title2 
 	 */
-	public PlotAudiogramView(Context context) {
+	public PlotAudiogramView(Context context, String title, double[] DPOAEData, 
+			double[] noiseFloor, double[] f1Data, double[] f2Data) {
 		super(context);
-
+	
+		this.DPOAEData = DPOAEData;
+		this.noiseFloor =noiseFloor;
+		this.f1Data =f1Data;
+		this.f2Data =f2Data;
+		
 		final AFreeChart chart = createChart2();
 
 		setChart(chart);
 	}
 
-	/**
-	 * Creates a sample dataset.
-	 * @return a sample dataset.
-	 */
-	
-    private static YIntervalSeriesCollection createDataset2() {
-    	
-    	//TODO: These are normative values. Maybe be best to move these values
-    	//into an resource folder where they can be easily modified in the future.
-    	YIntervalSeries series1 = new YIntervalSeries("RE DPOAE");
-    	int[] NUB={-10, -5, -5, -5, -4};
-    	int[] NLB={-15, -10, -13, -15, -13};
-    	
-		series1.add(7.206, -7,NLB[0], NUB[0]);
-		series1.add(5.083, 13.1,NLB[1], NUB[1]);
-		series1.add(3.616, 17.9,NLB[2], NUB[2]);
-		series1.add(2.542, 11.5,NLB[3], NUB[3]);
-		series1.add(1.818, 17.1,NLB[4], NUB[4]);
+	private static YIntervalSeriesCollection createDataset2() {
+	       
+        //TODO: These are normative values. Maybe be best to move these values
+        //into an resource folder where they can be easily modified in the future.
 		
-		YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-		dataset.addSeries(series1);
-		return dataset;
+		//TODO: Add this dataset to the graph
+        YIntervalSeries normativeRange = new YIntervalSeries("Normative Range");
+        int[] NUB={-10, -5, -5, -5, -4};
+        int[] NLB={-15, -10, -13, -15, -13};
+       
+        normativeRange.add(7.206, -7,NLB[0], NUB[0]);
+        normativeRange.add(5.083, 13.1,NLB[1], NUB[1]);
+        normativeRange.add(3.616, 17.9,NLB[2], NUB[2]);
+        normativeRange.add(2.542, 11.5,NLB[3], NUB[3]);
+        normativeRange.add(1.818, 17.1,NLB[4], NUB[4]);
+               
+                YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
+                dataset.addSeries(normativeRange);
+                return dataset;
     }
 
-private static XYSeriesCollection createDataset() {
+	
+	private  XYSeriesCollection createDataset() {
     	
     	
 		XYSeries series1 = new XYSeries("DPOAE");
@@ -106,29 +120,15 @@ private static XYSeriesCollection createDataset() {
 		XYSeries series3 = new XYSeries("F1");
 		XYSeries series4 = new XYSeries("F2");
     	
-		series1.add(7.206, -7);
-		series1.add(5.083, 13.1);
-		series1.add(3.616, 17.9);
-		series1.add(2.542, 11.5);
-		series1.add(1.818, 17.1);
-		
-		series2.add(7.206, -7-10);
-		series2.add(5.083, 13.1-10);
-		series2.add(3.616, 17.9-10);
-		series2.add(2.542, 11.5-10);
-		series2.add(1.818, 17.1-10);
-		
-		series3.add(7.206, 64);
-		series3.add(5.083, 64);
-		series3.add(3.616, 64);
-		series3.add(2.542, 64);
-		series3.add(1.818, 64);
-		
-		series4.add(7.206, 54.9);
-		series4.add(5.083, 56.6);
-		series4.add(3.616, 55.6);
-		series4.add(2.542, 55.1);
-		series4.add(1.818, 55.1);
+		//NOTE: We assume data is being send in an interleaved array where
+		// odd samples are X-axis and even samples go in the Y-axis
+		for(int i=0;i<(DPOAEData.length/2);i++){
+			series1.add(DPOAEData[i*2], DPOAEData[i*2+1]);
+			series2.add(noiseFloor[i*2], noiseFloor[i*2+1]);
+			series3.add(f1Data[i*2], f1Data[i*2+1]);
+			series4.add(f2Data[i*2], f2Data[i*2+1]);
+
+		}
 		
 		XYSeriesCollection dataset = new XYSeriesCollection();
 		dataset.addSeries(series1);
@@ -143,12 +143,10 @@ private static XYSeriesCollection createDataset() {
 	 * @return a chart.
 	 */
 
-private static AFreeChart createChart2() {
-	//XYDataset dataset = createDataset2();
+private AFreeChart createChart2() {
 	XYDataset data = createDataset();
-	// create the chart...
 	AFreeChart chart = ChartFactory.createXYLineChart(
-			"RE DPOAE Test", // chart title
+			title, // chart title
 			"Frequency (kHz)", // x axis label
 			"DPOAE Level (dB SPL)", // y axis label
 			data, // data

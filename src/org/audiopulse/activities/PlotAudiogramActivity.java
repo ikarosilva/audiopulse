@@ -54,7 +54,14 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		PlotAudiogramView mView = new PlotAudiogramView(this);
+        Bundle audioBundle = getIntent().getExtras();
+    	String title=audioBundle.getString("title");
+    	double[] DPOAEData=audioBundle.getDoubleArray("DPOAEData");
+    	double[] noiseFloor=audioBundle.getDoubleArray("noiseFloor");;
+    	double[] f1Data=audioBundle.getDoubleArray("f1Data");;
+    	double[] f2Data=audioBundle.getDoubleArray("f2Data");;
+        
+		PlotAudiogramView mView = new PlotAudiogramView(this,title,DPOAEData,noiseFloor,f1Data,f2Data);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(mView);
     }
