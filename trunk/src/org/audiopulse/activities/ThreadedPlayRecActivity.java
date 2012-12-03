@@ -97,8 +97,11 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         				for(String runme: RunTest){
         					emptyText(); //Clear text for new stimuli test and spectral plotting
         					playRecordThread(runme,false);
-            				//TODO: Implement a Hold between playing thread
+            				//TODO: Implement a hold between playing threads
         				}
+        				
+        				//Plot all results 
+        				plotAudiogram();
         			}
         			else {
         				emptyText(); //Clear text for new stimuli test and spectral plotting
