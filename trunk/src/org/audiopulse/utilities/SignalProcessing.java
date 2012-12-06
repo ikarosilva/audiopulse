@@ -4,6 +4,9 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
+import org.audiopulse.io.RecordThreadRunnable;
+
+import android.os.Bundle;
 
 public class SignalProcessing {
 	
@@ -55,5 +58,14 @@ public class SignalProcessing {
 		
 		return Pxx;
 	}
+	
+	/*
+	public static double[] getDPOAEResults(Bundle audioBundle, RecordThreadRunnable rRun){
+		short[] audioBuffer = audioBundle.getShortArray("samples");
+		double[] Pxx=SignalProcessing.getSpectrum(audioBuffer);
+		//TODO: set noise estimation to mid-frequency between desired stimulus and F1 for now
+		//double Fnoise=rRun
+		}
+		*/
 	
 }
