@@ -60,8 +60,8 @@ public class PlayThreadRunnable implements Runnable
 	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int audioMode= AudioManager.STREAM_MUSIC;
 	int trackMode=AudioTrack.MODE_STREAM;
-	double expectedResponse=0; //Results of where to expect a response, such as DPOAE
-	
+	public MobilePhone phone;
+	public DPOAESignal stimulus;
 	//The track volume should be held fixed always at the maximum!!
 	//if the signal is being clipped than attenuation the signal relative to this value!!
 	public static final float trackVolume=AudioTrack.getMaxVolume();
@@ -128,8 +128,6 @@ public class PlayThreadRunnable implements Runnable
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}	
-		Log.v(TAG,"Ch count= " + track.getChannelCount() + " Play Fs= " + track.getPlaybackRate() +
-				" Coding= " + track.getAudioFormat() + " Fs= " + track.getSampleRate());
 		if(track.getState() != AudioTrack.STATE_INITIALIZED) {
 			informMiddle("Error: Audio record was not properly initialized!!");
 			Log.e(TAG,"Error: Audio record was not properly initialized!!");
@@ -139,12 +137,12 @@ public class PlayThreadRunnable implements Runnable
 
 	private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
-		MobilePhone phone = new HTCOne(HTCOne.deviceCalParam.ER10C_40dBGain,
+		phone = new HTCOne(HTCOne.deviceCalParam.ER10C_40dBGain,
 				AcousticDevice.ioDevice.ER10C_40dBGain);
 		
-		DPOAESignal stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
+		stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
 				sampleRate,phone,channelConfig);
-		expectedResponse=stimulus.expectedResponse;
+		
 		
 		short[] tmpSamples = stimulus.generateSignal();
 		if(stimulus.getStereoFlag() == AudioFormat.CHANNEL_OUT_STEREO){
@@ -184,9 +182,6 @@ public class PlayThreadRunnable implements Runnable
 		Log.v(TAG,"play time " + real_play_time/1000 + " seconds" + " total samples: " + total);
 	}
 
-	public double getExpectedFrequency(){
-		return this.expectedResponse;
-	}
 }
 
 

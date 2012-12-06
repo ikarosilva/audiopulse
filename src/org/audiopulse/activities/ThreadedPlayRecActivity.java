@@ -48,6 +48,7 @@ import org.audiopulse.R;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
+import org.audiopulse.utilities.SignalProcessing;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -106,6 +107,8 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
         		        double[] f1Data={7.206, 64,5.083, 64,3.616, 64,2.542, 64,1.818, 64};
         		        double[] f2Data={7.206, 54.9,5.083, 56.6,3.616, 55.6,2.542, 55.1,1.818, 55.1};
 	
+        		        //double[] Pxx=SignalProcessing.getDPOAEResults(audioBundle);
+        		        
         				Bundle DPGramresults= new Bundle();
         				DPGramresults.putString("title",itemText);
         				DPGramresults.putDoubleArray("DPOAEData",DPOAEData);
@@ -127,7 +130,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 	}
     
 	
-	private void playRecordThread(String item_selected, boolean showSpectrum)
+	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum)
 	{
 		
 		//Ignore playing thread when obtaining SOAEs
@@ -150,7 +153,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
 			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
 			playThread = new Thread(pRun);
-			rRun.setExpectedFrequency(pRun.getExpectedFrequency());
+			rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);
 			recordThread = new Thread(rRun);	
 			playThread.setPriority(Thread.MAX_PRIORITY);
 			recordThread.setPriority(Thread.MAX_PRIORITY);
@@ -159,6 +162,7 @@ public class ThreadedPlayRecActivity extends AudioPulseRootActivity
 			execSvc.shutdown();
 		}
 		endTest();
+		return rRun;
 	}
 	
 }

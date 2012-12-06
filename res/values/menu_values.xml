@@ -7,6 +7,7 @@
         <item>@string/menu_3k</item>
         <item>@string/menu_2k</item>
         <item>@string/menu_spontaneous</item>
+        <item>@string/menu_iecalibration</item>
         <item>@string/menu_plot</item>
     </array>   
     <string name="menu_all_right">DPGram Right Ear</string>
@@ -14,7 +15,8 @@
     <string name="menu_4k">DPOAE 4kHz</string>
     <string name="menu_3k">DPOAE 3kHz</string>
     <string name="menu_2k">DPOAE 2kHz</string>
-    <string name="menu_spontaneous">Spontaneous</string>  
+    <string name="menu_spontaneous">Spontaneous</string>
+    <string name="menu_iecalibration">Ear Tip Calibration</string>   
     <string name="menu_plot">Plot Waveform</string>
     <style name="menu_style">
         <item name="android:textColor">@color/foreground</item>

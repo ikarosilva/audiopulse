@@ -54,9 +54,9 @@ import org.audiopulse.hardware.MobilePhone;
  */
 
 
-public class CalibrationTone extends PeriodicSeries {
+public class CalibrationSignal extends PeriodicSeries {
 
-	public CalibrationTone(int N, double Fs, MobilePhone phone, int channelConfig){
+	public CalibrationSignal(int N, double Fs, MobilePhone phone, int channelConfig){
 		//Call constructor on PeriodicSeries
 		super(N,Fs,phone.getCalFreq(),phone.getMaxAmplitude(),channelConfig);
 	}
