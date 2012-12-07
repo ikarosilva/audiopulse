@@ -45,7 +45,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
-public class AudioPulseRootActivity extends AudioPulseActivity{
+public class AudioPulseLaunchActivity extends AudioPulseActivity{
 
 	private Bundle audioResultsBundle;
 
