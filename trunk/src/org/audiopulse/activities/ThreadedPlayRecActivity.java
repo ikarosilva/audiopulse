@@ -58,7 +58,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ThreadedPlayRecActivity extends AudioPulseLaunchActivity 
+public class ThreadedPlayRecActivity extends TestActivity 
 {
 	public static final String TAG="ThreadedPlayRecActivity";
 	
@@ -163,6 +163,13 @@ public class ThreadedPlayRecActivity extends AudioPulseLaunchActivity
 		}
 		endTest();
 		return rRun;
+	}
+
+
+	@Override
+	public void startTest(View callingView) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

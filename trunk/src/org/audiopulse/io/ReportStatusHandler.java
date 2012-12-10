@@ -39,7 +39,7 @@
 
 package org.audiopulse.io;
 
-import org.audiopulse.activities.AudioPulseLaunchActivity;
+import org.audiopulse.activities.TestActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -48,9 +48,9 @@ import android.util.Log;
 public class ReportStatusHandler extends Handler
 {
 	public static final String TAG = "ReportStatusHandler";
-	private AudioPulseLaunchActivity parentActivity = null;
+	private TestActivity parentActivity = null;
 
-	public ReportStatusHandler(AudioPulseLaunchActivity inParentActivity)
+	public ReportStatusHandler(TestActivity inParentActivity)
 	{
 		//Registering handler in parent activity 
 		parentActivity = inParentActivity;

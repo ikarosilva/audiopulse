@@ -22,13 +22,13 @@
         </activity>
         <activity android:name=".activities.ThreadedPlayRecActivity"
                   android:label="Specific Tests">
+        </activity>
+        <activity android:name=".activities.TestMenuActivity"
+            	android:label="AudioPulse Tests">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".activities.TestMenuActivity"
-            	android:label="AudioPulse Tests">
         </activity>
         <activity android:name=".activities.DPOAEActivity"
         	android:configChanges="orientation|keyboardHidden">
