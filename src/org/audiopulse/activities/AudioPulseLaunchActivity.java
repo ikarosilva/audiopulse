@@ -45,6 +45,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
+//Activity that will be launched from home screen.
 public class AudioPulseLaunchActivity extends AudioPulseActivity{
 
 	private Bundle audioResultsBundle;
@@ -69,6 +70,7 @@ public class AudioPulseLaunchActivity extends AudioPulseActivity{
 		return (TextView)this.findViewById(R.id.text1);
 	}
 	
+	//plot recorded signal spectrum
 	public void plotSpectrum(Bundle audioResultsBundle) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotSpectralActivity.class);
 		intent.putExtras(audioResultsBundle);
@@ -76,6 +78,7 @@ public class AudioPulseLaunchActivity extends AudioPulseActivity{
 		startActivity(intent);
 	}
 
+	//plot recorded waveform
 	public void plotWaveform() {
 		//TODO: Add check for not null audioResultsBundle (notify user that to run stimulus if they press this option before running anything).
 		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
@@ -83,6 +86,12 @@ public class AudioPulseLaunchActivity extends AudioPulseActivity{
 		startActivity(intent);
 	}
 	
+	//plot DPgram / OAEgram results
+	public void plotEargram() {
+		
+	}
+	
+	//Deprecated? should be called DPgram or Eargram.
 	public void plotAudiogram(Bundle DPOAEGramResultsBundle) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
 		intent.putExtras(DPOAEGramResultsBundle);
