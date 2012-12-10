@@ -47,6 +47,7 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 import android.media.AudioManager;
 
+//AudioPulseActivity: base activity that all other AudioPulse activities should extend
 public class AudioPulseActivity extends Activity {
 
 	public final String TAG = "AudioPulseActivity";
@@ -62,17 +63,18 @@ public class AudioPulseActivity extends Activity {
 
 	}
 	
+	//disable some hardware key functionality that would interfere with a test
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 
 	    Log.v(TAG, event.toString());
 	    
 	    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
-	    	//do nothing
+	    	//override volume down function: do nothing.
 	        return true;
 	    }
 	    else if(keyCode == KeyEvent.KEYCODE_VOLUME_UP){
-	    	//do nothing
+	    	//override volume up function: do nothing.
 	        return true;
 	    }
 
@@ -84,34 +86,36 @@ public class AudioPulseActivity extends Activity {
 
 	    Log.v(TAG, event.toString());
 	    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
-	    	//do nothing
+	    	//override volume down function: do nothing.
 	        return true;
 	    }
 	    else if(keyCode == KeyEvent.KEYCODE_VOLUME_UP){
-	    	//do nothing
+	    	//override volume up function: do nothing.
 	        return true;
 	    }
 
 	    return super.onKeyUp(keyCode, event);
 	}
 
+	// Hardware setup prior to test: airplane mode, max volume, input AGC(?)
 	public void beginTest() {
-		// actions such as set volume, airplane mode, etc, to do before beginning any test
-		
+
 		//set airplane mode
     	try{ 
+    		//first read if airplane mode is already on
     		userAirplaneMode = Settings.System.getInt(getContentResolver(), Settings.System.AIRPLANE_MODE_ON)==1;
     	} catch(Exception e) { 
     		Log.e(TAG, "Airplane Mode setting not found");
 	    	Toast.makeText(this, "Warning: airplane mode error", Toast.LENGTH_LONG).show();
 	    	userAirplaneMode = true; 		//bypass set by pretending it's already on
     	}
-    		
+    	
+    	//set airplane mode if not already
 		if (!userAirplaneMode) {
 			setAirplaneMode(true);
 		}
 		
-		//set volume
+		//set volume to max
 		//Set the audio properties for play and recording
 		audioManager = (AudioManager) getApplicationContext().getSystemService(android.content.Context.AUDIO_SERVICE);
 		userVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);	
@@ -120,20 +124,28 @@ public class AudioPulseActivity extends Activity {
 		
 		//TODO: set up listeners / broadcast receivers / whatever to monitor volume & airplane mode
 		//TODO: wait until settings are confirmed (e.g. delay to set airplane mode)
+		
+		//TODO: disable input AGC?
 	}
 	
+	//restore setting to those prior to beginTest()
 	public void endTest() {
-		//release / restore resources set by beginTest()
 		Log.v(TAG,"End Test cleanup");
 		
+		//TODO: unregister listeners that check for changes
+		
+		//if airplane mode was off, turn it back off
 		if (!userAirplaneMode) {
 			setAirplaneMode(false);
 		}
 		
+		//set volume back to user setting
 		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, userVolume, 0);
 	
+		//TODO: re-enable input AGC?
 	}
 	
+	// enable or disable airplane mode
 	public void setAirplaneMode(boolean enable) {
 		Settings.System.putInt(getContentResolver(), Settings.System.AIRPLANE_MODE_ON,enable?1:0); 
     	//broadcast event.

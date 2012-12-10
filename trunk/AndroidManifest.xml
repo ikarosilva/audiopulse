@@ -27,5 +27,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
+        <activity android:name=".activities.TestMenuActivity"
+            	android:label="AudioPulse Tests">
+        </activity>
+        <activity android:name=".activities.DPOAEActivity"
+        	android:configChanges="orientation|keyboardHidden">
+        </activity>
+        </application>
 </manifest>
