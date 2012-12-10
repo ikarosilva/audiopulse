@@ -63,7 +63,7 @@ import android.widget.TextView;
 //tests includ DPOAE, TOAE, device calibration, in-situ calibration
 //in situ
 //TODO: implement tests as fragments? Or just independent threads?
-public class TestMenuActivity extends AudioPulseLaunchActivity 
+public class TestMenuActivity extends AudioPulseActivity 
 {
 	public static final String TAG="TestMenuActivity";
 	
@@ -92,17 +92,15 @@ public class TestMenuActivity extends AudioPulseLaunchActivity
         			        			//item.getId(), R.id.
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				//TODO: change this to launch a plot activity
-        				plotWaveform();
+        				//plotWaveform();
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right)) ||
         					itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_left))) {
-        				//TODO: launch test activity
+        				
         				startActivity(new Intent(TestMenuActivity.this, DPOAEActivity.class));
         				
         			}
         			else {
         				//TODO: launch test activity
-        				emptyText(); //Clear text for new stimuli test and spectral plotting
-        				playRecordThread(itemText,true);
         			} 
         			
         		}
@@ -111,70 +109,6 @@ public class TestMenuActivity extends AudioPulseLaunchActivity
 	}
     
 	
-	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum)
-	{
-		
-		//Ignore playing thread when obtaining SOAEs
-		beginTest();	
-		Context context=this.getApplicationContext();		
-		
-		
-		recordStatusBackHandler = new ReportStatusHandler(this);
-		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected,showSpectrum);
-		
-		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
-			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
-			rRun.setExpectedFrequency(0);
-			recordThread = new Thread(rRun);	
-			recordThread.setPriority(Thread.MAX_PRIORITY);
-			execSvc.execute( recordThread );
-			execSvc.shutdown();
-		}else{
-			playStatusBackHandler = new ReportStatusHandler(this);
-			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
-			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
-			playThread = new Thread(pRun);
-			rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);
-			recordThread = new Thread(rRun);	
-			playThread.setPriority(Thread.MAX_PRIORITY);
-			recordThread.setPriority(Thread.MAX_PRIORITY);
-			execSvc.execute( recordThread );
-			execSvc.execute( playThread );
-			execSvc.shutdown();
-		}
-		endTest();
-		return rRun;
-	}
 	
-	private Bundle generateDPGram(Bundle DPGramresults, String itemText) {
-		//TODO: plot audiogram results
-		//Generate list of tests to run
-		List<String> RunTest= new ArrayList<String>();
-		RunTest.add(getResources().getString(R.string.menu_2k));
-		RunTest.add(getResources().getString(R.string.menu_3k));
-		RunTest.add(getResources().getString(R.string.menu_4k));
-		for(String runme: RunTest){
-			emptyText(); //Clear text for new stimuli test and spectral plotting
-			playRecordThread(runme,false);
-			//TODO: Implement a hold between playing threads
-		}
-		
-		//TODO: Extract these results from data!
-		double[] DPOAEData={7.206, -7, 5.083, 13.1,3.616, 17.9,2.542, 11.5,1.818, 17.1};
-        double[] noiseFloor={7.206, -7-10,5.083, 13.1-10,3.616, 17.9-10,2.542, 11.5-10,1.818, 17.1-10};
-        double[] f1Data={7.206, 64,5.083, 64,3.616, 64,2.542, 64,1.818, 64};
-        double[] f2Data={7.206, 54.9,5.083, 56.6,3.616, 55.6,2.542, 55.1,1.818, 55.1};
-
-        //double[] Pxx=SignalProcessing.getDPOAEResults(audioBundle);
-        
-		DPGramresults.putString("title",itemText);
-		DPGramresults.putDoubleArray("DPOAEData",DPOAEData);
-		DPGramresults.putDoubleArray("noiseFloor",noiseFloor);
-		DPGramresults.putDoubleArray("f1Data",f1Data);
-		DPGramresults.putDoubleArray("f2Data",f2Data);
-		
-		return DPGramresults;
-
-	}
 	
 }

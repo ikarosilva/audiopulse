@@ -51,6 +51,7 @@ import org.audiopulse.io.ReportStatusHandler;
 import org.audiopulse.utilities.SignalProcessing;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -66,9 +67,13 @@ import android.widget.TextView;
 //e.g. calibration activity that has an I/O display
 //this activity and extended classes will be launched from TestMenuActivity.
 
-public class DPOAEActivity extends TestActivity 
+//TestActivity is a template for all tests; all test activities should extend TestActivity.
+
+public abstract class TestActivity extends AudioPulseActivity 
 {
-	public static final String TAG="ThreadedPlayRecActivity";
+	public static final String TAG="TestActivity";
+	
+	private Bundle audioResultsBundle;
 	
 	static final int STIMULUS_DIALOG_ID = 0;
 	Bundle audioBundle = new Bundle();
@@ -82,71 +87,103 @@ public class DPOAEActivity extends TestActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.dpoae);
+		setContentView(R.layout.basic_test_layout);
+
+		// // to perform the test automatically rather than by a button press:
 		//findViewById(android.R.id.content).invalidate();
-		
         //performTest();			
 	}
     
-	public void startTest(View callingView){
-		//TODO: plot audiogram results
-		//Generate list of tests to run
-		List<String> RunTest= new ArrayList<String>();
-		RunTest.add(getResources().getString(R.string.menu_2k));
-		//RunTest.add(getResources().getString(R.string.menu_3k));
-		//RunTest.add(getResources().getString(R.string.menu_4k));
-		for(String runme: RunTest){
-			emptyText(); //Clear text for new stimuli test and spectral plotting
-			playRecordThread(runme,false);
-			//TODO: Implement a hold between playing threads
-		}
-		
-		//TODO: Extract these results from data!
-		double[] DPOAEData={7.206, -7, 5.083, 13.1,3.616, 17.9,2.542, 11.5,1.818, 17.1};
-        double[] noiseFloor={7.206, -7-10,5.083, 13.1-10,3.616, 17.9-10,2.542, 11.5-10,1.818, 17.1-10};
-        double[] f1Data={7.206, 64,5.083, 64,3.616, 64,2.542, 64,1.818, 64};
-        double[] f2Data={7.206, 54.9,5.083, 56.6,3.616, 55.6,2.542, 55.1,1.818, 55.1};
+	//begin test. Generally, this function is called by a ButtonView in the layout.
+	public abstract void startTest(View callingView);
+	{
 
-        //double[] Pxx=SignalProcessing.getDPOAEResults(audioBundle);
-        
-		Bundle DPGramresults= new Bundle();
-		DPGramresults.putString("title","DPOAE Results");
-		DPGramresults.putDoubleArray("DPOAEData",DPOAEData);
-		DPGramresults.putDoubleArray("noiseFloor",noiseFloor);
-		DPGramresults.putDoubleArray("f1Data",f1Data);
-		DPGramresults.putDoubleArray("f2Data",f2Data);
+		//perform test
 		
-		//Plot all results 
-		plotAudiogram(DPGramresults);
+		//plot results
 		
 	}
 	
-	
+	//TODO: implement a focused "playRecordThread" function that simply takes params for what to play and what
+	// to record, so that the base class implementation can be called from all extended TestActivity classes.
 	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum)
 	{
 		
 		//Ignore playing thread when obtaining SOAEs
-		beginTest();	
+		beginTest();
 		Context context=this.getApplicationContext();		
 		
 		
 		recordStatusBackHandler = new ReportStatusHandler(this);
 		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected,showSpectrum);
 		
-		playStatusBackHandler = new ReportStatusHandler(this);
-		PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
-		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
-		playThread = new Thread(pRun);
-		rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);
-		recordThread = new Thread(rRun);	
-		playThread.setPriority(Thread.MAX_PRIORITY);
-		recordThread.setPriority(Thread.MAX_PRIORITY);
-		execSvc.execute( recordThread );
-		execSvc.execute( playThread );
-		execSvc.shutdown();
-
+		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
+			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
+			rRun.setExpectedFrequency(0);
+			recordThread = new Thread(rRun);	
+			recordThread.setPriority(Thread.MAX_PRIORITY);
+			execSvc.execute( recordThread );
+			execSvc.shutdown();
+		}else{
+			playStatusBackHandler = new ReportStatusHandler(this);
+			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
+			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
+			playThread = new Thread(pRun);
+			rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);
+			recordThread = new Thread(rRun);	
+			playThread.setPriority(Thread.MAX_PRIORITY);
+			recordThread.setPriority(Thread.MAX_PRIORITY);
+			execSvc.execute( recordThread );
+			execSvc.execute( playThread );
+			execSvc.shutdown();
+		}
 		endTest();
 		return rRun;
 	}
 	
+	
+	
+	//TODO: not all of these functions are general to TestActivity but instead specific to DPOAEActivity
+	public void appendText(String str){
+		TextView tv = getTextView(); 
+		tv.setText(tv.getText() + "\n" + str);
+	}
+	
+	public void emptyText(){
+		TextView tv = getTextView();
+		tv.setText("");
+	}
+	
+	private TextView getTextView(){
+		return (TextView)this.findViewById(R.id.text1);
+	}
+	
+	//plot recorded signal spectrum
+	public void plotSpectrum(Bundle audioResultsBundle) {
+		Intent intent = new Intent(this.getApplicationContext(), PlotSpectralActivity.class);
+		intent.putExtras(audioResultsBundle);
+		this.audioResultsBundle=audioResultsBundle;
+		startActivity(intent);
+	}
+
+	//plot recorded waveform
+	public void plotWaveform() {
+		//TODO: Add check for not null audioResultsBundle (notify user that to run stimulus if they press this option before running anything).
+		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
+		intent.putExtras(audioResultsBundle);
+		startActivity(intent);
+	}
+	
+	//plot DPgram / OAEgram results
+	public void plotEargram() {
+		
+	}
+	
+	//Deprecated? should be called DPgram or Eargram.
+	public void plotAudiogram(Bundle DPOAEGramResultsBundle) {
+		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
+		intent.putExtras(DPOAEGramResultsBundle);
+		startActivity(intent);
+	}
+
 }
