@@ -38,50 +38,27 @@
  */ 
 
 package org.audiopulse.activities;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.audiopulse.R;
-import org.audiopulse.io.PlayThreadRunnable;
-import org.audiopulse.io.RecordThreadRunnable;
-import org.audiopulse.io.ReportStatusHandler;
-import org.audiopulse.utilities.SignalProcessing;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 //Contains menu from which tests can be selected and run
-//tests includ DPOAE, TOAE, device calibration, in-situ calibration
-//in situ
-//TODO: implement tests as fragments? Or just independent threads?
 public class TestMenuActivity extends AudioPulseActivity 
 {
 	public static final String TAG="TestMenuActivity";
-	
-	static final int STIMULUS_DIALOG_ID = 0;
-	Bundle audioBundle = new Bundle();
-	Handler playStatusBackHandler = null;
-	Handler recordStatusBackHandler = null;
-	Thread playThread = null;
-	Thread recordThread = null;
-	public static double playTime=0.5;
-	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test_menu);
 		
-		// set listener for clickable menu items
+		// set actions for clickable menu items
 		ListView menuList = (ListView) findViewById(R.id.menu_list);
         menuList.setOnItemClickListener(
         	new AdapterView.OnItemClickListener() {
@@ -89,12 +66,15 @@ public class TestMenuActivity extends AudioPulseActivity
         			
         			TextView item = (TextView) itemClicked;
         			String itemText = item.getText().toString();
-        			        			//item.getId(), R.id.
+        			        			//item.getId(), R.id.??
+        			
         			//TODO: Tests should return a Bundle containing the data they are suppose to provide,
         			//and URLs to any file location they create
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				//TODO: change this to launch a plot activity
         				//plotWaveform();
+        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.old_menu))) {
+        				startActivity(new Intent(TestMenuActivity.this, ThreadedPlayRecActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.dpgram_right)) ||
         					itemText.equalsIgnoreCase(getResources().getString(R.string.dpgram_left)) ||
         					itemText.equalsIgnoreCase(getResources().getString(R.string.dpoae_4k)) ||
@@ -107,6 +87,8 @@ public class TestMenuActivity extends AudioPulseActivity
         				DPOAEIntent.putExtras(DPOAERequest);
         				startActivity(DPOAEIntent);
         				
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.tests_device_calibration))) {
+        				startActivity(new Intent(TestMenuActivity.this, DeviceCalibrationActivity.class));
         			}
         			else {
         				//TODO: launch test activity
