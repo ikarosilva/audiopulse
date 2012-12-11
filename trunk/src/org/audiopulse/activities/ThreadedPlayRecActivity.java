@@ -48,7 +48,7 @@ import org.audiopulse.R;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
-import org.audiopulse.utilities.SignalProcessing;
+
 
 import android.content.Context;
 import android.os.Bundle;
@@ -58,7 +58,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ThreadedPlayRecActivity extends TestActivity 
+//NOTE: This class has been Deprecated!! Do not use it! Each audio test will have its own activity,
+//rather than have this class control all types of test. 
+//A cleaner and abstract class was derived from this one (GeneralAudioTestActivities). 
+//You AudioTest class should extend that class, which can be called from the TestMenuActivity. 
+
+@Deprecated public class ThreadedPlayRecActivity extends GeneralAudioTestActivity 
 {
 	public static final String TAG="ThreadedPlayRecActivity";
 	
@@ -116,8 +121,6 @@ public class ThreadedPlayRecActivity extends TestActivity
         				DPGramresults.putDoubleArray("f1Data",f1Data);
         				DPGramresults.putDoubleArray("f2Data",f2Data);
         				
-        				//Plot all results 
-        				plotAudiogram(DPGramresults);
         			}
         			else {
         				emptyText(); //Clear text for new stimuli test and spectral plotting
@@ -139,7 +142,7 @@ public class ThreadedPlayRecActivity extends TestActivity
 		
 		
 		recordStatusBackHandler = new ReportStatusHandler(this);
-		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected,showSpectrum);
+		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
 		
 		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
 			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );

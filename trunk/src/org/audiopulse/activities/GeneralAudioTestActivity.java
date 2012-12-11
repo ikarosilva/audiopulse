@@ -29,8 +29,8 @@
  * -----------------
  * (C) Copyright 2012, by SanaAudioPulse
  *
- * Original Author:  Ikaro Silva
- * Contributor(s):   -;
+ * Original Author:  Andrew Schwartz
+ * Contributor(s):   Ikaro Silva
  *
  * Changes
  * -------
@@ -38,8 +38,6 @@
  */ 
 
 package org.audiopulse.activities;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -48,15 +46,12 @@ import org.audiopulse.R;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
-import org.audiopulse.utilities.SignalProcessing;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 //TODO: change the scope of this activity's purpose.
@@ -67,14 +62,14 @@ import android.widget.TextView;
 //e.g. calibration activity that has an I/O display
 //this activity and extended classes will be launched from TestMenuActivity.
 
-//TestActivity is a template for all tests; all test activities should extend TestActivity.
+//GeneralAudioTestActivity is a template for all tests; all test activities should extend GeneralAudioTestActivity.
 
-public abstract class TestActivity extends AudioPulseActivity 
+public abstract class GeneralAudioTestActivity extends AudioPulseActivity 
 {
-	public static final String TAG="TestActivity";
-	
+	public static final String TAG="GeneralAudioTestActivity";
+
 	private Bundle audioResultsBundle;
-	
+
 	static final int STIMULUS_DIALOG_ID = 0;
 	Bundle audioBundle = new Bundle();
 	Handler playStatusBackHandler = null;
@@ -91,73 +86,67 @@ public abstract class TestActivity extends AudioPulseActivity
 
 		// // to perform the test automatically rather than by a button press:
 		//findViewById(android.R.id.content).invalidate();
-        //performTest();			
+		//performTest();
+		//TODO: We should always have an option to do the test automatically (perhaps by reading from
+		//the context in which the activity was called
 	}
-    
+
 	//begin test. Generally, this function is called by a ButtonView in the layout.
 	public abstract void startTest(View callingView);
 	{
 
-		//perform test
-		
+		//perform test	
 		//plot results
-		
+
 	}
-	
+
 	//TODO: implement a focused "playRecordThread" function that simply takes params for what to play and what
-	// to record, so that the base class implementation can be called from all extended TestActivity classes.
-	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum)
+	// to record, so that the base class implementation can be called from all extended GeneralAudioTestActivity classes.
+	protected RecordThreadRunnable playRecordThread()
 	{
-		
-		//Ignore playing thread when obtaining SOAEs
+		//This is the most generic form. Some specific tests could overwrite this for optimization.
+		//For example, for SOAE there is no need to play a stimulus, so the play thread can be omitted.
+
 		beginTest();
 		Context context=this.getApplicationContext();		
-		
-		
 		recordStatusBackHandler = new ReportStatusHandler(this);
-		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected,showSpectrum);
-		
-		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
-			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
-			rRun.setExpectedFrequency(0);
-			recordThread = new Thread(rRun);	
-			recordThread.setPriority(Thread.MAX_PRIORITY);
-			execSvc.execute( recordThread );
-			execSvc.shutdown();
-		}else{
-			playStatusBackHandler = new ReportStatusHandler(this);
-			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
-			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
-			playThread = new Thread(pRun);
-			rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);
-			recordThread = new Thread(rRun);	
-			playThread.setPriority(Thread.MAX_PRIORITY);
-			recordThread.setPriority(Thread.MAX_PRIORITY);
-			execSvc.execute( recordThread );
-			execSvc.execute( playThread );
-			execSvc.shutdown();
-		}
+		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
+
+		playStatusBackHandler = new ReportStatusHandler(this);
+		PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
+		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
+		playThread = new Thread(pRun);
+		rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);
+		recordThread = new Thread(rRun);        
+		playThread.setPriority(Thread.MAX_PRIORITY);
+		recordThread.setPriority(Thread.MAX_PRIORITY);
+		execSvc.execute( recordThread );
+		execSvc.execute( playThread );
+		execSvc.shutdown();
+
 		endTest();
 		return rRun;
 	}
-	
-	
-	
-	//TODO: not all of these functions are general to TestActivity but instead specific to DPOAEActivity
+
+
+	//TODO: not all of these functions are general to GeneralAudioTestActivity but instead specific to DPOAEActivity
+	//NOTE(by Ikaro): Maybe we should still leave these functions here in general form, so that they can be used by other 
+	//activities, if we think that they are not being used by most children, than we can push them into more specific classes.
+	//But, in general if two or more children use these function, it best to keep it here.
 	public void appendText(String str){
 		TextView tv = getTextView(); 
 		tv.setText(tv.getText() + "\n" + str);
 	}
-	
+
 	public void emptyText(){
 		TextView tv = getTextView();
 		tv.setText("");
 	}
-	
+
 	private TextView getTextView(){
 		return (TextView)this.findViewById(R.id.text1);
 	}
-	
+
 	//plot recorded signal spectrum
 	public void plotSpectrum(Bundle audioResultsBundle) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotSpectralActivity.class);
@@ -171,18 +160,6 @@ public abstract class TestActivity extends AudioPulseActivity
 		//TODO: Add check for not null audioResultsBundle (notify user that to run stimulus if they press this option before running anything).
 		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
 		intent.putExtras(audioResultsBundle);
-		startActivity(intent);
-	}
-	
-	//plot DPgram / OAEgram results
-	public void plotEargram() {
-		
-	}
-	
-	//Deprecated? should be called DPgram or Eargram.
-	public void plotAudiogram(Bundle DPOAEGramResultsBundle) {
-		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
-		intent.putExtras(DPOAEGramResultsBundle);
 		startActivity(intent);
 	}
 
