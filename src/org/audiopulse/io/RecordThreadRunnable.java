@@ -40,6 +40,7 @@
 package org.audiopulse.io;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 
 import org.audiopulse.utilities.SignalProcessing;
@@ -109,7 +110,7 @@ public class RecordThreadRunnable implements Runnable
 		informFinish();
 
 		//Write file to disk
-		String fileName="AP_" + testType + Math.round(System.currentTimeMillis()/100) +".raw";
+		String fileName="AP_" + testType + new Date().toString() +".raw";
 		File outFile = new File(root, fileName);
 		informMiddle("Saving file: "+ outFile.getAbsolutePath());
 		try {
