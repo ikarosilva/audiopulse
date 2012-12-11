@@ -92,12 +92,12 @@ import android.widget.TextView;
         			
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				plotWaveform();
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right)) ||
-        					itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_left))) {
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.dpgram_right)) ||
+        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpgram_left))) {
         				//TODO: plot audiogram results
         				//Generate list of tests to run
         				List<String> RunTest= new ArrayList<String>();
-        				RunTest.add(getResources().getString(R.string.menu_2k));
+        				RunTest.add(getResources().getString(R.string.dpoae_2k));
         				//RunTest.add(getResources().getString(R.string.menu_3k));
         				//RunTest.add(getResources().getString(R.string.menu_4k));
         				for(String runme: RunTest){
@@ -144,7 +144,7 @@ import android.widget.TextView;
 		recordStatusBackHandler = new ReportStatusHandler(this);
 		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
 		
-		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_spontaneous)) ){
+		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.soae)) ){
 			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
 			rRun.setExpectedFrequency(0);
 			recordThread = new Thread(rRun);	

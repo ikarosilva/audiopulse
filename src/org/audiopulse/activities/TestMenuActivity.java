@@ -90,13 +90,22 @@ public class TestMenuActivity extends AudioPulseActivity
         			TextView item = (TextView) itemClicked;
         			String itemText = item.getText().toString();
         			        			//item.getId(), R.id.
+        			//TODO: Tests should return a Bundle containing the data they are suppose to provide,
+        			//and URLs to any file location they create
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				//TODO: change this to launch a plot activity
         				//plotWaveform();
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_right)) ||
-        					itemText.equalsIgnoreCase(getResources().getString(R.string.menu_all_left))) {
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.dpgram_right)) ||
+        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpgram_left)) ||
+        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpoae_4k)) ||
+        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpoae_3k)) ||
+        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpoae_2k)) ) {
         				
-        				startActivity(new Intent(TestMenuActivity.this, DPOAEActivity.class));
+        				Bundle DPOAERequest= new Bundle();
+        				DPOAERequest.putString("testName",itemText);
+        				Intent DPOAEIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
+        				DPOAEIntent.putExtras(DPOAERequest);
+        				startActivity(DPOAEIntent);
         				
         			}
         			else {

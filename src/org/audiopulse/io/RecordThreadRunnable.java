@@ -79,14 +79,12 @@ public class RecordThreadRunnable implements Runnable
 	private String testType;
 	private boolean showSpectrum;
 
-	public RecordThreadRunnable(Handler h, double playTime,Context context, String itemSelected, boolean showSpectrum)
+	public RecordThreadRunnable(Handler h, double playTime,Context context)
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
 		Buffer_Size=(int) (playTime*sampleRate); 
 		samples = new short[Buffer_Size];
-		testType=itemSelected;
-		this.showSpectrum=showSpectrum;
 		initRecord();
 		this.context=context;
 
