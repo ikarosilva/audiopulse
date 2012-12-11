@@ -45,6 +45,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.audiopulse.R;
+import org.audiopulse.io.DPOAEStimulus;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
@@ -68,7 +69,7 @@ import android.widget.TextView;
 
 public class DPOAEActivity extends GeneralAudioTestActivity 
 {
-	public static final String TAG="ThreadedPlayRecActivity";
+	public static final String TAG="DPOAEActivity";
 	
 	static final int STIMULUS_DIALOG_ID = 0;
 	Bundle audioBundle = new Bundle();
@@ -76,6 +77,12 @@ public class DPOAEActivity extends GeneralAudioTestActivity
 	Handler recordStatusBackHandler = null;
 	Thread playThread = null;
 	Thread recordThread = null;
+	String testNameKey="testName";
+	String testNameValue;
+	Bundle DPOAERequest;
+	String filePrefix="DPOAE_";
+	DPOAEStimulus stimulus;
+	
 	public static double playTime=0.5;
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 
@@ -83,8 +90,10 @@ public class DPOAEActivity extends GeneralAudioTestActivity
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.dpoae);
-		//findViewById(android.R.id.content).invalidate();
+		DPOAERequest = getIntent().getExtras();
+		testNameValue=DPOAERequest.getString(testNameKey);
 		
+		//findViewById(android.R.id.content).invalidate();
         //performTest();			
 	}
     
@@ -92,9 +101,17 @@ public class DPOAEActivity extends GeneralAudioTestActivity
 		//TODO: plot audiogram results
 		//Generate list of tests to run
 		List<String> RunTest= new ArrayList<String>();
-		RunTest.add(getResources().getString(R.string.menu_2k));
-		//RunTest.add(getResources().getString(R.string.menu_3k));
-		//RunTest.add(getResources().getString(R.string.menu_4k));
+		
+		if (testNameValue.equalsIgnoreCase(getResources().getString(R.string.dpgram_right)) ||
+				testNameValue.equalsIgnoreCase(getResources().getString(R.string.dpgram_left)) ){
+			RunTest.add(getResources().getString(R.string.dpoae_2k));
+			RunTest.add(getResources().getString(R.string.dpoae_3k));
+			RunTest.add(getResources().getString(R.string.dpoae_4k));
+		} else {
+			//In this case we are running a single test, the name of which is already passed by the Bundle
+			RunTest.add(testNameValue);
+		}
+		 
 		for(String runme: RunTest){
 			emptyText(); //Clear text for new stimuli test and spectral plotting
 			playRecordThread();

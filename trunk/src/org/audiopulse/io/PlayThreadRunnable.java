@@ -135,7 +135,11 @@ public class PlayThreadRunnable implements Runnable
 		}
 	}
 
-	private void generateStimulus(){
+	//TODO: This has to be done at the TestActivity level (for exampe: DPOAEActivity)!!
+	//The PlayThreadRunn from now on should  receive just the final waveform to be played 
+	//and not responsible for generating the stimulus.
+	//In your class make sure you extend the AcousticStimulus Type
+	@Deprecated private void generateStimulus(){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
 		phone = new HTCOne(HTCOne.deviceCalParam.ER10C_40dBGain,
 				AcousticDevice.ioDevice.ER10C_40dBGain);
