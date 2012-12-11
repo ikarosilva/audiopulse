@@ -66,7 +66,7 @@ import android.widget.TextView;
 //e.g. calibration activity that has an I/O display
 //this activity and extended classes will be launched from TestMenuActivity.
 
-public class DPOAEActivity extends TestActivity 
+public class DPOAEActivity extends GeneralAudioTestActivity 
 {
 	public static final String TAG="ThreadedPlayRecActivity";
 	
@@ -97,7 +97,7 @@ public class DPOAEActivity extends TestActivity
 		//RunTest.add(getResources().getString(R.string.menu_4k));
 		for(String runme: RunTest){
 			emptyText(); //Clear text for new stimuli test and spectral plotting
-			playRecordThread(runme,false);
+			playRecordThread();
 			//TODO: Implement a hold between playing threads
 		}
 		
@@ -120,33 +120,10 @@ public class DPOAEActivity extends TestActivity
 		plotAudiogram(DPGramresults);
 		
 	}
-	
-	
-	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum)
-	{
-		
-		//Ignore playing thread when obtaining SOAEs
-		beginTest();	
-		Context context=this.getApplicationContext();		
-		
-		
-		recordStatusBackHandler = new ReportStatusHandler(this);
-		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected,showSpectrum);
-		
-		playStatusBackHandler = new ReportStatusHandler(this);
-		PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
-		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
-		playThread = new Thread(pRun);
-		rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);
-		recordThread = new Thread(rRun);	
-		playThread.setPriority(Thread.MAX_PRIORITY);
-		recordThread.setPriority(Thread.MAX_PRIORITY);
-		execSvc.execute( recordThread );
-		execSvc.execute( playThread );
-		execSvc.shutdown();
 
-		endTest();
-		return rRun;
+	private void plotAudiogram(Bundle dPGramresults) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
