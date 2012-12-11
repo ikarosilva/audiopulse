@@ -144,7 +144,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	}
 
 	private TextView getTextView(){
-		return (TextView)this.findViewById(R.id.text1);
+		return (TextView)this.findViewById(R.id.testLog);
 	}
 
 	//plot recorded signal spectrum
