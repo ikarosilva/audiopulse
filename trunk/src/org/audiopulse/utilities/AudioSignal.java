@@ -1,4 +1,44 @@
+/* ===========================================================
+ * SanaAudioPulse : a free platform for teleaudiology.
+ *              
+ * ===========================================================
+ *
+ * (C) Copyright 2012, by Sana AudioPulse
+ *
+ * Project Info:
+ *    SanaAudioPulse: http://code.google.com/p/audiopulse/
+ *    Sana: http://sana.mit.edu/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * [Android is a trademark of Google Inc.]
+ *
+ * -----------------
+ * AudioPulseCalibrationActivity.java
+ * -----------------
+ * (C) Copyright 2012, by SanaAudioPulse
+ *
+ * Original Author:  Andrew Schwartz
+ * Contributor(s):   -;
+ *
+ * Changes
+ * -------
+ * Check: http://code.google.com/p/audiopulse/source/list
+ */
 package org.audiopulse.utilities;
+
+import android.util.Log;
 
 //AudioSignal: provides a wrapper to to double precision operations on audio data that are accessed as shorts.
 //use audiosignal.getDataAsShort() to get an array of shorts for playback
@@ -12,6 +52,7 @@ public class AudioSignal implements Cloneable {
 	
 	public final int numChannels;
 	public final int length;
+	public final static String TAG="AudioSignal";
 	
 	public static final int LEFT = 0;
 	public static final int RIGHT = 1;
@@ -59,8 +100,13 @@ public class AudioSignal implements Cloneable {
 		short[] buffer = new short[data[chan].length];
 		for (int n=0;n<data.length;n++) {
 			double sample = data[chan][n];
-			boolean clip = Math.abs(sample)>1;		//clip all values outside of +/-1
-			buffer[n] = (short) (Short.MAX_VALUE * (clip?Math.signum(sample):sample)); 
+			//clip all values outside of +/-1
+			if(Math.abs(sample)>1){	
+				buffer[n] = (short) (Short.MAX_VALUE * (Math.signum(sample)));
+				Log.w(TAG,"Digital (short) audio signal is being clipped!!");
+			}else{
+				buffer[n] = (short) (Short.MAX_VALUE * (sample));
+			}
 		}
 		return buffer;
 	}
