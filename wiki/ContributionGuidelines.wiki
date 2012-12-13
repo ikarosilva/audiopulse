@@ -18,5 +18,7 @@ This is a brief description of minimal guidelines you should follow when contrib
 3. Version Control
    A. Please make sure that the following directories are *not* under version control (svn:ignore in Eclipse/Subversion): 
 
+{{{
 AudioPulse/gen
 AudioPulse/bin
+}}}
