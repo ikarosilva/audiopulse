@@ -14,3 +14,9 @@ This is a brief description of minimal guidelines you should follow when contrib
    B. Make your changes and make sure your project runs without errors and warnings
    C. If this is a very significant change to the code (ie, API changes, modifying how a function returns, adding functions/constructors), add your name to the list of contributors. Make sure one of the contributors (listed in the code's license file) revises and accepts your changes.
    D. Commit
+
+3. Version Control
+   A. Please make sure that the following directories are *not* under version control (svn:ignore in Eclipse/Subversion): 
+
+AudioPulse/gen
+AudioPulse/bin
