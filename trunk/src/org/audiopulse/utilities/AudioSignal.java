@@ -52,32 +52,56 @@ public class AudioSignal implements Cloneable {
 	
 	public final int numChannels;
 	public final int length;
+	public final boolean isStereo;
 	public final static String TAG="AudioSignal";
 	
 	public static final int LEFT = 0;
 	public static final int RIGHT = 1;
+	
+	private final int LEFT_CHANNEL = 0;
+	private final int RIGHT_CHANNEL;
+	
 	
 	
 	//default constructor: stereo signal
 	public AudioSignal(int length) {
 		this.length = length;
 		this.numChannels = 2;
+		this.isStereo = true;
+		this.RIGHT_CHANNEL = 1;
 		this.data = new double [this.numChannels][this.length];
 		this.initializeData();
 	}
 	
-	//constructor: n-channels
-	public AudioSignal(int length, int numChannels) {
+	//constructor: mono or stereo
+	public AudioSignal(int length, boolean stereo) {
 		this.length = length;
-		this.numChannels = numChannels;
+		if (stereo) {
+			this.numChannels = 2;
+			this.isStereo = true;
+			this.RIGHT_CHANNEL = 1;
+		} else {
+			this.numChannels = 1;
+			this.isStereo = false;
+			this.RIGHT_CHANNEL = 0;
+		}
 		this.data = new double [this.numChannels][this.length];
 		this.initializeData();
 	}
 	
-	private void initializeData() {
-		for (int chan=0;chan<this.numChannels;chan++)
-			for (int n=0;n<this.length;n++)
-				this.data[chan][n] = 0;
+	//get playback signal, convert to mono or stereo as needed
+	public short[] getPlaybackSignal(boolean stereoFlag) {
+		short[] playBuffer;
+
+		if (stereoFlag) { //return stereo signal: interleave
+			short[][] shortData = this.getDataAsShort();
+			playBuffer = AudioSignal.interleave(shortData);
+		} else { //return mono signal
+			playBuffer = AudioSignal.convertToShort(this.getMono());
+
+		}
+		
+		return playBuffer;
 	}
 	
 
@@ -88,7 +112,7 @@ public class AudioSignal implements Cloneable {
 		
 	public double[][] getData() {
 		//clone each channel rather than passing back references to each channel. Java is weird.
-		double[][] returnData = new double[this.numChannels][data[0].length];
+		double[][] returnData = new double[this.numChannels][this.length];
 		for (int chan=0; chan<this.numChannels; chan++) {
 			returnData[chan] = this.getChannel(chan); 	// gets cloned channel
 		}
@@ -97,23 +121,12 @@ public class AudioSignal implements Cloneable {
 
 	//return single channel data as short. Convert +/-1 to +/-Short.MAX_VALUE.
 	public short[] getChannelAsShort(int chan) {
-		short[] buffer = new short[data[chan].length];
-		for (int n=0;n<data.length;n++) {
-			double sample = data[chan][n];
-			//clip all values outside of +/-1
-			if(Math.abs(sample)>1){	
-				buffer[n] = (short) (Short.MAX_VALUE * (Math.signum(sample)));
-				Log.w(TAG,"Digital (short) audio signal is being clipped!!");
-			}else{
-				buffer[n] = (short) (Short.MAX_VALUE * (sample));
-			}
-		}
-		return buffer;
+		return AudioSignal.convertToShort(data[chan]);
 	}
 
 	//return all channel data as short. Convert +/-1 to +/-Short.MAX_VALUE.
 	public short[][] getDataAsShort() {
-		short[][] buffer = new short[data.length][data[0].length];
+		short[][] buffer = new short[this.numChannels][this.length];
 		for (int chan=0;chan<this.numChannels;chan++) {
 			buffer[chan] = this.getChannelAsShort(chan);
 		}
@@ -132,9 +145,9 @@ public class AudioSignal implements Cloneable {
 		}
 	}
 	
-	//create a copy of the data
+	//create a copy of the data structure
 	public AudioSignal clone() {
-		AudioSignal returnSignal = new AudioSignal(this.numChannels, this.length) ;
+		AudioSignal returnSignal = new AudioSignal(this.length, this.isStereo) ;
 		returnSignal.setData(this.data);
 		return returnSignal;
 	}
@@ -142,31 +155,58 @@ public class AudioSignal implements Cloneable {
 	//returns a disease that makes you sleepy.
 	public double[] getMono(){
 		double[] monoSignal = new double [this.length];
-		monoSignal = this.data[0].clone();
-		for (int chan=1; chan<this.numChannels; chan++) {
+		monoSignal = this.getChannel(LEFT_CHANNEL);
+		//if stereo, average with right channel, else, return as is.
+		if (this.isStereo) {
 			for (int n=0;n<this.length; n++) {
-				monoSignal[n] += this.data[chan][n];
+				monoSignal[n] += this.data[RIGHT_CHANNEL][n];
+				monoSignal[n] /= 2;
 			}
-		}
+		} 
+		
 		return monoSignal;
 	}
-	
-	//return mono signal for playback: add all channels, clip values outside of +/- 1.
-	public double[] getMonoAsShort(){
-		double[] monoSignal = new double [this.length];
-		monoSignal = this.data[0].clone();
-		for (int chan=1; chan<this.numChannels; chan++) {
-			for (int n=0;n<this.length; n++) {
-				monoSignal[n] += this.data[chan][n];
-			}
-		}
-		for (int n=0;n<monoSignal.length;n++) {
-			double sample = monoSignal[n];
-			boolean clip = Math.abs(sample)>1;		//clip all values outside of +/-1
-			monoSignal[n] = (short) (Short.MAX_VALUE * (clip?Math.signum(sample):sample)); 
-		}
+		
 
-		return monoSignal;
+	
+	private void initializeData() {
+		for (int chan=0;chan<this.numChannels;chan++)
+			for (int n=0;n<this.length;n++)
+				this.data[chan][n] = 0;
+	}
+
+	
+	/*--- static functions ---*/
+	
+	public static short[] convertToShort(double[] doubleVector) {
+		short[] shortVector = new short [doubleVector.length];
+		for (int n=0;n<doubleVector.length;n++) {
+			double sample = doubleVector[n];
+			if(Math.abs(sample)>1){	
+				shortVector[n] = (short) (Short.MAX_VALUE * (Math.signum(sample)));
+				Log.w(TAG,"Digital (short) audio signal is being clipped!!");
+			}else{
+				shortVector[n] = (short) (Short.MAX_VALUE * (sample));
+			}
+		}
+		return shortVector;
+
 	}
 	
+	//interleave 2xN data into 1x2N vector
+	public static short[] interleave(short[][] data) {
+		return interleave(data[0],data[1]);
+	}
+	
+	//interleave left and right vectors into stereo interleaved
+	//left and right should be equal length (truncates if not)
+	public static short[] interleave(short[] left, short[] right) {
+		int N = Math.min(left.length, right.length);  //safe handling: choose minimum length. Really they should be equal.
+		short[] playBuffer = new short [2*N];
+		for (int n=0; n<N; n++) {
+			playBuffer[2*n] = left[n];
+			playBuffer[2*n+1] = right[n];
+		}
+		return playBuffer;
+	}
 }
