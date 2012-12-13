@@ -30,7 +30,7 @@
  * (C) Copyright 2012, by SanaAudioPulse
  *
  * Original Author:  Andrew Schwartz
- * Contributor(s):   -;
+ * Contributor(s):   Ikaro Silva;
  *
  * Changes
  * -------
@@ -40,156 +40,71 @@ package org.audiopulse.utilities;
 
 import android.util.Log;
 
-//AudioSignal: provides a wrapper to to double precision operations on audio data that are accessed as shorts.
-//use audiosignal.getDataAsShort() to get an array of shorts for playback
-//double values between +/-1 are mapped to shorts, values outside this range are clipped.
-//
-// Operates like an array of primitives. The size is declared upon intiialization
-// and cannot be changed (instead, create a new AudioSignal).
+// Useful functions for converting audio signals between double (for math) and short (for playback)
 
-public class AudioSignal implements Cloneable {
-	private final double[][] data;
-	
-	public final int numChannels;
-	public final int length;
-	public final boolean isStereo;
+//TODO: bi-directional! For recorded shorts, convert to doubles.
+public class AudioSignal {
 	public final static String TAG="AudioSignal";
 	
-	public static final int LEFT = 0;
-	public static final int RIGHT = 1;
 	
-	private final int LEFT_CHANNEL = 0;
-	private final int RIGHT_CHANNEL;
-	
-	
-	
-	//default constructor: stereo signal
-	public AudioSignal(int length) {
-		this.length = length;
-		this.numChannels = 2;
-		this.isStereo = true;
-		this.RIGHT_CHANNEL = 1;
-		this.data = new double [this.numChannels][this.length];
-		this.initializeData();
-	}
-	
-	//constructor: mono or stereo
-	public AudioSignal(int length, boolean stereo) {
-		this.length = length;
-		if (stereo) {
-			this.numChannels = 2;
-			this.isStereo = true;
-			this.RIGHT_CHANNEL = 1;
-		} else {
-			this.numChannels = 1;
-			this.isStereo = false;
-			this.RIGHT_CHANNEL = 0;
-		}
-		this.data = new double [this.numChannels][this.length];
-		this.initializeData();
-	}
-	
-	//get playback signal, convert to mono or stereo as needed
-	public short[] getPlaybackSignal(boolean stereoFlag) {
-		short[] playBuffer;
-
-		if (stereoFlag) { //return stereo signal: interleave
-			short[][] shortData = this.getDataAsShort();
-			playBuffer = AudioSignal.interleave(shortData);
+	//get short vector for playback buffer: stereo input version
+	//mono or stereo interleaved output
+	public short[] getPlaybackData(double[][] doubleData, boolean stereoOutput) {
+		assertSignal(doubleData);
+		
+		short[] bufferData;
+		if (stereoOutput) { //return stereo signal: interleave
+			bufferData = interleave(convertToShort(doubleData));
 		} else { //return mono signal
-			playBuffer = AudioSignal.convertToShort(this.getMono());
-
+			bufferData = convertToShort(convertToMono(doubleData));
 		}
 		
-		return playBuffer;
+		return bufferData;
 	}
-	
 
-	public double[] getChannel(int n) {
-		//return cloned array, not reference. Java is weird.
-		return data[n].clone();
-	}
+	//get short vector for playback buffer: mono input version
+	//mono or stereo interleaved output
+	public short[] getPlaybackData(double[] doubleData, boolean stereoOutput) {
+		assertSignal(doubleData);
 		
-	public double[][] getData() {
-		//clone each channel rather than passing back references to each channel. Java is weird.
-		double[][] returnData = new double[this.numChannels][this.length];
-		for (int chan=0; chan<this.numChannels; chan++) {
-			returnData[chan] = this.getChannel(chan); 	// gets cloned channel
+		short[] bufferData;
+		if (stereoOutput) { //return stereo signal: interleave duplicate
+			short[] shortVector = convertToShort(doubleData);
+			bufferData = interleave(shortVector,shortVector);
+		} else { //return mono signal
+			bufferData = convertToShort(doubleData);
 		}
-		return returnData;
-	}
-
-	//return single channel data as short. Convert +/-1 to +/-Short.MAX_VALUE.
-	public short[] getChannelAsShort(int chan) {
-		return AudioSignal.convertToShort(data[chan]);
-	}
-
-	//return all channel data as short. Convert +/-1 to +/-Short.MAX_VALUE.
-	public short[][] getDataAsShort() {
-		short[][] buffer = new short[this.numChannels][this.length];
-		for (int chan=0;chan<this.numChannels;chan++) {
-			buffer[chan] = this.getChannelAsShort(chan);
-		}
-		return buffer;
-	}
-	
-	//set channel data (clone array).
-	public void setChannel(int chan, double[] newData) {
-		data[chan] = newData.clone();
-	}
-	
-	//set all data at once (clone channel arrays)
-	public void setData(double[][] newData) {
-		for (int chan=0;chan<this.numChannels;chan++) {
-			this.setChannel(chan,newData[chan]);
-		}
-	}
-	
-	//create a copy of the data structure
-	public AudioSignal clone() {
-		AudioSignal returnSignal = new AudioSignal(this.length, this.isStereo) ;
-		returnSignal.setData(this.data);
-		return returnSignal;
-	}
-	
-	//returns a disease that makes you sleepy.
-	public double[] getMono(){
-		double[] monoSignal = new double [this.length];
-		monoSignal = this.getChannel(LEFT_CHANNEL);
-		//if stereo, average with right channel, else, return as is.
-		if (this.isStereo) {
-			for (int n=0;n<this.length; n++) {
-				monoSignal[n] += this.data[RIGHT_CHANNEL][n];
-				monoSignal[n] /= 2;
-			}
-		} 
 		
-		return monoSignal;
-	}
-		
-
-	
-	private void initializeData() {
-		for (int chan=0;chan<this.numChannels;chan++)
-			for (int n=0;n<this.length;n++)
-				this.data[chan][n] = 0;
+		return bufferData;
 	}
 
-	
-	/*--- static functions ---*/
-	
+	//convert double vector to short, scale appropriately.
 	public static short[] convertToShort(double[] doubleVector) {
 		short[] shortVector = new short [doubleVector.length];
 		for (int n=0;n<doubleVector.length;n++) {
-			double sample = doubleVector[n];
-			if(Math.abs(sample)>1){	
-				shortVector[n] = (short) (Short.MAX_VALUE * (Math.signum(sample)));
-				Log.w(TAG,"Digital (short) audio signal is being clipped!!");
-			}else{
-				shortVector[n] = (short) (Short.MAX_VALUE * (sample));
-			}
+			shortVector[n] = convertToShort(doubleVector[n]);
 		}
 		return shortVector;
+	}
+	public static short[][] convertToShort(double[][] doubleVector) {
+		assertSignal(doubleVector);
+		short[][] shortVector = new short [doubleVector.length][doubleVector[0].length];
+		for (int chan=0; chan<=doubleVector.length;chan++)
+			for (int n=0;n<doubleVector[0].length;n++) {
+				shortVector[chan][n] = convertToShort(doubleVector[chan][n]);
+		}
+		return shortVector;
+	}
+	
+	//scale and convert a single sample to short.
+	public static short convertToShort(double sample) {
+		if(Math.abs(sample)>1){	
+			Log.w(TAG,"Digital (short) audio signal is being clipped!!");
+			return (short) (Short.MAX_VALUE * (Math.signum(sample)));
+			
+		}else{
+			return (short) (Short.MAX_VALUE * (sample));
+		}
 
 	}
 	
@@ -208,5 +123,32 @@ public class AudioSignal implements Cloneable {
 			playBuffer[2*n+1] = right[n];
 		}
 		return playBuffer;
+	}
+	
+	public static double[] convertToMono(double[][] stereoData) {
+		assertSignal(stereoData);
+		
+		int N = stereoData[0].length;
+		double[] monoSignal = new double [N];
+
+		for (int n=0;n<N; n++) {
+			monoSignal[n] += 1/2 * (stereoData[0][n] + stereoData[1][n]);
+		}
+		
+		return monoSignal;
+	
+	}
+	
+	private static void assertSignal (double[][] x) {
+		assert (x.length==2) : "Stereo data required";
+		assert (x[0].length==x[1].length) : "Left, right vectors must be of equal length";
+	}
+	private static void assertSignal (short[][] x) {
+		assert (x.length==2) : "Stereo data required";
+		assert (x[0].length==x[1].length) : "Left, right vectors must be of equal length";
+	}
+	private static void assertSignal (double[] x) {
+	}
+	private static void assertSignal (short[] x) {
 	}
 }
