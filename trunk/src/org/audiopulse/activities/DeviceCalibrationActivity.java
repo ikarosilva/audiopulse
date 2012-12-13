@@ -63,7 +63,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class DeviceCalibrationActivity extends GeneralAudioTestActivity //change this  BACK to TestActivity fuckdamnit
+public class DeviceCalibrationActivity extends GeneralAudioTestActivity 
 
 {
 	public static final String TAG="ThreadedPlayRecActivity";

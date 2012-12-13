@@ -107,7 +107,7 @@ public abstract class TestActivity extends AudioPulseActivity
 //		Context context=this.getApplicationContext();		
 //		
 //		
-//		//give me my fucking TestActivity functionality back fuckdanit
+//		
 ////		recordStatusBackHandler = new ReportStatusHandler(this);
 ////		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected,showSpectrum);
 ////		
