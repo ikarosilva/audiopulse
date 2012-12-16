@@ -38,8 +38,6 @@
  */ 
 
 package org.audiopulse.activities;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -48,8 +46,7 @@ import org.audiopulse.R;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
-import org.audiopulse.utilities.DPOAESignal;
-import org.audiopulse.utilities.PeriodicSeries;
+import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
 import org.audiopulse.utilities.SpectralWindows;
 
@@ -66,7 +63,7 @@ import android.widget.TextView;
 public class DeviceCalibrationActivity extends GeneralAudioTestActivity 
 
 {
-	public static final String TAG="ThreadedPlayRecActivity";
+	public static final String TAG="DeviceCalibrationActivity";
 	
 	static final int STIMULUS_DIALOG_ID = 0;
 	Bundle audioBundle = new Bundle();
@@ -89,8 +86,8 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity
 	public void startTest(View callingView){
 		
 		// first task: play a tone. yay!
-		//beginTest();
-		/*
+		beginTest();
+		
 		short[] stimulus = this.generateStimulus();
 		
 		recordStatusBackHandler = new ReportStatusHandler(this);
@@ -98,6 +95,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity
 		
 		playStatusBackHandler = new ReportStatusHandler(this);
 		PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,stimulus);
+		
 		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
 		playThread = new Thread(pRun);
 		recordThread = new Thread(rRun);	
@@ -107,8 +105,8 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity
 		execSvc.execute( playThread );
 		execSvc.shutdown();
 
-		//endTest();
-		 * */
+		endTest();
+		
 		 
 		
 	}
@@ -118,29 +116,27 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity
 		double ramp = 0.100;	//ramp length for onset/offset (sec)
 		int Fs = 44100;			//sample rate
 		double f = 1000;		//stimulus frequency (Hz) 
-		double a = (double) Short.MAX_VALUE;			//stimulus amplitude
+		double a = 1;			//stimulus amplitude]
 		
 		int N = (int) (length * Fs);
 		int N_ramp = (int) (ramp*Fs);
 		double w = 2 * Math.PI * f;
+		double[] x = new double[N];
 		
-		short[] x = new short[2*N];
-
 		//create signal
 		for( int n = 0; n < N; n++ )
 		{
-			x[2*n] = x[2*n+1] = (short) (a * Math.sin(w*n));
+			x[n] = a * Math.sin(w*n/Fs);
 		}
 		
 		//apply ramp on/off
 		for (int n=0; n<N_ramp; n++) {
 			double r = (double) (n/N_ramp);
-			x[2*n] = (short) ((double) (x[2*n])*r);
-			x[2*n+1] = (short) ((double) (x[2*n+1])*r);
-			x[x.length-2*n-1] = (short) ((double) (x[x.length-2*n-1])*r);;
-			x[x.length-(2*n+1)-1] = (short) ((double) (x[x.length-(2*n+1)-1])*r);;
+			x[n] *= r;
+			x[x.length-n-1] *= r;
 		}
-		return x;
+		
+		return AudioSignal.getPlaybackData(x,true);
 
 	}
 	
