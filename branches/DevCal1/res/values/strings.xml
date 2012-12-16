@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- general -->
+    <string name="app_name">AudioPulse</string>
+    
+    <!--  test activity interface -->
+    <string name="begin_test">Begin Test</string>
+    <string name="begin_device_calibration">Begin</string>
+</resources>
