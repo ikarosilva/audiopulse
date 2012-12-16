@@ -49,8 +49,8 @@ public class AudioSignal {
 	
 	//get short vector for playback buffer: stereo input version
 	//mono or stereo interleaved output
-	public short[] getPlaybackData(double[][] doubleData, boolean stereoOutput) {
-		assertSignal(doubleData);
+	public static short[] getPlaybackData(double[][] doubleData, boolean stereoOutput) {
+		//TODO: check 2-channel, same length
 		
 		short[] bufferData;
 		if (stereoOutput) { //return stereo signal: interleave
@@ -64,8 +64,8 @@ public class AudioSignal {
 
 	//get short vector for playback buffer: mono input version
 	//mono or stereo interleaved output
-	public short[] getPlaybackData(double[] doubleData, boolean stereoOutput) {
-		assertSignal(doubleData);
+	public static short[] getPlaybackData(double[] doubleData, boolean stereoOutput) {
+		//TODO: check 2-channel, same length
 		
 		short[] bufferData;
 		if (stereoOutput) { //return stereo signal: interleave duplicate
@@ -87,7 +87,7 @@ public class AudioSignal {
 		return shortVector;
 	}
 	public static short[][] convertToShort(double[][] doubleVector) {
-		assertSignal(doubleVector);
+		//TODO: check 2-channel, same length
 		short[][] shortVector = new short [doubleVector.length][doubleVector[0].length];
 		for (int chan=0; chan<=doubleVector.length;chan++)
 			for (int n=0;n<doubleVector[0].length;n++) {
@@ -126,7 +126,7 @@ public class AudioSignal {
 	}
 	
 	public static double[] convertToMono(double[][] stereoData) {
-		assertSignal(stereoData);
+		//TODO: check 2-channel, same length
 		
 		int N = stereoData[0].length;
 		double[] monoSignal = new double [N];
@@ -139,16 +139,4 @@ public class AudioSignal {
 	
 	}
 	
-	private static void assertSignal (double[][] x) {
-		assert (x.length==2) : "Stereo data required";
-		assert (x[0].length==x[1].length) : "Left, right vectors must be of equal length";
-	}
-	private static void assertSignal (short[][] x) {
-		assert (x.length==2) : "Stereo data required";
-		assert (x[0].length==x[1].length) : "Left, right vectors must be of equal length";
-	}
-	private static void assertSignal (double[] x) {
-	}
-	private static void assertSignal (short[] x) {
-	}
 }
