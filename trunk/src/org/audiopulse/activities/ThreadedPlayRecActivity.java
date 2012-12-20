@@ -142,7 +142,7 @@ import android.widget.TextView;
 		
 		
 		recordStatusBackHandler = new ReportStatusHandler(this);
-		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
+		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected);
 		
 		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.soae)) ){
 			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
@@ -152,8 +152,19 @@ import android.widget.TextView;
 			execSvc.execute( recordThread );
 			execSvc.shutdown();
 		}else{
+			
+			//quick hack. depracated anyway.
+			int f;
+			if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_3k)))
+				f = 3;
+			else if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_4k)))
+				f = 4;
+			else
+				f = 2;
+
+					
 			playStatusBackHandler = new ReportStatusHandler(this);
-			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
+			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime, f);
 			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
 			playThread = new Thread(pRun);
 			rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);

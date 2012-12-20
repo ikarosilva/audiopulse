@@ -82,6 +82,14 @@ public class PlayThreadRunnable implements Runnable
 		this.initPlayTrack();
 		this.generateStimulus();
 	}
+	public PlayThreadRunnable(Handler h, double playTime, int f)
+	{
+		Log.v(TAG,"constructing playback thread");
+		mainThreadHandler = h;
+		PlayBufferSize=(int) (playTime*sampleRate);
+		this.initPlayTrack();
+		this.generateStimulus(f);
+	}
 
 	public synchronized void run()
 	{
@@ -101,7 +109,7 @@ public class PlayThreadRunnable implements Runnable
 	public void informStart()
 	{
 		Message m = mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Playing sound for "  + PlayBufferSize/sampleRate));
+		m.setData(Utils.getStringAsABundle("Playing sound for "  + (float)PlayBufferSize/(float)sampleRate));
 		mainThreadHandler.sendMessage(m);
 	}
 	public void informFinish()
@@ -140,14 +148,27 @@ public class PlayThreadRunnable implements Runnable
 	//and not responsible for generating the stimulus.
 	//In your class make sure you extend the AcousticStimulus Type
 	@Deprecated private void generateStimulus(){
+		generateStimulus(2);
+	}
+	@Deprecated private void generateStimulus(int f){
 		Log.v(TAG,"generating stimulus of length = " + (double) PlayBufferSize/sampleRate + " seconds with samples= " + PlayBufferSize);
 		phone = new HTCOne(HTCOne.deviceCalParam.ER10C_40dBGain,
 				AcousticDevice.ioDevice.ER10C_40dBGain);
 		
-		stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
-				sampleRate,phone,channelConfig);
-		
-		
+		//quick hack to allow the Brazilians to generate mutliple freq stimuli
+		if (f==2)
+			stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
+					sampleRate,phone,channelConfig);
+		else if (f==3)
+			stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F3k,PlayBufferSize,
+					sampleRate,phone,channelConfig);
+		else if (f==4)
+			stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F4k,PlayBufferSize,
+					sampleRate,phone,channelConfig);
+		else
+			stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
+					sampleRate,phone,channelConfig);
+			
 		short[] tmpSamples = stimulus.generateSignal();
 		if(stimulus.getStereoFlag() == AudioFormat.CHANNEL_OUT_STEREO){
 			trackConfig="stereo";

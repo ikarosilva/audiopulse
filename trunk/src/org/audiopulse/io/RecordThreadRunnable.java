@@ -91,6 +91,17 @@ public class RecordThreadRunnable implements Runnable
 
 	}
 
+	public RecordThreadRunnable(Handler h, double playTime,Context context, String itemSelected)
+	{
+		Log.v(TAG,"constructing record thread");
+		mainThreadHandler = h;
+		Buffer_Size=(int) (playTime*sampleRate); 
+		samples = new short[Buffer_Size];
+		initRecord();
+		this.context=context;
+		testType = itemSelected;
+	}
+	
 	public void setExpectedFrequency(double eFrequency){
 		expectedFrequency=eFrequency;
 	}
