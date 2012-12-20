@@ -131,7 +131,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity
 		
 		//apply ramp on/off
 		for (int n=0; n<N_ramp; n++) {
-			double r = (double) (n/N_ramp);
+			double r = (double)(n)/(double)(N_ramp);
 			x[n] *= r;
 			x[x.length-n-1] *= r;
 		}
