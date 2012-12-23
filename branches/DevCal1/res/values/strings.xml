@@ -6,4 +6,8 @@
     <!--  test activity interface -->
     <string name="begin_test">Begin Test</string>
     <string name="begin_device_calibration">Begin</string>
+    <string name="setting_on">On</string>
+    <string name="setting_off">Off</string>
+    <string name="amplitude">Amplitude</string>
+    <string name="frequency">Frequency</string>
 </resources>

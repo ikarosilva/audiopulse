@@ -23,8 +23,20 @@ public class SignalProcessing {
 		return Math.round(rms*10)/10;
 	}
 	
+	@Deprecated 	// as written, this is power (not rms) to dB (not dBu)
 	public static double rms2dBU(double x){
 		return 10*Math.log10(x);
+	}
+	
+	public static double rms2dB(double rms) {
+		return 20*Math.log10(rms);
+	}
+	
+	public static double dB2lin(int a) {
+		return dB2lin((double)a);
+	}
+	public static double dB2lin(double a) {
+		return Math.pow(10, a/20);
 	}
 
 	public static double[] getSpectrum(short[] x){

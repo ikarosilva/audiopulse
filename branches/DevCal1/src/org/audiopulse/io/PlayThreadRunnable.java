@@ -91,17 +91,7 @@ public class PlayThreadRunnable implements Runnable
 		PlayBufferSize=signal.length;
 		this.initPlayTrack();
 		this.samples = signal.clone();
-	}
-	
-	public PlayThreadRunnable(Handler h, double[] signal)
-	{
-		Log.v(TAG,"constructing playback thread");
-		mainThreadHandler = h;
-		PlayBufferSize=signal.length;
-		this.initPlayTrack();
-		this.samples = AudioSignal.convertToShort(signal);
-	}
-	
+	}	
 	
 	public synchronized void run()
 	{
