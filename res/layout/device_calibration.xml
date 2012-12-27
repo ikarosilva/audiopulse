@@ -9,7 +9,8 @@
 	<Spinner
 	    android:id="@+id/calibration_source"
 	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content" />
+	    android:layout_height="wrap_content" 
+	    android:entries="@array/calibration_stimuli"/> 
 
 	<TextView
 	    android:id="@+id/calibration_amplitude_text"
