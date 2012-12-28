@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="calibration_stimuli">
+        <item>@string/calibration_tone</item>
+        <item>@string/calibration_noise</item>
+        <item>@string/calibration_clicks</item>
+    </string-array>
+    <string name="calibration_tone">Tone</string>
+    <string name="calibration_noise">Noise</string>
+    <string name="calibration_clicks">Clicks</string>
+
+</resources>

@@ -1,23 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/dpoae_view"
+    android:id="@+id/test_view"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
     
-	<Button
-	    android:id="@+id/testButton"
+	<Spinner
+	    android:id="@+id/calibration_source"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content" 
+	    android:entries="@array/calibration_stimuli"/> 
+
+	<TextView
+	    android:id="@+id/calibration_amplitude_text"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:text="@string/begin_device_calibration" 
-	    android:onClick="startTest"/>
-    
-	<TextView  
+	    android:text="@string/amplitude" />
+
+	<SeekBar
+	    android:id="@+id/calibration_amplitude_bar"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content" />
+
+	<TextView
+	    android:id="@+id/calibration_frequency_text"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="@string/frequency" />
+
+	<SeekBar
+	    android:id="@+id/calibration_frequency_bar"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content" />
+
+	
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/test_buttons"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<ToggleButton
+		    android:id="@+id/toggleSound"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:onClick="toggleSound"
+		    android:textOn="@string/setting_on"
+		    android:textOff="@string/setting_off" />
+	
+		<Button
+		    android:id="@+id/testButton"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:onClick="startTest"
+		    android:text="@string/begin_device_calibration" />
+	</LinearLayout>
+	
+		<TextView  
 		android:id="@+id/testLog"
 	    android:layout_width="fill_parent" 
 	    android:layout_height="wrap_content"
 	    />
-
-
+	
 </LinearLayout>
