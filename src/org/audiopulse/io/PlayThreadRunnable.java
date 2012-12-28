@@ -41,6 +41,7 @@ package org.audiopulse.io;
 
 import org.audiopulse.hardware.HTCOne;
 import org.audiopulse.hardware.MobilePhone;
+import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.DPOAESignal;
 import org.audiopulse.hardware.AcousticDevice;
 
@@ -73,7 +74,7 @@ public class PlayThreadRunnable implements Runnable
 	String trackConfig;
 	
 
-
+	//TODO: allow programmable sample frequency
 	public PlayThreadRunnable(Handler h, double playTime)
 	{
 		Log.v(TAG,"constructing playback thread");
@@ -89,6 +90,14 @@ public class PlayThreadRunnable implements Runnable
 		PlayBufferSize=(int) (playTime*sampleRate);
 		this.initPlayTrack();
 		this.generateStimulus(f);
+	}
+	public PlayThreadRunnable(Handler h, short[] stimulus)
+	{
+		Log.v(TAG,"constructing playback thread");
+		mainThreadHandler = h;
+		PlayBufferSize=stimulus.length;
+		this.initPlayTrack();
+		this.samples = stimulus.clone();
 	}
 
 	public synchronized void run()

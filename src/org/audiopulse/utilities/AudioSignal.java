@@ -47,10 +47,10 @@ public class AudioSignal {
 	public final static String TAG="AudioSignal";
 	
 	
-	//get short vector for playback buffer: stereo input version
+	//get short vector for playback buffer from stereo input
 	//mono or stereo interleaved output
-	public short[] getPlaybackData(double[][] doubleData, boolean stereoOutput) {
-		assertSignal(doubleData);
+	public static short[] getAudioTrackData(double[][] doubleData, boolean stereoOutput) {
+		//TODO: check 2-channel, same length
 		
 		short[] bufferData;
 		if (stereoOutput) { //return stereo signal: interleave
@@ -62,10 +62,10 @@ public class AudioSignal {
 		return bufferData;
 	}
 
-	//get short vector for playback buffer: mono input version
+	//get short vector for playback buffer from mono input
 	//mono or stereo interleaved output
-	public short[] getPlaybackData(double[] doubleData, boolean stereoOutput) {
-		assertSignal(doubleData);
+	public static short[] getAudioTrackData(double[] doubleData, boolean stereoOutput) {
+		//TODO: check 2-channel, same length
 		
 		short[] bufferData;
 		if (stereoOutput) { //return stereo signal: interleave duplicate
@@ -77,17 +77,18 @@ public class AudioSignal {
 		
 		return bufferData;
 	}
+	
 
 	//convert double vector to short, scale appropriately.
-	public static short[] convertToShort(double[] doubleVector) {
+	private static short[] convertToShort(double[] doubleVector) {
 		short[] shortVector = new short [doubleVector.length];
 		for (int n=0;n<doubleVector.length;n++) {
 			shortVector[n] = convertToShort(doubleVector[n]);
 		}
 		return shortVector;
 	}
-	public static short[][] convertToShort(double[][] doubleVector) {
-		assertSignal(doubleVector);
+	private static short[][] convertToShort(double[][] doubleVector) {
+		//TODO: check 2-channel, same length
 		short[][] shortVector = new short [doubleVector.length][doubleVector[0].length];
 		for (int chan=0; chan<=doubleVector.length;chan++)
 			for (int n=0;n<doubleVector[0].length;n++) {
@@ -97,25 +98,23 @@ public class AudioSignal {
 	}
 	
 	//scale and convert a single sample to short.
-	public static short convertToShort(double sample) {
+	private static short convertToShort(double sample) {
 		if(Math.abs(sample)>1){	
 			Log.w(TAG,"Digital (short) audio signal is being clipped!!");
 			return (short) (Short.MAX_VALUE * (Math.signum(sample)));
-			
 		}else{
 			return (short) (Short.MAX_VALUE * (sample));
 		}
-
 	}
 	
 	//interleave 2xN data into 1x2N vector
-	public static short[] interleave(short[][] data) {
+	private static short[] interleave(short[][] data) {
 		return interleave(data[0],data[1]);
 	}
 	
 	//interleave left and right vectors into stereo interleaved
 	//left and right should be equal length (truncates if not)
-	public static short[] interleave(short[] left, short[] right) {
+	private static short[] interleave(short[] left, short[] right) {
 		int N = Math.min(left.length, right.length);  //safe handling: choose minimum length. Really they should be equal.
 		short[] playBuffer = new short [2*N];
 		for (int n=0; n<N; n++) {
@@ -126,7 +125,7 @@ public class AudioSignal {
 	}
 	
 	public static double[] convertToMono(double[][] stereoData) {
-		assertSignal(stereoData);
+		//TODO: check 2-channel, same length
 		
 		int N = stereoData[0].length;
 		double[] monoSignal = new double [N];
@@ -139,16 +138,4 @@ public class AudioSignal {
 	
 	}
 	
-	private static void assertSignal (double[][] x) {
-		assert (x.length==2) : "Stereo data required";
-		assert (x[0].length==x[1].length) : "Left, right vectors must be of equal length";
-	}
-	private static void assertSignal (short[][] x) {
-		assert (x.length==2) : "Stereo data required";
-		assert (x[0].length==x[1].length) : "Left, right vectors must be of equal length";
-	}
-	private static void assertSignal (double[] x) {
-	}
-	private static void assertSignal (short[] x) {
-	}
 }
