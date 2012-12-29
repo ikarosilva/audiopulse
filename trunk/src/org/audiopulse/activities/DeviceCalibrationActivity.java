@@ -44,12 +44,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.audiopulse.R;
+import org.audiopulse.io.AudioStreamer;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
 import org.audiopulse.utilities.SpectralWindows;
+import org.audiopulse.utilities.ThreadedSignalGenerator;
+import org.audiopulse.utilities.ThreadedToneGenerator;
 
 import android.content.Context;
 import android.media.AudioFormat;
@@ -80,11 +83,14 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	public static double playTime=0.5;
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 	
+	AudioStreamer player;
+	ThreadedSignalGenerator source;
+	
 	double[] toneFrequencies = {500, 1000, 2000, 4000, 8000};
 	double[] clickFrequencies = {1, 2, 5, 10, 20};
 	double[] amplitudes = {.2, .4, .6, .8, 1};
 	
-	int Fs = 44100; 		//TODO: make this app-wide
+	private static final int sampleFrequency = 44100; 		//TODO: make this app-wide
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -105,7 +111,10 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		frequencyBar.setOnSeekBarChangeListener(this);
 		amplitudeBar.setOnSeekBarChangeListener(this);
 		
-		
+		player = new AudioStreamer(sampleFrequency, sampleFrequency/10);
+		source = new ThreadedToneGenerator(player.getFrameLength(), getFrequency(), sampleFrequency);
+		source.initialize();
+		player.attachSource(source);
 		
 		//findViewById(android.R.id.content).invalidate();
         //performTest();			
@@ -114,28 +123,24 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	public void toggleSound(View view) {
 		if (((ToggleButton)view).isChecked()) {
 				
-			//TODO: make this toggle a continuous sound. For now it will just play a sound.
-			beginTest();
+			Log.v(TAG,"Request start signal generator");
+			beginTest();			
+			player.start();
+				
+		} else {
+			Log.v(TAG,"Request stop signal generator");
+			player.stop();
+			endTest();
 			
-			/*
-			 * GenerateThread(PlayThreadRunnable)
-			 * GenerateThread(StimulusGeneratorRunnable)
-			 * ExecuteThreads
-			 * 
-			 * StimuluGeneratorRunnable(Fs, blockSize, anonnymousStimulusFunction) {
-			 * 
-			 * loop {
-			 * x = generateStimulusBlock();
-			 * waitUntilPlayThreadNeedsMoreData();
-			 * if checkForTerminateSignal(), terminate();
-			 * writeStimulusBlock(x);
-			 * }
-			 * } 
-			 */
-			
-			short[] stimulus = this.generateStimulus();
+		}
+		
+		
+	}
+	
+	/*
+	 * 			short[] stimulus = this.generateStimulus();
 
-			// BEGIN: all this should be a function call
+			// BEGIN: all this should be a (static?) function call
 			recordStatusBackHandler = new ReportStatusHandler(this);
 			RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,getApplicationContext());
 			
@@ -152,14 +157,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 			execSvc.shutdown();
 			// END
 			
-	
-			endTest();
-		} else {
-			
-		}
-		
-		
-	}
+	 */
 	
 	public void startTest(View callingView){
 		
@@ -189,14 +187,14 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		double f = getFrequency();		//stimulus frequency (Hz) 
 		double a = getAmplitude();			//stimulus amplitude]
 		
-		int N = (int) (length * Fs);
+		int N = (int) (length * sampleFrequency);
 		double w = 2 * Math.PI * f;
 		double[] x = new double[N];
 		
 		//create signal
 		for( int n = 0; n < N; n++ )
 		{
-			x[n] = a * Math.sin(w*n/Fs);
+			x[n] = a * Math.sin(w*n/sampleFrequency);
 		}
 		
 		x = applyRamp(x);
@@ -208,7 +206,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		double length = 2.000;	//stimulus length (sec)
 		double a = getAmplitude();			//stimulus amplitude]
 		
-		int N = (int) (length * Fs);
+		int N = (int) (length * sampleFrequency);
 		double[] x = new double[N];
 		
 		//create signal
@@ -228,9 +226,9 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		double f = getFrequency();		//click frequency (Hz) 
 		double a = getAmplitude();			//stimulus amplitude]
 		
-		int N = (int) (length * Fs);
+		int N = (int) (length * sampleFrequency);
 		double[] x = new double[N];
-		int period = (int) (1/f * Fs);
+		int period = (int) (1/f * sampleFrequency);
 		
 		//create signal
 		for( int n = 0; n < N; n++ )
@@ -245,7 +243,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	
 	private double[] applyRamp(double[] x) {
 		double ramp = 0.200;	//ramp length for onset/offset (sec)
-		int N_ramp = (int) (ramp*Fs);
+		int N_ramp = (int) (ramp*sampleFrequency);
 
 		for (int n=0; n<N_ramp; n++) {
 			double r = (double)(n)/(double)(N_ramp);

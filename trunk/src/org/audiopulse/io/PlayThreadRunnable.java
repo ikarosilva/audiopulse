@@ -60,7 +60,7 @@ public class PlayThreadRunnable implements Runnable
 	int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
 	int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	int audioMode= AudioManager.STREAM_MUSIC;
-	int trackMode=AudioTrack.MODE_STREAM;
+	int trackMode=AudioTrack.MODE_STREAM;		//TODO: why not use MODE_STATIC to reduce latency?
 	public MobilePhone phone;
 	public DPOAESignal stimulus;
 	//The track volume should be held fixed always at the maximum!!
