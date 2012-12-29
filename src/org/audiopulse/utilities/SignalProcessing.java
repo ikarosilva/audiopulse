@@ -10,6 +10,7 @@ import android.os.Bundle;
 
 public class SignalProcessing {
 	
+	@Deprecated // function name should indicate that it does not actually calculate linearly scaled rms. Perhaps name it dBfs? 
 	public static double rms(short[] x){
 		double y=0;
 		double rms;
@@ -21,6 +22,16 @@ public class SignalProcessing {
 		//And Round RMS value to nearest 
 		rms=20*Math.log10(Math.sqrt(y)/Short.MAX_VALUE);
 		return Math.round(rms*10)/10;
+	}
+	
+	public static double rms(double[] x) {
+		double rms = 0;
+		int N = x.length;
+		for (int n=0; n<N; n++) {
+			rms += x[n]*x[n]/N; 		//warning: not rms yet!
+		}
+		rms = Math.sqrt(rms);
+		return rms;
 	}
 	
 	@Deprecated 	// as written, this is linear scaling in power (not rms) to dB (not dBu)
