@@ -63,7 +63,8 @@ public class AudioStreamer
 	private boolean requestStop;	//TODO: volatile?
 	private AudioTrack track;
 	private final int frameLength;		//num mono samples per audio frame
-	
+	private boolean isPlaying = false;
+
 	//default buffer values constructor
 	public AudioStreamer(int sampleRate) {
 		this(sampleRate, 0);
@@ -99,26 +100,44 @@ public class AudioStreamer
 		
 		this.source = source;
 	}
+	
+	public boolean hasSource() {
+		return (source!=null);
+	}
 
 	public void start()
 	{
-		Log.v(TAG,"Stream start");
-		track.play();
+		Log.d(TAG,"Stream start");
+		
+		if (source==null) {
+			Log.e(TAG, "No source, cannot start AudioStreamer");
+			return;
+		}
 		
 		//create thread to play
-		
 		playThread = new Thread( new Runnable( ) {
 			public void run( ) {
+				
+				waitForSourceReady();
+				
+				track.flush();
+				track.play();
+				isPlaying = true;
+				
 				requestStop = false;
 				while(!requestStop) {
 					double[] frame = null;
-					while (!requestStop && frame==null)
-						frame = source.getBuffer();	//gets current buffer, tells source to generate next buffer
+					waitForSourceReady();
+					frame = source.getBuffer();	//gets current buffer, tells source to generate next buffer
 					Log.v(TAG,"Writing audio frame");
 					short[] writeData = AudioSignal.getAudioTrackData(frame, true);
 					int nWritten = track.write(writeData,0,writeData.length);
 					if (nWritten == AudioTrack.ERROR_INVALID_OPERATION || nWritten == AudioTrack.ERROR_BAD_VALUE) {
-						Log.e(TAG, "Audio write failed: " + nWritten);
+						if (requestStop)
+							Log.e(TAG, "Audio write failed: " + nWritten);
+						else
+							Log.v(TAG, "Audio write aborted due to stop request: " + nWritten);
+						
 						break;
 					}
 					Log.v(TAG,"Frame written successfully");
@@ -130,15 +149,38 @@ public class AudioStreamer
 		
 	}
 	public void stop() {
-		Log.v(TAG,"AudioStreamer Stop");
+		Log.d(TAG,"AudioStreamer Stop");
 		requestStop = true;
 		track.pause();
 		track.flush();
+		isPlaying = false;
 		//track.release();	//don't really know if this is necessary (or sufficient)
 	}
+	public void destroy() {
+		Log.d(TAG,"AudioStreamer Destroy");
+		stop();
+		track.release();
+	}
 	
+	public boolean isPlaying() {
+		return isPlaying;
+	}
+
 	public int getFrameLength() {
 		return frameLength;
+	}
+	
+	private void waitForSourceReady() {
+		if (!source.isReady()) Log.i(TAG,"Waiting for source ready");
+		while (!source.isReady()) {	//TODO: add an explicit timeout
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Log.e(TAG,"Wait for source ready interrupted!");
+			}
+		}
 	}
 
 }
