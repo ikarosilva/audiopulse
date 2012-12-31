@@ -2,16 +2,18 @@ package org.audiopulse.utilities;
 
 import android.util.Log;
 
-public class ThreadedToneGenerator extends ThreadedSignalGenerator {
-	private final String TAG = "ThreadedToneGenerator";
-	private final double sampleFrequency;
-	private double frequency=1000, amplitude=0.1;
+public class ThreadedClickGenerator extends ThreadedSignalGenerator {
+	private final String TAG = "ThreadedClickGenerator";
+	private final double sampleFrequency, samplePeriod;
+	private double frequency=10, amplitude=0.1;
 	
-	private double angle = 0, angleIncrement;
+	private double t = 0;
+	private double clickInterval, clickDuration = 50e-6;
 	
-	public ThreadedToneGenerator(int bufferLength, double frequency, double sampleFrequency) {
+	public ThreadedClickGenerator(int bufferLength, double frequency, double sampleFrequency) {
 		super(bufferLength);
 		this.sampleFrequency = sampleFrequency;
+		samplePeriod = 1/sampleFrequency;
 		this.setFrequency(frequency);
 	}
 
@@ -19,11 +21,12 @@ public class ThreadedToneGenerator extends ThreadedSignalGenerator {
 	protected double[] computeNextBuffer() {
 		double[] samples = new double[this.bufferLength];
 		for (int n=0; n<this.bufferLength; n++) {
-			angle += angleIncrement;
-			samples[n] = amplitude * Math.sin(angle);
+			t += samplePeriod;
+			samples[n] = (t%clickInterval)<clickDuration ? amplitude : 0;
 		}
 		return samples;
 	}
+	
 	
 	public double getFrequency() {
 		return frequency;
@@ -31,8 +34,8 @@ public class ThreadedToneGenerator extends ThreadedSignalGenerator {
 
 	public void setFrequency(double frequency) {
 		this.frequency = frequency;
-		angleIncrement = 2*Math.PI*frequency/sampleFrequency;
-		Log.d(TAG, "Set toneGenerator frequency to " + frequency);
+		clickInterval = 1/frequency;
+		Log.v(TAG, "Set clickGenerator frequency to " + frequency);
 	}
 
 	public double getAmplitude() {

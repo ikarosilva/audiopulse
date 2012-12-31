@@ -39,6 +39,7 @@
 
 package org.audiopulse.activities;
 import java.util.Collections;
+import java.util.MissingResourceException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -51,6 +52,8 @@ import org.audiopulse.io.ReportStatusHandler;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
 import org.audiopulse.utilities.SpectralWindows;
+import org.audiopulse.utilities.ThreadedClickGenerator;
+import org.audiopulse.utilities.ThreadedNoiseGenerator;
 import org.audiopulse.utilities.ThreadedSignalGenerator;
 import org.audiopulse.utilities.ThreadedToneGenerator;
 
@@ -69,7 +72,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class DeviceCalibrationActivity extends GeneralAudioTestActivity implements OnSeekBarChangeListener//, OnItemSelectedListener 
+public class DeviceCalibrationActivity extends GeneralAudioTestActivity implements OnSeekBarChangeListener, OnItemSelectedListener 
 
 {
 	public static final String TAG="DeviceCalibrationActivity";
@@ -97,34 +100,36 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.device_calibration);
 		
-		//Spinner sourceSpinner = (Spinner) findViewById(R.id.calibration_source);
-		//sourceSpinner.setOnItemSelectedListener(this);
+		//create audio streaming device with 1/4 second buffer
+		player = new AudioStreamer(sampleFrequency, 1/4);
+
+		Spinner sourceSpinner = (Spinner) findViewById(R.id.calibration_source);
+		sourceSpinner.setOnItemSelectedListener(this);
 		
+		//set frequency and amplitude bar properties
 		SeekBar frequencyBar = (SeekBar) findViewById(R.id.calibration_frequency_bar);
 		SeekBar amplitudeBar = (SeekBar) findViewById(R.id.calibration_amplitude_bar);
-		//set frequency and amplitude bar properties
 		frequencyBar.setMax(toneFrequencies.length-1);
 		amplitudeBar.setMax(amplitudes.length-1);
-		setFrequency();
-		setAmplitude();
+		
 		//set this class to be the listener for the bars. That's why this class "implements OnSeekBarChangeListener".
 		frequencyBar.setOnSeekBarChangeListener(this);
 		amplitudeBar.setOnSeekBarChangeListener(this);
-		
-		player = new AudioStreamer(sampleFrequency, sampleFrequency/10);
-		source = new ThreadedToneGenerator(player.getFrameLength(), getFrequency(), sampleFrequency);
-		source.initialize();
-		player.attachSource(source);
-		
-		//findViewById(android.R.id.content).invalidate();
-        //performTest();			
+				
+		//updateDisplay();
+		//attachSource();
 	}
     
 	public void toggleSound(View view) {
 		if (((ToggleButton)view).isChecked()) {
-				
+			
 			Log.v(TAG,"Request start signal generator");
-			beginTest();			
+			beginTest();	
+			if (!player.hasSource()){
+				updateSource();
+				attachSource();
+			}
+			
 			player.start();
 				
 		} else {
@@ -161,106 +166,53 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	
 	public void startTest(View callingView){
 		
-		// first task: play a tone. yay!
+	}
+	
+	//Read source from spinner, create this source as new.
+	private void attachSource() {
+		boolean wasPlaying = player.isPlaying();
+		if (wasPlaying) player.stop();
+		
+		//create new source object
+		String sourceName = getSource();
+		if (sourceName.equals(getString(R.string.calibration_tone))) {
+			source = new ThreadedToneGenerator(player.getFrameLength(), getFrequency(), sampleFrequency);			
+		} else if (sourceName.equals(getString(R.string.calibration_noise))) {
+			source = new ThreadedNoiseGenerator(player.getFrameLength(), sampleFrequency);
+		} else if (sourceName.equals(getString(R.string.calibration_clicks))) {
+			source = new ThreadedClickGenerator(player.getFrameLength(), getFrequency(), sampleFrequency);
+		} else throw new MissingResourceException("Unknown source selected", sourceName, sourceName);
 
+		updateSource(); 				//update parameters from UI
+		source.initialize();			//initialize source (create first buffer);
+		player.attachSource(source);	//attach to player object
 		
-	}
-	
-	private short[] generateStimulus() {
+		if (wasPlaying) player.start();
 
-		double[] x = {0};
-		
-		String source = getSource();
-		if (source.equals(getString(R.string.calibration_tone))) {
-			x = generateTone();
-		} else if (source.equals(getString(R.string.calibration_noise))) {
-			x = generateNoise();
-		} else if (source.equals(getString(R.string.calibration_clicks))) {
-			x = generateClicks();
-		} else { assert false : "Unknown calibration source selected";}
-		
-		return AudioSignal.getAudioTrackData(x, true);	//TODO: determine stereo output
+		Log.d(TAG,"Source created: " + sourceName);
 	}
 	
-	private double[] generateTone() {
-		double length = 2.000;	//stimulus length (sec)
-		double f = getFrequency();		//stimulus frequency (Hz) 
-		double a = getAmplitude();			//stimulus amplitude]
-		
-		int N = (int) (length * sampleFrequency);
-		double w = 2 * Math.PI * f;
-		double[] x = new double[N];
-		
-		//create signal
-		for( int n = 0; n < N; n++ )
-		{
-			x[n] = a * Math.sin(w*n/sampleFrequency);
+	//update source parameters from UI values
+	private void updateSource() {
+		Class<? extends ThreadedSignalGenerator> sourceClass =  source.getClass();
+		if (sourceClass == ThreadedToneGenerator.class) {
+			((ThreadedToneGenerator) source).setFrequency(getFrequency());
+			((ThreadedToneGenerator) source).setAmplitude(getAmplitude());
+		} else if (sourceClass == ThreadedNoiseGenerator.class) {
+			((ThreadedNoiseGenerator) source).setAmplitude(getAmplitude());
+		} else if (source.getClass() == ThreadedClickGenerator.class) {
+			((ThreadedClickGenerator) source).setFrequency(getFrequency());
+			((ThreadedClickGenerator) source).setAmplitude(getAmplitude());
 		}
 		
-		x = applyRamp(x);
-				
-		return x;
 	}
 	
-	private double[] generateNoise() {
-		double length = 2.000;	//stimulus length (sec)
-		double a = getAmplitude();			//stimulus amplitude]
-		
-		int N = (int) (length * sampleFrequency);
-		double[] x = new double[N];
-		
-		//create signal
-		for( int n = 0; n < N; n++ )
-		{
-			x[n] = a * 2*(Math.random()-1);
-		}
-		
-		x = applyRamp(x);
-		
-		return x;
-	}
-	
-	private double[] generateClicks() {
-		//TODO: make this
-		double length = 2.000;	//stimulus length (sec)
-		double f = getFrequency();		//click frequency (Hz) 
-		double a = getAmplitude();			//stimulus amplitude]
-		
-		int N = (int) (length * sampleFrequency);
-		double[] x = new double[N];
-		int period = (int) (1/f * sampleFrequency);
-		
-		//create signal
-		for( int n = 0; n < N; n++ )
-		{
-			x[n] = (n%period == 0) ? a:0;
-		}
-		
-		//no ramp for clicks
-				
-		return x;
-	}
-	
-	private double[] applyRamp(double[] x) {
-		double ramp = 0.200;	//ramp length for onset/offset (sec)
-		int N_ramp = (int) (ramp*sampleFrequency);
-
-		for (int n=0; n<N_ramp; n++) {
-			double r = (double)(n)/(double)(N_ramp);
-			x[n] *= r;
-			x[x.length-n-1] *= r;
-		}
-		
-		return x;
-		
-	}
-	
-	public void setFrequency() {
-		TextView text = (TextView)findViewById(R.id.calibration_frequency_text);
+	public void updateDisplay() {
+		TextView text;
+		text = (TextView)findViewById(R.id.calibration_frequency_text);
 		text.setText(getString(R.string.frequency) + ": " + getFrequency() + " Hz");
-	}
-	public void setAmplitude () {
-		TextView text = (TextView)findViewById(R.id.calibration_amplitude_text);
+		
+		text = (TextView)findViewById(R.id.calibration_amplitude_text);
 		text.setText(getString(R.string.amplitude) + ": " + getAmplitude());
 	}
 	
@@ -279,16 +231,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 			return clickFrequencies[freq_ind];						
 		} else { assert false : "Unknown calibration source selected"; return 0;}
 	}
-	private double getClickFrequency(){
-		int freq_ind = ((SeekBar)findViewById(R.id.calibration_frequency_bar)).getProgress();
-		assert freq_ind < toneFrequencies.length;
-		return toneFrequencies[freq_ind];
-	}
-	private double getToneFrequency(){
-		int freq_ind = ((SeekBar)findViewById(R.id.calibration_frequency_bar)).getProgress();
-		assert freq_ind < toneFrequencies.length;
-		return toneFrequencies[freq_ind];
-	}
+
 	private double getAmplitude(){
 		int amp_ind = ((SeekBar)findViewById(R.id.calibration_amplitude_bar)).getProgress();
 		assert amp_ind < amplitudes.length;
@@ -298,41 +241,38 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	private String getSource(){
 		return ((Spinner)findViewById(R.id.calibration_source)).getSelectedItem().toString();
 	}
+	
+	//functions to allow calibration routine to automatically set stimulus parameters
 	private void setSource(){
-		
 	}
+	private void setFrequency(){		
+	}
+	private void setAmplitude(){
+	}
+	
 	// --- implementations for OnSeekBarChangeListener --- //
 	public void onProgressChanged(SeekBar seekBar, int progress,
 			boolean fromUser) {
-		int barId = seekBar.getId();
-		if (barId == R.id.calibration_amplitude_bar) {
-			setAmplitude();
-		} else if (barId == R.id.calibration_frequency_bar) {
-			setFrequency();
-		}
-		
+		updateSource();
+		updateDisplay();
 	}
 
 	public void onStartTrackingTouch(SeekBar seekBar) {
-		// TODO Auto-generated method stub
-		
+		//do nothing
 	}
 
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		// TODO Auto-generated method stub
-		int value = seekBar.getProgress();
-		
+		//do nothing
 	}
 
 	// --- implementations for OnItemSelectedListener --- //
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		// TODO Auto-generated method stub
-		
+		attachSource();
+		updateDisplay();
 	}
 
 	public void onNothingSelected(AdapterView<?> arg0) {
-		// TODO Auto-generated method stub
-		
+		// do nothing
 	}
 	
 }
