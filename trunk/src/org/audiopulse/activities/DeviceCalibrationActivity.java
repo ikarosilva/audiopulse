@@ -90,7 +90,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	ThreadedSignalGenerator source;
 	
 	double[] toneFrequencies = {500, 1000, 2000, 4000, 8000};
-	double[] clickFrequencies = {1, 2, 5, 10, 20};
+	double[] clickFrequencies = {5, 10, 20, 30, 40};
 	double[] amplitudes = {.2, .4, .6, .8, 1};
 	
 	private static final int sampleFrequency = 44100; 		//TODO: make this app-wide
@@ -101,7 +101,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		setContentView(R.layout.device_calibration);
 		
 		//create audio streaming device with 1/4 second buffer
-		player = new AudioStreamer(sampleFrequency, 1/4);
+		player = new AudioStreamer(sampleFrequency, sampleFrequency/4);
 
 		Spinner sourceSpinner = (Spinner) findViewById(R.id.calibration_source);
 		sourceSpinner.setOnItemSelectedListener(this);
@@ -116,56 +116,21 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		frequencyBar.setOnSeekBarChangeListener(this);
 		amplitudeBar.setOnSeekBarChangeListener(this);
 				
-		//updateDisplay();
-		//attachSource();
+		attachSource();
 	}
     
 	public void toggleSound(View view) {
 		if (((ToggleButton)view).isChecked()) {
-			
-			Log.v(TAG,"Request start signal generator");
 			beginTest();	
-			if (!player.hasSource()){
-				updateSource();
-				attachSource();
-			}
-			
 			player.start();
-				
 		} else {
-			Log.v(TAG,"Request stop signal generator");
 			player.stop();
 			endTest();
-			
 		}
-		
-		
 	}
 	
-	/*
-	 * 			short[] stimulus = this.generateStimulus();
-
-			// BEGIN: all this should be a (static?) function call
-			recordStatusBackHandler = new ReportStatusHandler(this);
-			RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,getApplicationContext());
-			
-			playStatusBackHandler = new ReportStatusHandler(this);
-			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,stimulus);
-			
-			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
-			playThread = new Thread(pRun);
-			recordThread = new Thread(rRun);	
-			playThread.setPriority(Thread.MAX_PRIORITY);
-			recordThread.setPriority(Thread.MAX_PRIORITY);
-			execSvc.execute( recordThread );
-			execSvc.execute( playThread );
-			execSvc.shutdown();
-			// END
-			
-	 */
-	
 	public void startTest(View callingView){
-		
+		//TODO: implement this
 	}
 	
 	//Read source from spinner, create this source as new.
@@ -194,16 +159,23 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	
 	//update source parameters from UI values
 	private void updateSource() {
+		SeekBar frequencyBar = (SeekBar) findViewById(R.id.calibration_frequency_bar);
 		Class<? extends ThreadedSignalGenerator> sourceClass =  source.getClass();
 		if (sourceClass == ThreadedToneGenerator.class) {
+			frequencyBar.setMax(toneFrequencies.length-1);
+			frequencyBar.setVisibility(View.VISIBLE);
 			((ThreadedToneGenerator) source).setFrequency(getFrequency());
 			((ThreadedToneGenerator) source).setAmplitude(getAmplitude());
 		} else if (sourceClass == ThreadedNoiseGenerator.class) {
+			frequencyBar.setVisibility(View.INVISIBLE);
 			((ThreadedNoiseGenerator) source).setAmplitude(getAmplitude());
 		} else if (source.getClass() == ThreadedClickGenerator.class) {
+			frequencyBar.setMax(clickFrequencies.length-1);
+			frequencyBar.setVisibility(View.VISIBLE);
 			((ThreadedClickGenerator) source).setFrequency(getFrequency());
 			((ThreadedClickGenerator) source).setAmplitude(getAmplitude());
 		}
+		source.initialize();
 		
 	}
 	

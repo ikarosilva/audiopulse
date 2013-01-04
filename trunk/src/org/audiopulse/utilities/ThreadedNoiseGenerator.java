@@ -10,9 +10,8 @@ public class ThreadedNoiseGenerator extends ThreadedSignalGenerator {
 	private double amplitude=0.1;
 	private Random RNG;
 	
-	private final int numBuffers = 64;
-	private double[][] buffers;
-	
+	private final int bigBufferMultipler = 4;
+	private double[] bigBuffer;
 	
 	public ThreadedNoiseGenerator(int bufferLength) {
 		this(bufferLength,1);
@@ -23,13 +22,14 @@ public class ThreadedNoiseGenerator extends ThreadedSignalGenerator {
 		this.RNG = new Random();
 		
 		//Math.random and java.util.Random are for some reason very slow, too slow for 44.1 kHz streaming
-		//So instead I will create several buffers a priori and just return them.
-		buffers = new double[numBuffers][bufferLength];
-		for (int ii=0; ii<numBuffers; ii++) {
-			for (int n=0; n<bufferLength; n++) {
-				buffers[ii][n] = (2*RNG.nextDouble() - 1);
-			}
+		//So instead we create a long buffer, and return a random sample from within this buffer
+		long t = new Date().getTime();
+		bigBuffer = new double[bufferLength * bigBufferMultipler];
+		for (int n=0; n<bigBuffer.length; n++) {
+			bigBuffer[n] = (2*RNG.nextDouble() - 1);
 		}
+		t = new Date().getTime() - t;
+		Log.d(TAG,"Noise samples created in " + t + "ms");
 	}
 
 	protected double[] computeNextBuffer() {
@@ -40,10 +40,15 @@ public class ThreadedNoiseGenerator extends ThreadedSignalGenerator {
 //		
 //		return samples;
 		
-		//select a random pre-computed buffer, scale it by amplitude.
-		double[] samples = buffers[(int)(Math.random()*numBuffers)].clone();
+		//select a random sample from bigBuffer
+		int index = RNG.nextInt(bigBuffer.length);		//starting point of sample
+		int step = RNG.nextInt(bigBufferMultipler)+1;		//increase sample space by allowing multiple sample stepping values
+		boolean dir = RNG.nextBoolean();				//increase sample space by allowing samples to go up or down
+		double[] samples = new double[bufferLength];
 		for (int n=0; n<this.bufferLength; n++) {
-			samples[n] *= amplitude;
+			int bn = (index+(dir?step:-step)*n)%(bigBuffer.length);
+			if (bn<0) bn+=bigBuffer.length;
+			samples[n] = amplitude * bigBuffer[bn];
 		}
 		return samples;
 	}

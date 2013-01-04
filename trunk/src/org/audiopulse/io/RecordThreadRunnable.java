@@ -75,7 +75,10 @@ public class RecordThreadRunnable implements Runnable
 	Handler mainThreadHandler = null;
 	private Bundle results;
 	public int clipped;
+	
+	//TODO: handle external storage unavailability
 	private static File root = Environment.getExternalStorageDirectory();
+	
 	Context context;
 	private String testType;
 	private boolean showSpectrum;
