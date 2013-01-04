@@ -95,7 +95,7 @@ public class AudioStreamer
 	}
 	
 	public void attachSource(ThreadedSignalGenerator source) {
-		if (source.getBufferLength() != frameLength)
+		if (source.bufferLength != frameLength)
 			throw new IllegalArgumentException("Source bufferLength must match AudioStreamer frameLength");
 		
 		this.source = source;
@@ -118,8 +118,7 @@ public class AudioStreamer
 		playThread = new Thread( new Runnable( ) {
 			public void run( ) {
 				
-				waitForSourceReady();
-				
+				track.pause();
 				track.flush();
 				track.play();
 				isPlaying = true;
@@ -133,10 +132,8 @@ public class AudioStreamer
 					short[] writeData = AudioSignal.getAudioTrackData(frame, true);
 					int nWritten = track.write(writeData,0,writeData.length);
 					if (nWritten == AudioTrack.ERROR_INVALID_OPERATION || nWritten == AudioTrack.ERROR_BAD_VALUE) {
-						if (requestStop)
-							Log.e(TAG, "Audio write failed: " + nWritten);
-						else
-							Log.v(TAG, "Audio write aborted due to stop request: " + nWritten);
+						if (requestStop) Log.e(TAG, "Audio write failed: " + nWritten);
+						else Log.v(TAG, "Audio write aborted due to stop request: " + nWritten);
 						
 						break;
 					}
@@ -171,16 +168,15 @@ public class AudioStreamer
 	}
 	
 	private void waitForSourceReady() {
-		if (!source.isReady()) Log.i(TAG,"Waiting for source ready");
-		while (!source.isReady()) {	//TODO: add an explicit timeout
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				Log.e(TAG,"Wait for source ready interrupted!");
-			}
+		if (!source.isBufferReady()) Log.i(TAG,"Waiting for buffer");
+		try {
+			source.waitForBuffer();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Log.e(TAG,"Wait for source ready interrupted!");
 		}
+
 	}
 
 }
