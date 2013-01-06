@@ -60,11 +60,14 @@ public class AudioStreamer
 			
 	private ThreadedSignalGenerator source = null;
 	private Thread playThread;
-	private boolean requestStop;	//TODO: volatile?
-	private AudioTrack track;
-	private final int frameLength;		//num mono samples per audio frame
 	private boolean isPlaying = false;
+	private volatile boolean requestStop;
+	private volatile AudioTrack track;
 
+	private final int frameLength;		//num mono samples per audio frame
+		
+	private Object audioLock = new Object();
+	
 	//default buffer values constructor
 	public AudioStreamer(int sampleRate) {
 		this(sampleRate, 0);
@@ -105,7 +108,7 @@ public class AudioStreamer
 		return (source!=null);
 	}
 
-	public void start()
+	public synchronized void start()
 	{
 		Log.d(TAG,"Stream start");
 		
@@ -117,13 +120,14 @@ public class AudioStreamer
 		//create thread to play
 		playThread = new Thread( new Runnable( ) {
 			public void run( ) {
+				synchronized (audioLock) {
+					track.pause();
+					track.flush();
+					track.play();
+					isPlaying = true;
+					requestStop = false;
+				}
 				
-				track.pause();
-				track.flush();
-				track.play();
-				isPlaying = true;
-				
-				requestStop = false;
 				while(!requestStop) {
 					double[] frame = null;
 					waitForSourceReady();
@@ -131,13 +135,14 @@ public class AudioStreamer
 					Log.v(TAG,"Writing audio frame");
 					short[] writeData = AudioSignal.getAudioTrackData(frame, true);
 					int nWritten = track.write(writeData,0,writeData.length);
+
 					if (nWritten == AudioTrack.ERROR_INVALID_OPERATION || nWritten == AudioTrack.ERROR_BAD_VALUE) {
 						if (requestStop) Log.e(TAG, "Audio write failed: " + nWritten);
 						else Log.v(TAG, "Audio write aborted due to stop request: " + nWritten);
-						
 						break;
+					} else {
+						Log.v(TAG,"Frame written successfully");
 					}
-					Log.v(TAG,"Frame written successfully");
 				}
 			}
 		} );
@@ -145,19 +150,37 @@ public class AudioStreamer
 		playThread.start();
 		
 	}
-	public void stop() {
+	public synchronized void stop() {
 		Log.d(TAG,"AudioStreamer Stop");
-		requestStop = true;
-		track.pause();
-		track.flush();
-		isPlaying = false;
+		
+		//send stop request, wait for success, then flush audio track
+		new Thread( new Runnable() {
+			public void run() {
+				synchronized (audioLock) {
+					requestStop = true;
+					if (isPlaying) {
+						try {
+							playThread.join();
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					track.pause();
+					track.flush();
+					isPlaying = false;
+				}
+			}
+			
+		}).start();
+		
 		//track.release();	//don't really know if this is necessary (or sufficient)
 	}
-	public void destroy() {
-		Log.d(TAG,"AudioStreamer Destroy");
-		stop();
-		track.release();
-	}
+//	public void destroy() {
+//		Log.d(TAG,"AudioStreamer Destroy");
+//		stop();
+//		track.release();
+//	}
 	
 	public boolean isPlaying() {
 		return isPlaying;
@@ -167,7 +190,7 @@ public class AudioStreamer
 		return frameLength;
 	}
 	
-	private void waitForSourceReady() {
+	private void waitForSourceReady() {		//blocking call: do not call from UI thread!
 		if (!source.isBufferReady()) Log.i(TAG,"Waiting for buffer");
 		try {
 			source.waitForBuffer();
