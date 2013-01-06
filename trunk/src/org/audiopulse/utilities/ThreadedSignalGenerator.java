@@ -62,13 +62,16 @@ import android.util.Log;
  */
 public abstract class ThreadedSignalGenerator {
 	private final String TAG = "ThreadedSignalGenerator";
-	private double[] buffer;	//Not accessible by subclasses. Subclass must return new arrays and are not permitted to modify this buffer.
 	public final int bufferLength;
 
-	private boolean isBufferReady = false;	//is the buffer ready to be read by client?
-	private boolean initialized = false;	//has this object been initialized? (call initialize());
+	private volatile double[] buffer;	//Not accessible by subclasses. Subclass must return new arrays and are not permitted to modify this buffer.
+	private volatile boolean isBufferReady = false;	//is the buffer ready to be read by client?
+	private volatile boolean initialized = false;	//has this object been initialized? (call initialize());
 
 	private Thread computeThread;
+	
+	private Object readBufferLock = new Object(); 		//lock for read buffer processes, to allow updates to other vars
+	private Object writeBufferLock = new Object();		//lock for write buffer processes
 	
 	//All subclasses will be required to call this constructor to set bufferLength.
 	public ThreadedSignalGenerator(int bufferLength) {
@@ -79,17 +82,23 @@ public abstract class ThreadedSignalGenerator {
 	//constructor because subclasses (e.g. ToneGenerator) may set other parameters
 	//in their constructor (e.g. frequency) that we need to wait for before
 	//computing our first buffer. (Subclasses are required to call super(bufferLength) as a first statement)
-	public synchronized void initialize() {
-		//if (initialized) return;
-		computeSamples();	//synchronized, so if a computeThread is active it will wait and replace it
+	public void initialize() {
+		if (initialized) return;
+		threadedComputeSamples();
 		initialized = true;
 		Log.v(TAG,"Signal generator (" + this.getClass().getSimpleName() + ") initialized.");
 	}
+	//if source parameters (e.g. freq, amplitude) change, call recompute() to replace the existing
+	//buffer so that the next getBuffer() call will return the correct signal
+	public void recompute() {
+		threadedComputeSamples();	//synchronized, so if a computeThread is active it will wait and replace it
+	}
+	
 
 	// Return current buffer, mark as read, and begin computing next buffer.
 	// Returns null of buffer is not ready. Use waitForBuffer(...) to wait.
 	public final double[] getBuffer() {
-		long t = new Date().getTime();
+		double[] returnBuffer;
 		
 		if (!initialized) initialize();
 		if (!isBufferReady) {
@@ -97,25 +106,27 @@ public abstract class ThreadedSignalGenerator {
 			return null;
 		}
 		
-		double[] returnBuffer = buffer;		//save reference to current buffer as computeSamples() will overwrite it
-		isBufferReady = false;				//mark buffer as not ready until computeThread finishes.
-		threadedComputeSamples();			//spawn new thread to compute next buffer
+		synchronized (readBufferLock) {	//prevent interleaved double-access to buffer; once we read it, it's gone.
+			returnBuffer = buffer;		//save reference to current buffer as computeSamples() will overwrite it
+			isBufferReady = false;				//mark buffer as not ready until computeThread finishes.
+		}
 		
-		t = new Date().getTime() - t;
-		Log.v(TAG,"Buffer returned in " + t + "ms");
+		threadedComputeSamples();			//spawn new thread to compute next buffer
 		return returnBuffer;
 	}
 		
-	private synchronized void computeSamples() {
-		long t = new Date().getTime();
-		
-		buffer = computeNextBuffer();		//computeNextBuffer is implemented by subclasses		
-		assert buffer != null && buffer.length==bufferLength : "Signal generator returned invalid buffer";
-		isBufferReady = true;
+	private void computeSamples() {
+		synchronized (writeBufferLock) {				//recompute() can be called externally, so we must lock
+			isBufferReady = false;
+			buffer = computeNextBuffer();		//computeNextBuffer is implemented by subclasses
 
-		long dt = new Date().getTime() - t;
-		Log.d(TAG, "Buffer computed in " + dt + "ms");
-
+			// Check that subclass.computeNextBuffer returns something valid
+			if (buffer == null || buffer.length!=bufferLength) {
+				throw new RuntimeException();
+			}
+			
+			isBufferReady = true;
+		}
 	}
 	
 	private void threadedComputeSamples() {
@@ -130,7 +141,9 @@ public abstract class ThreadedSignalGenerator {
 	
 	//is the next buffer ready to read?
 	public boolean isBufferReady() {
-		return isBufferReady;
+		synchronized (readBufferLock) {
+			return isBufferReady;
+		}
 	}
 	public boolean isInitialized() {
 		return initialized;
@@ -138,6 +151,7 @@ public abstract class ThreadedSignalGenerator {
 	
 	public void waitForBuffer() throws InterruptedException {
 		if (!initialized) initialize();
+		assert computeThread != null;
 		if (!isBufferReady) {
 			Log.d(TAG,"Waiting for buffer!");
 			computeThread.join();	//wait for computing thread to finish
@@ -145,10 +159,12 @@ public abstract class ThreadedSignalGenerator {
 	}
 	public void waitForBuffer(long millis) throws InterruptedException {
 		if (!initialized) initialize();
+		assert computeThread != null;
 		if (!isBufferReady) computeThread.join(millis);	//wait for computing thread to finish
 	}
 	public void waitForBuffer(long millis, int nanos) throws InterruptedException {
 		if (!initialized) initialize();
+		assert computeThread != null;
 		if (!isBufferReady) computeThread.join(millis,nanos);	//wait for computing thread to finish
 	}
 	

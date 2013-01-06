@@ -175,7 +175,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 			((ThreadedClickGenerator) source).setFrequency(getFrequency());
 			((ThreadedClickGenerator) source).setAmplitude(getAmplitude());
 		}
-		source.initialize();
+		source.recompute();
 		
 	}
 	
