@@ -124,7 +124,7 @@ public class RecordThreadRunnable implements Runnable
 		informFinish();
 
 		//Write file to disk
-		String fileName="AP_" + testType + new Date().toString() +".raw";
+		String fileName="AP_" + testType + new Date().toString().replace(" ","-").replace(":", "-") +".raw";
 		File outFile = new File(root, fileName);
 		informMiddle("Saving file: "+ outFile.getAbsolutePath());
 		try {
