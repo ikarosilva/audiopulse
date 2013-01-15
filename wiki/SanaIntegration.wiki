@@ -1,0 +1,24 @@
+#summary Instructions for integrating Audiopulse application with Sana Android client.
+
+= Introduction =
+This document outlines the implementation instructions and details for integrating Audiopulse as a plugin to the Sana Android client.
+
+= Details =
+==Information sent to Audiopulse from Sana==
+Information is added in the *Extras* as part of the intent used to launch Audipulse and can be retrieved via an an Activity's getIntent method. 
+  * Encounter ID - key *encounter*
+  * Patient ID - key *subject*
+  * Observation ID - key *observation
+*Note:* If chaining activities together, the extra meta information should be passed to subsequent Activity classes.
+
+==Information required on return==
+Information is returned as part of the data intent when Audipulse completes. Requires:
+  * Audiopulse sets the result status as Result.OK
+  * Audiopulse returns the Uri of the file as the returned Intent data
+
+==Audiopulse Manifest==
+Any activity which is launched from Sana mus have a unique *name* String declared as part of an intent filter for that Activity in the Audiopulse manifest. Changes to date:
+  * .. fill in as implemented
+
+==Integration with Sana workflow(Procedure XML)==
+
