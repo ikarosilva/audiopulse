@@ -29,9 +29,33 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="org.audiopulse.CAPTURE_MENU"/>
+            </intent-filter>
         </activity>
         <activity android:name=".activities.DPOAEActivity"
         	android:configChanges="orientation|keyboardHidden">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="org.audiopulse.DPGRAM_RIGHT"/>
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="org.audiopulse.DPGRAM_LEFT"/>
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="org.audiopulse.DPOAE_4KHZ"/>
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="org.audiopulse.DPOAE_3KHZ"/>
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="org.audiopulse.DPOAE_2KHZ"/>
+            </intent-filter>
         </activity>
         <activity android:name=".activities.DeviceCalibrationActivity"
         	android:configChanges="orientation|keyboardHidden">

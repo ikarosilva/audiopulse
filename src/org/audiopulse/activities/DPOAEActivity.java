@@ -38,6 +38,7 @@
  */ 
 
 package org.audiopulse.activities;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -50,10 +51,15 @@ import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
 import org.audiopulse.utilities.SignalProcessing;
+import org.sana.android.Constants;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -90,15 +96,24 @@ public class DPOAEActivity extends GeneralAudioTestActivity
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.dpoae);
-		DPOAERequest = getIntent().getExtras();
-		testNameValue=DPOAERequest.getString(testNameKey);
+		// Sana observation meta data - from Sana API ObservationActivity
+		initMetaData();
 		
+		DPOAERequest = getIntent().getExtras();
+		// TODO Set test name value from concept? Or just use concept
+		testNameValue=DPOAERequest.getString(testNameKey);
+
 		//findViewById(android.R.id.content).invalidate();
-        //performTest();			
+        //performTest();
+		
 	}
     
 	public void startTest(View callingView){
 		//TODO: plot audiogram results
+		startMockTest();
+		if(this.getIntent().getAction().length() > 0)
+			this.finish();
+			
 		//Generate list of tests to run
 		List<String> RunTest= new ArrayList<String>();
 		
@@ -136,11 +151,20 @@ public class DPOAEActivity extends GeneralAudioTestActivity
 		//Plot all results 
 		plotAudiogram(DPGramresults);
 		
+		//TODO Call setResultOkAndData(..) with the zip uri. 
+		// ...or maybe in superclass?
+		
 	}
-
+	
 	private void plotAudiogram(Bundle dPGramresults) {
 		// TODO Auto-generated method stub
 		
 	}
 	
+	protected void startMockTest(){
+		String path =Constants.MEDIA_PATH +"DPOAE.jpg";
+		File data = new File(path);
+		this.setResultOkAndData(Uri.fromFile(data));
+	}
+
 }

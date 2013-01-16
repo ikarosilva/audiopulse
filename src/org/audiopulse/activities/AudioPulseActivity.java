@@ -38,6 +38,8 @@
  */ 
 package org.audiopulse.activities;
 
+import org.sana.android.app.ObservationActivity;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -48,7 +50,7 @@ import android.widget.Toast;
 import android.media.AudioManager;
 
 //AudioPulseActivity: base activity that all other AudioPulse activities should extend
-public class AudioPulseActivity extends Activity {
+public class AudioPulseActivity extends ObservationActivity {
 
 	public final String TAG = "AudioPulseActivity";
 	
