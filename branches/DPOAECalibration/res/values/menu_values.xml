@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="main_menu">
+        <item>@string/old_menu</item>
+        <item>@string/menu_all_right</item>
+        <item>@string/menu_all_left</item>
+        <!-- <item>@string/menu_4k</item>
+        <item>@string/menu_3k</item>
+        <item>@string/menu_2k</item> -->
+        <item>@string/menu_spontaneous</item>
+        <item>@string/menu_iecalibration</item>
+        <item>@string/tests_device_calibration</item>
+        <item>@string/menu_plot</item>
+    </array>   
+    <array name="old_menu">
+        <item>@string/menu_4k</item>
+        <item>@string/menu_3k</item>
+        <item>@string/menu_2k</item>
+        <item>@string/menu_spontaneous</item>
+        <item>@string/menu_iecalibration</item>
+        <item>@string/tests_device_calibration</item>
+        <item>@string/menu_plot</item>
+    </array>   
+    <string name="old_menu">Older test menu</string>
+    <string name="menu_all_right">DPGram Right Ear</string>
+    <string name="menu_all_left">DPGram Left Ear</string>
+    <string name="dpgram_left">DPGram Right Ear</string>
+    <string name="dpgram_right">DPGram Left Ear</string>
+    <string name="menu_4k">DPOAE 4kHz</string>
+    <string name="menu_3k">DPOAE 3kHz</string>
+    <string name="menu_2k">DPOAE 2kHz</string>
+    <string name="dpoae_4k">DPOAE 4kHz</string>
+    <string name="dpoae_3k">DPOAE 3kHz</string>
+    <string name="dpoae_2k">DPOAE 2kHz</string>
+    <string name="menu_spontaneous">Spontaneous</string>
+    <string name="soae">Spontaneous</string>
+    <string name="menu_iecalibration">Ear Tip Calibration</string>   
+    <string name="menu_plot">Plot Waveform</string>
+    <string name="tests_device_calibration">Device Calibration</string>
+    <style name="menu_style">
+        <item name="android:textColor">@color/foreground</item>
+        <item name="android:textSize">24dp</item>
+        <item name="android:divider">@color/lowlight</item>
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:listSelector">@color/highlight</item>            
+        <item name="android:gravity">left</item>
+        <item name="android:clickable">true</item>
+        <item name="android:selectable">true</item>
+	</style>  
+</resources>
