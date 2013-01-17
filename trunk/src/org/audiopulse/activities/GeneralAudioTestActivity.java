@@ -163,4 +163,9 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		startActivity(intent);
 	}
 
+	// TODO Set some common functionality here or make abstract
+	public void appendData(Bundle b) {
+		// TODO Auto-generated method stub
+		
+	}
 }
