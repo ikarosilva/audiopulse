@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.audiopulse.R;
+import org.audiopulse.io.PackageDataThreadRunnable;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
@@ -51,6 +52,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -77,8 +79,22 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	Thread playThread = null;
 	Thread recordThread = null;
 	public static double playTime=0.5;
+	private static threadState recordingstate=GeneralAudioTestActivity.threadState.INITIALIZED;
+	private static threadState playbackstate=GeneralAudioTestActivity.threadState.INITIALIZED;
+	private static threadState packedDataState=GeneralAudioTestActivity.threadState.INITIALIZED;
+	private static threadState testState=GeneralAudioTestActivity.threadState.INITIALIZED;
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 
+	public static enum threadState{
+		INITIALIZED(0),
+		ACTIVE(1),
+		COMPLETE(2);
+		int state;
+		threadState(int i){
+			state=i;
+		}	
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -111,7 +127,6 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		Context context=this.getApplicationContext();		
 		recordStatusBackHandler = new ReportStatusHandler(this);
 		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context);
-
 		playStatusBackHandler = new ReportStatusHandler(this);
 		PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime);
 		ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
@@ -138,6 +153,31 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		tv.setText(tv.getText() + "\n" + str);
 	}
 
+	public static void setRecordingState(GeneralAudioTestActivity.threadState state){
+		GeneralAudioTestActivity.recordingstate=state;
+	}
+	
+	public static GeneralAudioTestActivity.threadState getRecordingState(){
+		return GeneralAudioTestActivity.recordingstate;
+	}
+	public static void setPackedDataState(GeneralAudioTestActivity.threadState state){
+		GeneralAudioTestActivity.packedDataState=state;
+	}
+	public static GeneralAudioTestActivity.threadState getTestState(){
+		return GeneralAudioTestActivity.testState;
+	}
+	public static void setTestState(GeneralAudioTestActivity.threadState state){
+		GeneralAudioTestActivity.testState=state;
+	}
+	
+	public static GeneralAudioTestActivity.threadState getPackedDataState(){
+		return GeneralAudioTestActivity.packedDataState;
+	}
+	public void appendLine(String str){
+		TextView tv = getTextView(); 
+		tv.setText(tv.getText() + str);
+	}
+	
 	public void emptyText(){
 		TextView tv = getTextView();
 		tv.setText("");
@@ -168,4 +208,25 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		// TODO Auto-generated method stub
 		
 	}
+	
+	//Need to overwrite this method in the child class in order to used the package the data
+	//througth the ReportStatusHandler callback methods
+	 public PackageDataThreadRunnable packageThread(){
+		 Log.v(TAG,"packageThread being called from" +TAG +
+				 " this should not happen!!");
+		 return null;
+	 }
+	 public void addXMLFile(String key, String fileName){
+		 Log.v(TAG,"packageThread being called from" +TAG +
+				 " this should not happen!!");
+	 }
+
+	public static void setPlaybackState(GeneralAudioTestActivity.threadState state) {
+		GeneralAudioTestActivity.playbackstate=state;
+	}
+	public static GeneralAudioTestActivity.threadState getPlaybackState() {
+		return GeneralAudioTestActivity.playbackstate;
+	}
+	
+	
 }
