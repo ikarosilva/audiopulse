@@ -40,9 +40,14 @@
 package org.audiopulse.io;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
+import org.audiopulse.activities.GeneralAudioTestActivity;
+import org.audiopulse.activities.ThreadedPlayRecActivity;
 import org.audiopulse.utilities.SignalProcessing;
 
 import android.content.Context;
@@ -73,6 +78,7 @@ public class RecordThreadRunnable implements Runnable
 	private double expectedFrequency; 
 	final short[] samples ;
 	Double recordRMS;
+	public static final String RECFILEKEY="outfile";
 	Handler mainThreadHandler = null;
 	private Bundle results;
 	public int clipped;
@@ -120,27 +126,25 @@ public class RecordThreadRunnable implements Runnable
 		if(streamVolume != 15){
 		informMiddle("Warning: volume is set to: " + streamVolume);
 		}
-		informMiddle("Recording, please wait...");
 		record();
-
 		// Write file to disk
-		// Define file name here beacause inform finish is adding the Uri to the message bundle 
+		// Define file name here because inform finish is adding the Uri to the message bundle 
 		// TODO Does the bundling need to happen post SHortfile.writeFile
 		String fileName="AP_" + testType + new Date().toString()+".raw";
 		outFile = new File(root, fileName.replace(" ","-").replace(":", "-") ); 
 		
-		//Finish up
-		informFinish();
-
 		Log.d(TAG, "outFile => "+ outFile.getAbsolutePath());
-		informMiddle("Saving file: "+ outFile.getAbsolutePath());
+		//informMiddle("Saving file: "+ outFile.getAbsolutePath());
 		try {
 			ShortFile.writeFile(outFile,samples);
 		} catch (IOException e) {	
 			informMiddle("Error in saving file: ");
 			informMiddle(e.getLocalizedMessage());
 		}
-		informMiddle("Finished!");
+		
+		//Finish up
+		informFinish();
+		//informMiddle("Finished!");
 
 	}
 
@@ -153,17 +157,20 @@ public class RecordThreadRunnable implements Runnable
 
 	public void informStart()
 	{
-		Message m = this.mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Recording for: " + (double) Buffer_Size/sampleRate +" s"));
-		this.mainThreadHandler.sendMessage(m);
+		//Message m = this.mainThreadHandler.obtainMessage();
+		//m.setData(Utils.getStringAsABundle("Recording for: " + (double) Buffer_Size/sampleRate +" s"));
+		//m.arg1=RecordThreadRunnable.MSG_INDEX;
+		GeneralAudioTestActivity.setRecordingState(GeneralAudioTestActivity.threadState.ACTIVE);
+		//this.mainThreadHandler.sendMessage(m);
 	}
 	public void informFinish()
 	{
 		mAudio.release();
 		Message m = this.mainThreadHandler.obtainMessage();
 		results= new Bundle();
-		String msg="Release time= " + record_time/1000 + " seconds. RMS = " + recordRMS +
-				" eFrequency= "+ expectedFrequency;
+		//TODO: Convert strings to key values and define them as public constant on top of the class.
+		String msg="Rec time= " + record_time/1000 + " seconds. RMS = " + recordRMS +
+				"  Frequency= "+ expectedFrequency;
 		results.putString("message", msg);
 		results.putShortArray("samples",samples);
 		results.putFloat("recSampleRate",sampleRate);
@@ -175,10 +182,10 @@ public class RecordThreadRunnable implements Runnable
 		// TODO use the final zip file uri instead of the raw file
 		Uri output = (outFile != null)? Uri.fromFile(outFile):
 						Uri.EMPTY;
-		Log.d(TAG, "Output Uri: " + output);
-		results.putParcelable("outfile", output);
+		results.putParcelable(RECFILEKEY,output);
 	    
 		m.setData(results);
+		GeneralAudioTestActivity.setRecordingState(GeneralAudioTestActivity.threadState.COMPLETE);
 		this.mainThreadHandler.sendMessage(m);
 	}
 
@@ -209,15 +216,14 @@ public class RecordThreadRunnable implements Runnable
 		//TODO: Implement a getNotificationMarkerPosition() to read 
 		long st = System.currentTimeMillis();
 		mAudio.startRecording();
+		informMiddle("Capturing audio data, please wait...");
 		while(dataLeft>0){
 			endbuffer=(frameSize<dataLeft) ? frameSize: dataLeft;
-			//nRead=mAudio.read(this.samples,ind*frameSize,endbuffer);
 			nRead=mAudio.read(samples,ind,endbuffer);
 			if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
 				Log.e(TAG, "Audio read failed: " + nRead);
 				break;
 			}
-
 			//TODO: There is an initial zeroing in the data 
 			//this is likely due to reading the initial soundcard buffer  that is not fullly filled.
 			//FIXME: Should try to set a   a method using getPositionNotificationPeriod () to get  a cleaner working solution
@@ -241,6 +247,13 @@ public class RecordThreadRunnable implements Runnable
 				dataLeft -= nRead;
 				ind +=nRead;
 			}
+			/*
+			if(System.currentTimeMillis()-logTime > informTime){
+				informMiddle("*");
+				logTime=System.currentTimeMillis();
+			}
+			*/
+			
 		}
 
 		mAudio.stop();
@@ -257,7 +270,6 @@ public class RecordThreadRunnable implements Runnable
 	 *
 	 */
 	public File getOutFile(){
-		
 		return outFile;
 	}
 	

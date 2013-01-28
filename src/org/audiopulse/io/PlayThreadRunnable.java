@@ -39,9 +39,9 @@
 
 package org.audiopulse.io;
 
+import org.audiopulse.activities.GeneralAudioTestActivity;
 import org.audiopulse.hardware.HTCOne;
 import org.audiopulse.hardware.MobilePhone;
-import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.DPOAESignal;
 import org.audiopulse.hardware.AcousticDevice;
 
@@ -72,7 +72,6 @@ public class PlayThreadRunnable implements Runnable
 	Handler mainThreadHandler = null;
 	private long real_play_time;
 	String trackConfig;
-	
 
 	//TODO: allow programmable sample frequency
 	public PlayThreadRunnable(Handler h, double playTime)
@@ -117,16 +116,21 @@ public class PlayThreadRunnable implements Runnable
 
 	public void informStart()
 	{
-		Message m = mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Playing sound for "  + (float)PlayBufferSize/(float)sampleRate));
-		mainThreadHandler.sendMessage(m);
+		//Message m = mainThreadHandler.obtainMessage();
+		//m.setData(Utils.getStringAsABundle("Playing sound for "  
+		//			+ (float)PlayBufferSize/(float)sampleRate + " seconds") );
+		//m.arg1=PlayThreadRunnable.MSG_INDEX;
+		GeneralAudioTestActivity.setPlaybackState(GeneralAudioTestActivity.threadState.ACTIVE);
+		//mainThreadHandler.sendMessage(m);
 	}
 	public void informFinish()
 	{
 		track.release();
-		Message m = mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Released soundcard in " + real_play_time/1000 + " seconds"));
-		mainThreadHandler.sendMessage(m);
+		//Message m = mainThreadHandler.obtainMessage();
+		//m.setData(Utils.getStringAsABundle(PLAYBACKFINISHED));
+		//m.arg1=PlayThreadRunnable.MSG_INDEX;
+		GeneralAudioTestActivity.setPlaybackState(GeneralAudioTestActivity.threadState.COMPLETE);
+		//mainThreadHandler.sendMessage(m);
 	}
 
 
