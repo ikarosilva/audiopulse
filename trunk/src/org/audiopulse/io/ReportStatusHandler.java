@@ -40,6 +40,8 @@
 package org.audiopulse.io;
 
 import org.audiopulse.activities.GeneralAudioTestActivity;
+
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -49,7 +51,7 @@ public class ReportStatusHandler extends Handler
 {
 	public static final String TAG = "ReportStatusHandler";
 	private GeneralAudioTestActivity parentActivity = null;
-
+	private boolean isBuzy;
 	public ReportStatusHandler(GeneralAudioTestActivity inParentActivity)
 	{
 		//Registering handler in parent activity 
@@ -59,29 +61,45 @@ public class ReportStatusHandler extends Handler
 	@Override
 	public void handleMessage(Message msg) 
 	{
-		Log.v(TAG,"Handling received message");
 		String pm = Utils.getStringFromABundle(msg.getData());		
 		Bundle b=msg.getData();
-		if(b.getLong("N") == 0L){
+		isBuzy=(GeneralAudioTestActivity.getRecordingState() == GeneralAudioTestActivity.threadState.ACTIVE) &&
+				(GeneralAudioTestActivity.getPlaybackState() == GeneralAudioTestActivity.threadState.ACTIVE);
+		if(isBuzy){
+			this.printLine("*");
+			this.sendEmptyMessageDelayed(0,100);
+		}else if (pm != null){
 			this.printMessage(pm);
-		}else{
-			// Thread should be done so we are sending data back to
-			// parent
-			// Need this so parent has bundled file uri to return to Sana.
-			parentActivity.appendData(b);
+			if (GeneralAudioTestActivity.getRecordingState() == GeneralAudioTestActivity.threadState.COMPLETE){
+				//If it is the end of a recording, get the file name for the data and append to metinfomation object
+				Uri outfile=b.getParcelable(RecordThreadRunnable.RECFILEKEY);
+				if(outfile != null){
+					parentActivity.addXMLFile("DPOAE",outfile.toString());
+					this.printMessage("Added file to package: " + outfile.toString());
+					
+				}
+				if(GeneralAudioTestActivity.getPackedDataState() == GeneralAudioTestActivity.threadState.INITIALIZED){
+					//Call the package thread to compress and package the data, this method, though defined in the
+					// parentActivity (GeneralAudioPulseTesting) is actually being implemented/called from a subclass (i.e., ThreadedRecPlayActivity). 
+					parentActivity.packageThread();
+				}
+			}
+			//parentActivity.appendData(b);
 			if(b.getBoolean("showSpectrum") ==true){
 				this.plotAudioSpectrum(b);
 			}
 		}
 
-
 	}
 
 	private void printMessage(String str)
 	{
-		//Printing status
-		Log.v(TAG,"printing message");
 		parentActivity.appendText(str);
+	}
+
+	private void printLine(String str)
+	{
+		parentActivity.appendLine(str);
 	}
 
 	private void plotAudioSpectrum(Bundle b)
