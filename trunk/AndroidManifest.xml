@@ -20,6 +20,9 @@
         <activity android:name=".activities.PlotAudiogramActivity"
             android:configChanges="orientation|keyboardHidden">
         </activity>
+        <activity android:name=".activities.DPOAEActivity"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
         <activity android:name=".activities.ThreadedPlayRecActivity"
                   android:label="Specific Tests">
             <intent-filter>
