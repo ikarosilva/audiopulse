@@ -46,6 +46,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.audiopulse.R;
+import org.audiopulse.io.AudioPulseXMLData;
+import org.audiopulse.io.PackageDataThreadRunnable;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
@@ -70,29 +72,38 @@ import android.widget.TextView;
 @Deprecated public class ThreadedPlayRecActivity extends GeneralAudioTestActivity 
 {
 	public static final String TAG="ThreadedPlayRecActivity";
-	
+
 	static final int STIMULUS_DIALOG_ID = 0;
 	Bundle audioBundle = new Bundle();
 	Handler playStatusBackHandler = null;
 	Handler recordStatusBackHandler = null;
+	Handler packageStatusBackHandler = null;
 	Thread playThread = null;
 	Thread recordThread = null;
+	Thread packageDataThread = null;
 	public static double playTime=0.5;
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
-	List<Uri> outFiles = new ArrayList<Uri>();
+	private List<Uri> outFiles = new ArrayList<Uri>();
+	public AudioPulseXMLData xmlData=null;
+	private String selected;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// Check if sana is starting the application
 		String caller = this.getCallingPackage();
-		Log.d(TAG, "Called by: " + caller);
+		//TODO: Move this inside so it gets called only when Sana launches the app!
+		xmlData= new AudioPulseXMLData();//Initial XML Data only when being called from Sana
+		selected = getString(R.string.dpgram_right);
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			setContentView(R.layout.sana_thread);
+			Log.v(TAG,"Initializing Sana metadata ");
+			// Sana observation meta data - from Sana API ObservationActivity
 			initMetaData();
-			String selected = getString(R.string.dpgram_right);
-			selectAndRunThread(selected);
+			selectAndRunThread();
+			//The packaging of the data is done through the handler call back
 		} else {
+			Log.v(TAG,"in standalone mode ");
 			setContentView(R.layout.thread);
 			// set listener for menu items
 			ListView menuList = (ListView) findViewById(R.id.menu_list);
@@ -102,70 +113,80 @@ import android.widget.TextView;
 
 							TextView item = (TextView) itemClicked;
 							String itemText = item.getText().toString();
-							selectAndRunThread(itemText);
+							selected=itemText;
+							selectAndRunThread();
 
 						}});
 		}
-        
+
 	}
-    
-	private final void selectAndRunThread(String selected){
+
+	private final void selectAndRunThread(){
 
 		if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
+			Log.v(TAG,"ploting waveform");
 			plotWaveform();
 		} else if(selected.equalsIgnoreCase(getResources().getString(R.string.dpgram_right)) ||
 				selected.equalsIgnoreCase(getResources().getString(R.string.dpgram_left))) {
 			//TODO: plot audiogram results
 			//Generate list of tests to run
+			this.appendText("Starting: " + selected +"\n");
 			List<String> RunTest= new ArrayList<String>();
-			
+
 			RunTest.add(getResources().getString(R.string.dpoae_2k));
 			//RunTest.add(getResources().getString(R.string.menu_3k));
 			//RunTest.add(getResources().getString(R.string.menu_4k));
 			for(String runme: RunTest){
-				emptyText(); //Clear text for new stimuli test and spectral plotting
-
-				Log.d(TAG, "playRecordThread() => Starting");
+				Log.v(TAG,"Running thread: " + runme + " from test: " + selected);
+				this.appendText("testing: " + runme + " \n");
 				playRecordThread(runme,false);
-				Log.d(TAG, "playRecordThread() => Complete?");
-				//TODO: Implement a hold between playing threads
 			}
-			
-			//TODO: Extract these results from data!
-			double[] DPOAEData={7.206, -7, 5.083, 13.1,3.616, 17.9,2.542, 11.5,1.818, 17.1};
-	        double[] noiseFloor={7.206, -7-10,5.083, 13.1-10,3.616, 17.9-10,2.542, 11.5-10,1.818, 17.1-10};
-	        double[] f1Data={7.206, 64,5.083, 64,3.616, 64,2.542, 64,1.818, 64};
-	        double[] f2Data={7.206, 54.9,5.083, 56.6,3.616, 55.6,2.542, 55.1,1.818, 55.1};
-
-	        //double[] Pxx=SignalProcessing.getDPOAEResults(audioBundle);
-	        
-			Bundle DPGramresults= new Bundle();
-			DPGramresults.putString("title",selected);
-			DPGramresults.putDoubleArray("DPOAEData",DPOAEData);
-			DPGramresults.putDoubleArray("noiseFloor",noiseFloor);
-			DPGramresults.putDoubleArray("f1Data",f1Data);
-			DPGramresults.putDoubleArray("f2Data",f2Data);
 			
 		}
 		else {
+			//In this case we are assuming we are doing a single test only
+			//ie: dpoae4kHz, dpoae2kHz, soae, etc...
 			emptyText(); //Clear text for new stimuli test and spectral plotting
 			playRecordThread(selected,true);
 		} 
-		
-	
 	}
 	
+	private void AnalyzeData(){
+		this.appendText("analyzing results from test " + selected+ " \n");
+		Log.v(TAG,"analyzing results from test " + selected);
+		//TODO: Extract these results from data!
+		double[] DPOAEData={7.206, -7, 5.083, 13.1,3.616, 17.9,2.542, 11.5,1.818, 17.1};
+		double[] noiseFloor={7.206, -7-10,5.083, 13.1-10,3.616, 17.9-10,2.542, 11.5-10,1.818, 17.1-10};
+		double[] f1Data={7.206, 64,5.083, 64,3.616, 64,2.542, 64,1.818, 64};
+		double[] f2Data={7.206, 54.9,5.083, 56.6,3.616, 55.6,2.542, 55.1,1.818, 55.1};
+
+		//double[] Pxx=SignalProcessing.getDPOAEResults(audioBundle);
+
+		Bundle DPGramresults= new Bundle();
+		DPGramresults.putString("title",selected);
+		DPGramresults.putDoubleArray("DPOAEData",DPOAEData);
+		DPGramresults.putDoubleArray("noiseFloor",noiseFloor);
+		DPGramresults.putDoubleArray("f1Data",f1Data);
+		DPGramresults.putDoubleArray("f2Data",f2Data);
+		
+		//TODO: condition on left/right
+		this.appendText("setting xmldata properties\n");
+		Log.v(TAG,"setting xmldata properties ");
+		
+		xmlData.setDPOAELeftEarGram("response="+DPOAEData.toString()+";noise=" + noiseFloor.toString() + ";f1=" + 
+				f1Data + ";f2=" + f2Data.toString());
+	}
 	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum)
 	{
-		
+
 		//Ignore playing thread when obtaining SOAEs
 		beginTest();	
 		Context context=this.getApplicationContext();		
-		
-		
+
+
 		recordStatusBackHandler = new ReportStatusHandler(this);
 		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected);
-		
+
 		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.soae)) ){
 			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
 			rRun.setExpectedFrequency(0);
@@ -174,7 +195,6 @@ import android.widget.TextView;
 			execSvc.execute( recordThread );
 			execSvc.shutdown();
 		}else{
-			
 			//quick hack. depracated anyway.
 			int f;
 			if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_3k)))
@@ -184,7 +204,6 @@ import android.widget.TextView;
 			else
 				f = 2;
 
-					
 			playStatusBackHandler = new ReportStatusHandler(this);
 			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime, f);
 			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
@@ -195,26 +214,48 @@ import android.widget.TextView;
 			recordThread.setPriority(Thread.MAX_PRIORITY);
 			execSvc.execute( recordThread );
 			execSvc.execute( playThread );
-			execSvc.shutdown();
+			execSvc.shutdown();	
+			
 		}
-		endTest();
+		//TODO: this is not where the endTest should be called.
+		//endTest();
 		return rRun;
 	}
 
+	public PackageDataThreadRunnable packageThread()
+	{
+		PackageDataThreadRunnable pRun=null;
+		if(xmlData != null){
+			//Only Package data if called from Sana App
+			Context context=this.getApplicationContext();		
+			packageStatusBackHandler = new ReportStatusHandler(this);
+			pRun = new PackageDataThreadRunnable(recordStatusBackHandler,xmlData,context);
+			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
+			packageDataThread = new Thread(pRun);	
+			execSvc.execute( packageDataThread );
+			execSvc.shutdown();
+			endTest();
+		}
+		return pRun;
+	}
 
 	@Override
 	public void startTest(View callingView) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	
+	public void addXMLFile(String key, String fileName){
+		this.xmlData.setSingleElement(key,fileName);
+	}
+
 	protected void startMockTest(){
 		String path =Constants.MEDIA_PATH +"DPOAE.jpg";
 		File data = new File(path);
 		data.mkdirs();
 		this.setResultOkAndData(Uri.fromFile(data));
 	}
-	
+
 	public void appendData(Bundle b){
 		Uri output = b.getParcelable("outfile");
 		outFiles.add(output);
@@ -223,7 +264,7 @@ import android.widget.TextView;
 		//this.setResult(Result.OK, output);
 		this.setResultOkAndData(output);
 	}
-	
+
 	protected void onPause(){
 		super.onPause();
 		Log.d(TAG, "onPause()");
