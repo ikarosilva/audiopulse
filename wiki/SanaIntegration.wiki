@@ -8,28 +8,29 @@ This document outlines the implementation instructions and details for integrati
 Information is added in the *Extras* as part of the intent used to launch Audipulse and can be retrieved via an an Activity's getIntent method. 
   * Encounter ID - key *encounter*
   * Patient ID - key *subject*
-  * Observation ID - key *observation
+  * Observation ID - key *observation*
   * Concept Name - key *concept*
 *Note:* If chaining activities together, the extra meta information should be passed to subsequent Activity classes. The sana-api-android.jar library is included with the project to provide a parent class which will read the Sana meta data correctly. Implementation requires extending the org.sana.android .app.ObservationActivity class and calling that classes initMetaData() method in the subclass onCreate method. To check if the subclass was launched from Sana, call the getCallingPackage() method-it will be equal to "org.moca" if launched from Sana.
- 
+
 
 ==Information required on return==
-Information is returned as part of the data intent when Audipulse completes. Requires:
+Information is returned as part of the data intent when Audiopulse completes. Requires:
   * Audiopulse sets the result status as Result.OK
   * Audiopulse returns the Uri of the file as the returned Intent data
 
 ==Audiopulse Manifest==
-Any activity which is launched from Sana mus have a unique *name* String declared as part of an intent filter for that Activity in the Audiopulse manifest. For example
+Any activity which is launched from Sana mus have a unique *name* String declared as part of an intent filter for that Activity in the [http://code.google.com/p/audiopulse/source/browse/trunk/AndroidManifest.xml Audiopulse manifest]. For example
+    {{{
     <activity android:name=".activities.ThreadedPlayRecActivity"
     android:label="Specific Tests">
         <intent-filter>
             <category android:name="android.intent.category.DEFAULT"/>
-            <action android:name="org.audiopulse.DPOAE_4KHZ"/>
+            <action android:name="org.audiopulse.DPOAE_4KHZ"/>;
         </intent-filter>
-
+    }}}
 ==Integration with Sana workflow(Procedure XML)==
 Audiopulse is called from within a Sana defined Procedure XML document based on the named action in the Intent Filter declared in the AudioPulse manifest and matching it to the "action" attribute value of a PLUGIN type Element in the XML. For example:
-
+    {{{
         <Element type="PLUGIN" id="4" 
         concept="DPOAE 4KHZ"
         question="DPOAE 4KHz"
@@ -38,5 +39,5 @@ Audiopulse is called from within a Sana defined Procedure XML document based on 
         answer=""
         helpText="Capture data before proceeding." 
         required="true"/>
-
-will launch the ThreadPlayRecActivity shown above.
+    }}}
+will launch the [http://code.google.com/p/audiopulse/source/browse/trunk/src/org/audiopulse/activities/ThreadedPlayRecActivity.java ThreadPlayRecActivity] shown above.
