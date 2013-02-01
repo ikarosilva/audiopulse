@@ -50,7 +50,7 @@ import android.widget.Toast;
 import android.media.AudioManager;
 
 //AudioPulseActivity: base activity that all other AudioPulse activities should extend
-public class AudioPulseActivity extends ObservationActivity {
+public class AudioPulseActivity extends Activity {
 
 	public final String TAG = "AudioPulseActivity";
 	
