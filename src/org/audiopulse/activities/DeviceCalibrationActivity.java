@@ -45,10 +45,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.audiopulse.R;
+import org.audiopulse.hardware.AcousticConversion;
 import org.audiopulse.io.AudioStreamer;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
+import org.audiopulse.io.Utils;
 import org.audiopulse.tests.DPOAECalibrationProcedure;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
@@ -60,8 +62,11 @@ import org.audiopulse.utilities.ThreadedToneGenerator;
 
 import android.content.Context;
 import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -73,7 +78,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class DeviceCalibrationActivity extends GeneralAudioTestActivity implements OnSeekBarChangeListener, OnItemSelectedListener 
+public class DeviceCalibrationActivity extends BasicTestActivity
+									implements OnSeekBarChangeListener, OnItemSelectedListener 
 
 {
 	public static final String TAG="DeviceCalibrationActivity";
@@ -85,6 +91,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	Thread playThread = null;
 	Thread recordThread = null;
 	public static double playTime=0.5;
+	private InputProcessor recorder;
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 	
 	AudioStreamer player;
@@ -94,7 +101,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	double[] clickFrequencies = {5, 10, 20, 30, 40};
 	double[] amplitudes = {.2, .4, .6, .8, 1};
 	
-	private static final int sampleFrequency = 44100; 		//TODO: make this app-wide
+	public final int sampleFrequency = 44100; 		//TODO: make this app-wide
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -103,7 +110,8 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		
 		//create audio streaming device with 1/4 second buffer
 		player = new AudioStreamer(sampleFrequency, sampleFrequency/4);
-
+		recorder = new InputProcessor(this);
+		
 		Spinner sourceSpinner = (Spinner) findViewById(R.id.calibration_source);
 		sourceSpinner.setOnItemSelectedListener(this);
 		
@@ -131,10 +139,6 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	}
 	
 	public void startTest(View callingView){
-		if (callingView.getId() == R.id.testingButton) {
-			appendText("Starting DPOAE Calibration");
-			new Thread( new DPOAECalibrationProcedure(new ReportStatusHandler(this))).start();
-		}
 	}
 	
 	//Read source from spinner, create this source as new.
@@ -157,8 +161,9 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		player.attachSource(source);	//attach to player object
 		
 		if (wasPlaying) player.start();
-
 		Log.d(TAG,"Source created: " + sourceName);
+		
+		new Thread(recorder).start();
 	}
 	
 	//update source parameters from UI values
@@ -249,6 +254,79 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// do nothing
+	}
+	
+	// implement handleMessage
+	@Override
+	public boolean handleMessage(Message msg) {
+		Bundle data = msg.getData();
+		double spl = data.getDouble("SPL");
+		TextView text = (TextView)findViewById(R.id.input_meter);
+		text.setText(String.format("%.1f dB SPL",spl));
+		return true;
+	}
+	
+	private class InputProcessor implements Runnable
+	{
+		private AudioRecord recorder;
+		private int processBufferLength = 2048;
+		private int recordBufferLength = 10000;
+		private int recordFrameLength = 1024;
+		private short[] recordedSamples;
+		private volatile boolean requestStop = false;
+		private int processBufferIndex = 0;
+		private AcousticConversion converter = new AcousticConversion();
+		private Handler handler;
+		
+		public InputProcessor(DeviceCalibrationActivity parent) {
+			int minBuffer = AudioRecord.getMinBufferSize(
+					parent.sampleFrequency,
+					AudioFormat.CHANNEL_IN_MONO,
+					AudioFormat.ENCODING_PCM_16BIT
+					);
+			int bufferSizeInBytes = recordBufferLength;
+			if (bufferSizeInBytes < minBuffer) bufferSizeInBytes = minBuffer;
+
+			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+					parent.sampleFrequency,
+					AudioFormat.CHANNEL_IN_MONO,
+					AudioFormat.ENCODING_PCM_16BIT,
+					bufferSizeInBytes);
+
+			handler = new Handler(parent);
+		}
+		
+		public void run() {
+			double[] processBuffer = new double[processBufferLength];
+			short[] frameBuffer = new short[recordFrameLength];
+			recorder.startRecording();
+			while(!requestStop){ 
+				int nRead=recorder.read(frameBuffer,0,recordFrameLength);
+				if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
+					Log.e(TAG, "Audio read failed: " + nRead);
+					//TODO: send a useful message to main activity informing of failure
+				}
+				for (int n=0; n<nRead; n++) {
+					processBufferIndex++;
+					if (processBufferIndex >= processBuffer.length) {
+						//do something
+						compute(processBuffer.clone());
+						processBufferIndex = 0;
+					}
+					processBuffer[processBufferIndex] = AudioSignal.convertSampleToDouble(frameBuffer[n]);
+				}				
+			}
+			recorder.stop();
+		}
+
+		private void compute(double[] buffer) {
+			double amplitude = converter.getInputLevel(buffer);
+			Bundle msgData = new Bundle();
+			msgData.putDouble("SPL", amplitude);
+			Message msg = handler.obtainMessage();
+			msg.setData(msgData);
+			handler.sendMessage(msg);
+		}
 	}
 	
 }

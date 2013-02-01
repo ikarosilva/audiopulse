@@ -34,6 +34,20 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content" />
 
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<TextView 
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/calibration_input_level" />
+		<TextView android:id="@+id/input_meter"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content" />
+		
+	</LinearLayout>
 	
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:id="@+id/test_buttons"
@@ -57,17 +71,10 @@
 		    android:text="@string/begin_device_calibration" />
 	</LinearLayout>
 	
-		<TextView  
+	<TextView  
 		android:id="@+id/testLog"
 	    android:layout_width="fill_parent" 
 	    android:layout_height="wrap_content"
 	    />
-		
-	<Button
-	    android:id="@+id/testingButton"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:onClick="startTest"
-	    android:text="Test DPOAE Calib" />
-	
+			
 </LinearLayout>

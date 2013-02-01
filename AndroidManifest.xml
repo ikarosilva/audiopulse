@@ -57,5 +57,8 @@
         <activity android:name=".activities.DeviceCalibrationActivity"
         	android:configChanges="orientation|keyboardHidden">
         </activity>
+        <activity android:name=".activities.BasicTestActivity"
+        	android:configChanges="orientation|keyboardHidden">
+        </activity>
         </application>
 </manifest>

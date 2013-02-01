@@ -10,24 +10,53 @@ public class AcousticConversion {
 	private double SPL1uV = 0;				//db SPL for 1uV rms micorphone electrical signal
 	
 	public AcousticConversion() {
+		//TODO: determine that mic & headphone jack are connected to something
 		
 	}
 	
+	// get signal as output level in dB SPL
 	public double getOutputLevel(double[] x) {
-		double r = SignalProcessing.rms(x);		//digital signal rms
-		if (r==0)
+		return getOutputLevel(x,0,x.length-1);
+	}
+	public double getOutputLevel(double[] x, int fromSample, int toSample) {
+		//compute sum of squares
+		double r = 0;
+		int N = toSample-fromSample;
+		for (int n=fromSample; n<=toSample; n++) {
+			r+=x[n]*x[n];
+		}
+		if (r==0)								//avoid log(0), return min value instead
 			return Double.MIN_VALUE;
-		
-		r *= VPerDU_output;						//electrical signal rms
-		return 10*Math.log10(r) + SPL1V;		//convert to dB SPL
+		r /= N;										//convert to mean-squared
+		r *= (VPerDU_output*VPerDU_output);			//convert mean-squared value to volts^2
+		return 10*Math.log10(r) + SPL1V;			//convert to dB SPL
 	}
 	
+	//set signal as output level in dB SPL
+	public double[] setOutputLevel(double[] x, double spl) {
+		double a = getOutputLevel(x);
+		double gain = spl - a;
+		for (int n=0; n<x.length; n++) {
+			x[n] *= Math.pow(10, gain/20);
+		}
+		return x;
+	}
+	
+	//compute input signal level in dB SPL
 	public double getInputLevel(double[] x) {
-		double r = SignalProcessing.rms(x);		//digital signal rms
-		if (r==0)
+		return getInputLevel(x,0,x.length-1);
+	}
+	public double getInputLevel(double[] x, int fromSample, int toSample) {
+		//compute sum of squares
+		double r = 0;
+		int N = toSample-fromSample;
+		for (int n=fromSample; n<=toSample; n++) {
+			r+=x[n]*x[n];
+		}
+		if (r==0)								//avoid log(0), return min value instead
 			return Double.MIN_VALUE;
-		
-		r *= VPerDU_input;						//electrical signal rms
-		return 10*Math.log10(r*1e6) + SPL1uV;	//convert to dB SPL (using uV reference)
+		r /= N;										//convert to mean-squared
+		r *= (VPerDU_input*VPerDU_input);			//convert to volts^2
+		return 10*Math.log10(r*1e6) + SPL1uV;		//convert to dB SPL (using uV reference)
 	}
 }

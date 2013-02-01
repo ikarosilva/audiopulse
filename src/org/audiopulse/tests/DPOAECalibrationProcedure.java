@@ -1,5 +1,7 @@
 package org.audiopulse.tests;
 
+import org.audiopulse.activities.BasicTestActivity;
+import org.audiopulse.hardware.AcousticConversion;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
 import org.audiopulse.utilities.Signals;
@@ -18,8 +20,10 @@ public class DPOAECalibrationProcedure extends TestProcedure{
 	private int fs = 44100;
 	private double duration = 0.5;
 	
-	public DPOAECalibrationProcedure(Handler handler) {
-		super(handler);
+	private AcousticConversion converter = new AcousticConversion();
+	
+	public DPOAECalibrationProcedure(BasicTestActivity parentActivity) {
+		super(parentActivity);
 		// TODO Auto-generated constructor stub
 	}
 	public void run() {
@@ -35,18 +39,20 @@ public class DPOAECalibrationProcedure extends TestProcedure{
 		//5. Determine level between onset & offset
 		//6. Save result.
 		double[] tone1 = Signals.tone(fs, f1, duration);
+		tone1 = converter.setOutputLevel(tone1, 65);
 		double[] tone2 = Signals.tone(fs, f2, duration);
-		
+		tone2 = converter.setOutputLevel(tone2, 65);
+				
 		double A1 = calibrateTone(tone1);
-		informUI("f1 amplitude: " + A1);
+		informUI("f1 amplitude: " + String.format("%.1f dB SPL",A1));
 		double A2 = calibrateTone(tone2);
-		informUI("f2 amplitude: " + A2);
+		informUI("f1 amplitude: " + String.format("%.1f dB SPL",A2));
 	}
 	
 	private double calibrateTone(double[] tone) {
 		testIO.setStimulus(AudioSignal.convertToStereo(tone));
 		double[] x = testIO.playAndRecord();
-		double A = SignalProcessing.rms(x);
+		double A = converter.getInputLevel(x);
 		return A;
 	}
 	

@@ -54,54 +54,50 @@ public class PlayRecordManager{
 	
 	//start playback & recording (if enabled)
 	private void playRec() {
-		if (!playbackEnabled && !recordEnabled) {
-			return;
-		} else if (playbackEnabled && !recordEnabled) {
-			player.play();
-			//TODO: suspend until play is done
-		} else if (recordEnabled) {
-			//determine sample lengths from parameters specified in ms
-			int preRollSamples = recordPreRoll * sampleRate / 1000;
-			int postRollSamples = recordPostRoll * sampleRate / 1000;
-			int recordFrameSize = recordPollPeriod * sampleRate / 1000;
-			recordedSamples = new short[stimulusLength + preRollSamples + postRollSamples];
-			
-			//define playback triggers: when we reach a certain sample, start / stop playback
-			int startPlaybackTrigger = preRollSamples;
-			boolean playbackTriggered = false;
-			int stopPlaybackTrigger = preRollSamples + stimulusLength;
-			boolean playbackStopped = false;
-			
-			//start recording loop: poll record buffer, write data to recordedSamples
-			int n = 0;
-			recorder.startRecording();
-			while(n<recordedSamples.length){ 
-				int remainingSamples = recordedSamples.length - n;
-				int requestSize=(recordFrameSize<=remainingSamples) ? recordFrameSize: remainingSamples;
-				int nRead=recorder.read(recordedSamples,n,requestSize);
-				if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
-					Log.e(TAG, "Audio read failed: " + nRead);
-					//TODO: send a useful message to main activity informing of failure
-				}
-				n += nRead;
-				
-				//determine if we should trigger playback start or stop
-				if (playbackEnabled) {
-					if (!playbackTriggered && n>=startPlaybackTrigger){
-						player.play();
-						playbackTriggered = true;
-					}
-					if (!playbackStopped && n>=stopPlaybackTrigger){
-						player.stop();
-						playbackStopped = true;
-					}
-				}
-				
+		//determine sample lengths from parameters specified in ms
+		int preRollSamples = recordPreRoll * sampleRate / 1000;
+		int postRollSamples = recordPostRoll * sampleRate / 1000;
+		int recordFrameSize = recordPollPeriod * sampleRate / 1000;
+		recordedSamples = new short[stimulusLength + preRollSamples + postRollSamples];
+		
+		//define playback triggers: when we reach a certain sample, start / stop playback
+		int startPlaybackTrigger = preRollSamples;
+		boolean playbackTriggered = false;
+		int stopPlaybackTrigger = preRollSamples + stimulusLength;
+		boolean playbackStopped = false;
+		
+		//start recording loop: poll record buffer, write data to recordedSamples
+		int n = 0;
+		recorder.startRecording();
+		while(n<recordedSamples.length){ 
+			int remainingSamples = recordedSamples.length - n;
+			int requestSize=(recordFrameSize<=remainingSamples) ? recordFrameSize: remainingSamples;
+			int nRead=recorder.read(recordedSamples,n,requestSize);
+			if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
+				Log.e(TAG, "Audio read failed: " + nRead);
+				//TODO: send a useful message to main activity informing of failure
 			}
-	
-			recorder.stop();
-			initializeRecorder();		//release & re-initialize so we're ready to record again
+			n += nRead;
+			
+			//determine if we should trigger playback start or stop
+			if (playbackEnabled) {
+				if (!playbackTriggered && n>=startPlaybackTrigger){
+					player.play();
+					playbackTriggered = true;
+				}
+				if (!playbackStopped && n>=stopPlaybackTrigger){
+					player.pause();
+					player.flush();
+					player.release();
+					player = null;
+					playbackStopped = true;
+				}
+			}
+			
 		}
+		
+		recorder.stop();
+		initializeRecorder();		//release & re-initialize so we're ready to record again
 	}
 	
 	//define stimulus for playback.
@@ -120,7 +116,6 @@ public class PlayRecordManager{
 				  AudioFormat.ENCODING_PCM_16BIT,
 				  stimulusLength*4,
 				  AudioTrack.MODE_STATIC);
-
 		return player.write(writeData,0,writeData.length);
 	}
 	
@@ -142,7 +137,7 @@ public class PlayRecordManager{
 				AudioFormat.CHANNEL_CONFIGURATION_STEREO,
 				AudioFormat.ENCODING_PCM_16BIT
 				);
-		int bufferSizeInBytes = recordBufferLength * sampleRate / 1000;
+		int bufferSizeInBytes = 2 * recordBufferLength * sampleRate / 1000;
 		if (bufferSizeInBytes < minBuffer) bufferSizeInBytes = minBuffer;
 		recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
 				sampleRate,
