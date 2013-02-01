@@ -7,7 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 
 public abstract class TestProcedure implements Runnable {
-	protected PlayRecordManager testIO;
+	protected PlayRecordManager testIO = new PlayRecordManager();
 	private Handler uiThreadHandler;
 	
 	public TestProcedure (Handler handler) {
