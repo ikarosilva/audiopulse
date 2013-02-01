@@ -10,7 +10,7 @@ import android.media.AudioTrack;
 import android.os.Handler;
 import android.util.Log;
 
-public class DPOAECalibration extends TestProcedure{
+public class DPOAECalibrationProcedure extends TestProcedure{
 
 	private final String TAG = "DPOAECalibration";
 	
@@ -18,7 +18,7 @@ public class DPOAECalibration extends TestProcedure{
 	private int fs = 44100;
 	private double duration = 0.5;
 	
-	public DPOAECalibration(Handler handler) {
+	public DPOAECalibrationProcedure(Handler handler) {
 		super(handler);
 		// TODO Auto-generated constructor stub
 	}

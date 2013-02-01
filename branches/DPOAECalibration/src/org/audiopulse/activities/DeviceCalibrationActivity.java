@@ -49,7 +49,7 @@ import org.audiopulse.io.AudioStreamer;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
-import org.audiopulse.tests.DPOAECalibration;
+import org.audiopulse.tests.DPOAECalibrationProcedure;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
 import org.audiopulse.utilities.SpectralWindows;
@@ -133,7 +133,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	public void startTest(View callingView){
 		if (callingView.getId() == R.id.testingButton) {
 			appendText("Starting DPOAE Calibration");
-			new Thread( new DPOAECalibration(new ReportStatusHandler(this))).start();
+			new Thread( new DPOAECalibrationProcedure(new ReportStatusHandler(this))).start();
 		}
 	}
 	
