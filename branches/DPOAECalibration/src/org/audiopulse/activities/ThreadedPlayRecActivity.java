@@ -89,7 +89,7 @@ import android.widget.TextView;
 		Log.d(TAG, "Called by: " + caller);
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			setContentView(R.layout.sana_thread);
-			//initMetaData();
+			initMetaData();
 			String selected = getString(R.string.dpgram_right);
 			selectAndRunThread(selected);
 		} else {
@@ -212,7 +212,7 @@ import android.widget.TextView;
 		String path =Constants.MEDIA_PATH +"DPOAE.jpg";
 		File data = new File(path);
 		data.mkdirs();
-		//this.setResultOkAndData(Uri.fromFile(data));
+		this.setResultOkAndData(Uri.fromFile(data));
 	}
 	
 	public void appendData(Bundle b){
@@ -221,7 +221,7 @@ import android.widget.TextView;
 		// TODO remove when done testing
 		Log.d(TAG, "Setting output " + output);
 		//this.setResult(Result.OK, output);
-		//this.setResultOkAndData(output);
+		this.setResultOkAndData(output);
 	}
 	
 	protected void onPause(){
