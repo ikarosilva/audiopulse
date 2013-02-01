@@ -54,14 +54,6 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
-//TODO: change the scope of this activity's purpose.
-//this activity will be a base class for test procedures (rename it TestProcedureActivity?)
-//and will have a default layout: text log, quick graph of input & output
-//other tests procedures can extend this, define their own layouts
-//e.g. define a DPOAE activity that has an online DPgram display
-//e.g. calibration activity that has an I/O display
-//this activity and extended classes will be launched from TestMenuActivity.
-
 //GeneralAudioTestActivity is a template for all tests; all test activities should extend GeneralAudioTestActivity.
 
 public abstract class GeneralAudioTestActivity extends AudioPulseActivity 
@@ -89,6 +81,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		//performTest();
 		//TODO: We should always have an option to do the test automatically (perhaps by reading from
 		//the context in which the activity was called
+		//[AHS] why can't the calling activity simply call startTest()?
 	}
 
 	//begin test. Generally, this function is called by a ButtonView in the layout.
@@ -163,4 +156,9 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		startActivity(intent);
 	}
 
+	// TODO Set some common functionality here or make abstract
+	public void appendData(Bundle b) {
+		// TODO Auto-generated method stub
+		
+	}
 }

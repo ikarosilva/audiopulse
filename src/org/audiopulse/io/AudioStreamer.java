@@ -58,10 +58,10 @@ public class AudioStreamer
 	public static final int audioMode = AudioManager.STREAM_MUSIC;
 	public static final int trackMode = AudioTrack.MODE_STREAM;
 			
-	private ThreadedSignalGenerator source = null;
-	private Thread playThread;
+	private ThreadedSignalGenerator source = null;			//continuously generates samples to write to audio buffer
+	private Thread playThread;								//contains main playback loop
 	private boolean isPlaying = false;
-	private volatile boolean requestStop;
+	private volatile boolean requestStop;					//used to attempt to stop main playback loop
 	private volatile AudioTrack track;
 
 	private final int frameLength;		//num mono samples per audio frame
@@ -75,6 +75,7 @@ public class AudioStreamer
 	//general constructor
 	public AudioStreamer (int sampleRate, int frameLength)
 	{
+		//determine PCM buffer parameters
 		int bytesPerFrame = frameLength * 2 * 2;		//2 bytes per sample, 2 buffer samples per stereo signal sample
 		int minBufferSizeInBytes = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
 		assert false : "Test assertion";
@@ -89,6 +90,7 @@ public class AudioStreamer
 		this.sampleRate = sampleRate;
 		this.frameLength = frameLength;
 		
+		//initialize AudioTrack object
 		track = new AudioTrack(audioMode, sampleRate, channelConfig, audioFormat, bytesPerFrame, trackMode); 
 		if(track.getState() != AudioTrack.STATE_INITIALIZED) {
 			Log.e(TAG,"Error: Audio record was not properly initialized!!");
@@ -97,6 +99,7 @@ public class AudioStreamer
 		
 	}
 	
+	//connect AudioStreamer object with a ThreadedSignalGenerator object that will give it a signal
 	public void attachSource(ThreadedSignalGenerator source) {
 		if (source.bufferLength != frameLength)
 			throw new IllegalArgumentException("Source bufferLength must match AudioStreamer frameLength");
@@ -108,6 +111,7 @@ public class AudioStreamer
 		return (source!=null);
 	}
 
+	//begin playback
 	public synchronized void start()
 	{
 		Log.d(TAG,"Stream start");
@@ -117,10 +121,10 @@ public class AudioStreamer
 			return;
 		}
 		
-		//create thread to play
+		//create thread to handle playback loop
 		playThread = new Thread( new Runnable( ) {
 			public void run( ) {
-				synchronized (audioLock) {
+				synchronized (audioLock) {		//block access if we're in the middle of a stop()
 					track.pause();
 					track.flush();
 					track.play();
@@ -128,14 +132,17 @@ public class AudioStreamer
 					requestStop = false;
 				}
 				
-				while(!requestStop) {
+				while(!requestStop) {		//break out of loop if someone sets reqeustStop
 					double[] frame = null;
-					waitForSourceReady();
+					waitForSourceReady();		//wait if buffer hasn't been computed yet
 					frame = source.getBuffer();	//gets current buffer, tells source to generate next buffer
+					
+					//write frame to audio out
 					Log.v(TAG,"Writing audio frame");
-					short[] writeData = AudioSignal.getAudioTrackData(frame, true);
+					short[] writeData = AudioSignal.convertStereoToShort(AudioSignal.convertToStereo(frame));
 					int nWritten = track.write(writeData,0,writeData.length);
 
+					//discover if error
 					if (nWritten == AudioTrack.ERROR_INVALID_OPERATION || nWritten == AudioTrack.ERROR_BAD_VALUE) {
 						if (requestStop) Log.e(TAG, "Audio write failed: " + nWritten);
 						else Log.v(TAG, "Audio write aborted due to stop request: " + nWritten);
@@ -156,11 +163,11 @@ public class AudioStreamer
 		//send stop request, wait for success, then flush audio track
 		new Thread( new Runnable() {
 			public void run() {
-				synchronized (audioLock) {
+				synchronized (audioLock) {	//block access if we're in the middle of a start()
 					requestStop = true;
 					if (isPlaying) {
 						try {
-							playThread.join();
+							playThread.join();		//stop requested, now wait until playback loops exits
 						} catch (InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -190,6 +197,7 @@ public class AudioStreamer
 		return frameLength;
 	}
 	
+	//suspend until source is ready with another buffer
 	private void waitForSourceReady() {		//blocking call: do not call from UI thread!
 		if (!source.isBufferReady()) Log.i(TAG,"Waiting for buffer");
 		try {
@@ -203,15 +211,3 @@ public class AudioStreamer
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -65,6 +65,10 @@ public class ReportStatusHandler extends Handler
 		if(b.getLong("N") == 0L){
 			this.printMessage(pm);
 		}else{
+			// Thread should be done so we are sending data back to
+			// parent
+			// Need this so parent has bundled file uri to return to Sana.
+			parentActivity.appendData(b);
 			if(b.getBoolean("showSpectrum") ==true){
 				this.plotAudioSpectrum(b);
 			}
