@@ -49,6 +49,7 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -82,7 +83,8 @@ public class RecordThreadRunnable implements Runnable
 	Context context;
 	private String testType;
 	private boolean showSpectrum;
-
+	private File outFile =null;
+	
 	public RecordThreadRunnable(Handler h, double playTime,Context context)
 	{
 		Log.v(TAG,"constructing record thread");
@@ -120,12 +122,17 @@ public class RecordThreadRunnable implements Runnable
 		}
 		informMiddle("Recording, please wait...");
 		record();
+
+		// Write file to disk
+		// Define file name here beacause inform finish is adding the Uri to the message bundle 
+		// TODO Does the bundling need to happen post SHortfile.writeFile
+		String fileName="AP_" + testType + new Date().toString()+".raw";
+		outFile = new File(root, fileName.replace(" ","-").replace(":", "-") ); 
+		
 		//Finish up
 		informFinish();
 
-		//Write file to disk
-		String fileName="AP_" + testType + new Date().toString().replace(" ","-").replace(":", "-") +".raw";
-		File outFile = new File(root, fileName);
+		Log.d(TAG, "outFile => "+ outFile.getAbsolutePath());
 		informMiddle("Saving file: "+ outFile.getAbsolutePath());
 		try {
 			ShortFile.writeFile(outFile,samples);
@@ -165,6 +172,12 @@ public class RecordThreadRunnable implements Runnable
 		results.putDouble("recordRMS",recordRMS);
 		results.putDouble("expectedFrequency",expectedFrequency);
 		results.putBoolean("showSpectrum",showSpectrum);
+		// TODO use the final zip file uri instead of the raw file
+		Uri output = (outFile != null)? Uri.fromFile(outFile):
+						Uri.EMPTY;
+		Log.d(TAG, "Output Uri: " + output);
+		results.putParcelable("outfile", output);
+	    
 		m.setData(results);
 		this.mainThreadHandler.sendMessage(m);
 	}
@@ -237,4 +250,15 @@ public class RecordThreadRunnable implements Runnable
 		Log.v(TAG,"recording RMS= " + recordRMS);		
 	}
 
+	// outFile added as raw output to pass to Sana
+	// TODO change to use zipped file
+	// TODO maybe remove entirely since pass Uri in bundle
+	/**
+	 *
+	 */
+	public File getOutFile(){
+		
+		return outFile;
+	}
+	
 }

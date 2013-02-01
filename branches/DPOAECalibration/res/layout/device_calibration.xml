@@ -62,5 +62,12 @@
 	    android:layout_width="fill_parent" 
 	    android:layout_height="wrap_content"
 	    />
+		
+	<Button
+	    android:id="@+id/testingButton"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:onClick="startTest"
+	    android:text="Test DPOAE Calib" />
 	
 </LinearLayout>
