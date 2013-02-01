@@ -101,7 +101,7 @@ public class AudioSignal {
 	
 	
 	//scale and convert a single sample to short.
-	private static short convertSampleToShort(double sample) {
+	public static short convertSampleToShort(double sample) {
 		if(Math.abs(sample)>1){	
 			Log.w(TAG,"Digital (short) audio signal is being clipped!!");
 			return (short) (Short.MAX_VALUE * (Math.signum(sample)));
@@ -109,13 +109,13 @@ public class AudioSignal {
 			return (short) (Short.MAX_VALUE * (sample));
 		}
 	}
-	private static double convertSampleToDouble(short sample) {
+	public static double convertSampleToDouble(short sample) {
 		return ((double)sample) / ((double)Short.MAX_VALUE);
 	}
 	
 	//interleave left and right vectors into stereo interleaved
 	//left and right should be equal length (truncates if not)
-	private static short[] interleave(short[] left, short[] right) {
+	public static short[] interleave(short[] left, short[] right) {
 		if (left.length != right.length)
 			throw new IllegalArgumentException("Cannot interleave vectors of unequal length");
 		

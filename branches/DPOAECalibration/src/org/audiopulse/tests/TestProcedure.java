@@ -1,5 +1,6 @@
 package org.audiopulse.tests;
 
+import org.audiopulse.activities.BasicTestActivity;
 import org.audiopulse.io.PlayRecordManager;
 import org.audiopulse.io.Utils;
 
@@ -10,8 +11,8 @@ public abstract class TestProcedure implements Runnable {
 	protected PlayRecordManager testIO = new PlayRecordManager();
 	private Handler uiThreadHandler;
 	
-	public TestProcedure (Handler handler) {
-		this.uiThreadHandler = handler;
+	public TestProcedure (BasicTestActivity parent) {
+		this.uiThreadHandler = new Handler(parent);
 	}
 	
 	public void informUI(String str)
