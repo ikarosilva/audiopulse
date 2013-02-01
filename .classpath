@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry exported="true" kind="lib" path="lib/commons-math3-3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/afreechart-0.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sana-api-android.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="lib/sana-api-android.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
