@@ -97,7 +97,7 @@ public class DPOAEActivity extends GeneralAudioTestActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.dpoae);
 		// Sana observation meta data - from Sana API ObservationActivity
-		//initMetaData();
+		initMetaData();
 		
 		DPOAERequest = getIntent().getExtras();
 		// TODO Set test name value from concept? Or just use concept
@@ -164,7 +164,7 @@ public class DPOAEActivity extends GeneralAudioTestActivity
 	protected void startMockTest(){
 		String path =Constants.MEDIA_PATH +"DPOAE.jpg";
 		File data = new File(path);
-		//this.setResultOkAndData(Uri.fromFile(data));
+		this.setResultOkAndData(Uri.fromFile(data));
 	}
 
 }
