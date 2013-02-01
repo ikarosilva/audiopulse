@@ -28,6 +28,10 @@ public class PlayRecordManager{
 	private static final String TAG = "PlayRecordManager";
 	
 	public PlayRecordManager() {
+		this(44100);
+	}
+	public PlayRecordManager(int sampleRate) {
+		this.sampleRate = sampleRate;
 		this.setPlaybackEnabled(false);
 		this.setRecordEnabled(true);
 	}
