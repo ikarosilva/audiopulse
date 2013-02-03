@@ -81,7 +81,10 @@ import android.widget.TextView;
 	Thread playThread = null;
 	Thread recordThread = null;
 	Thread packageDataThread = null;
-	public static double playTime=0.5;
+	//Parameters will be set close to that from Gorga et al 1993 (JASA 93(4)).
+	private static double sweeps=200;
+    private static double epocTime=0.02048; //epoch time in seconds 
+	public static double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 	private List<Uri> outFiles = new ArrayList<Uri>();
 	public AudioPulseXMLData xmlData=null;
@@ -133,9 +136,9 @@ import android.widget.TextView;
 			this.appendText("Starting: " + selected +"\n");
 			List<String> RunTest= new ArrayList<String>();
 
-			RunTest.add(getResources().getString(R.string.dpoae_2k));
+			//RunTest.add(getResources().getString(R.string.dpoae_2k));
 			//RunTest.add(getResources().getString(R.string.menu_3k));
-			//RunTest.add(getResources().getString(R.string.menu_4k));
+			RunTest.add(getResources().getString(R.string.menu_4k));
 			for(String runme: RunTest){
 				Log.v(TAG,"Running thread: " + runme + " from test: " + selected);
 				this.appendText("testing: " + runme + " \n");

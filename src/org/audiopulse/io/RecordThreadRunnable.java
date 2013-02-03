@@ -73,7 +73,7 @@ public class RecordThreadRunnable implements Runnable
 	final static int channelConfig = AudioFormat.CHANNEL_IN_MONO;
 	final static int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 	final static int recSource=MediaRecorder.AudioSource.MIC;
-	private int sampleRate=8000;
+	private int sampleRate=16000;
 	private int Buffer_Size;
 	private double expectedFrequency; 
 	final short[] samples ;
