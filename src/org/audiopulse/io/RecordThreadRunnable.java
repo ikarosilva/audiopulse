@@ -126,6 +126,7 @@ public class RecordThreadRunnable implements Runnable
 		if(streamVolume != 15){
 		informMiddle("Warning: volume is set to: " + streamVolume);
 		}
+		
 		record();
 		// Write file to disk
 		// Define file name here because inform finish is adding the Uri to the message bundle 
@@ -197,9 +198,12 @@ public class RecordThreadRunnable implements Runnable
 					audioFormat, soundCardBufferSize*soundCardBufferSizeScale);
 			mAudio.setPositionNotificationPeriod(soundCardBufferSize);
 		} catch (IllegalArgumentException e) {
+			System.err.println("Error initializing recording");
 			e.printStackTrace();
 		}	
-
+		if(mAudio.getSampleRate() != sampleRate){
+			System.err.println("Not recording at the correct sample rate!!");
+		}
 	}
 
 
