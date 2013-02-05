@@ -93,7 +93,7 @@ public class DPOAESignal extends PeriodicSeries{
 			f[0]=f2/1.2;
 			f[1]=f2;
 			A[0]=(double)(Short.MAX_VALUE)*.1;//65; 
-			A[1]=(double)(Short.MAX_VALUE)*.1;//65;
+			A[1]=A[0]*Math.pow(10,-15/20);//Second frequency should be at -15 dB lower!
 			expectedResponse=2*f[0]-f[1];
 			stimPresentation[0]=0;
 			stimPresentation[1]=1;
