@@ -170,16 +170,16 @@ public class PlayThreadRunnable implements Runnable
 		
 		//quick hack to allow the Brazilians to generate mutliple freq stimuli
 		if (f==2)
-			stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
+			stimulus = new DPOAESignal(DPOAESignal.protocolHOAE.F2k,PlayBufferSize,
 					sampleRate,phone,channelConfig);
 		else if (f==3)
-			stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F3k,PlayBufferSize,
+			stimulus = new DPOAESignal(DPOAESignal.protocolHOAE.F3k,PlayBufferSize,
 					sampleRate,phone,channelConfig);
 		else if (f==4)
-			stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F4k,PlayBufferSize,
+			stimulus = new DPOAESignal(DPOAESignal.protocolHOAE.F4k,PlayBufferSize,
 					sampleRate,phone,channelConfig);
 		else
-			stimulus = new DPOAESignal(DPOAESignal.protocolBioLogic.F2k,PlayBufferSize,
+			stimulus = new DPOAESignal(DPOAESignal.protocolHOAE.F2k,PlayBufferSize,
 					sampleRate,phone,channelConfig);
 			
 		short[] tmpSamples = stimulus.generateSignal();
