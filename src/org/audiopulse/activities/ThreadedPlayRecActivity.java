@@ -141,7 +141,7 @@ import android.widget.TextView;
 			RunTest.add(getResources().getString(R.string.menu_4k));
 			for(String runme: RunTest){
 				Log.v(TAG,"Running thread: " + runme + " from test: " + selected);
-				this.appendText("testing: " + runme + " \n");
+				this.appendText("Running Test: " + runme + " \n");
 				playRecordThread(runme,false);
 			}
 			
@@ -199,14 +199,17 @@ import android.widget.TextView;
 			execSvc.shutdown();
 		}else{
 			//quick hack. depracated anyway.
-			int f;
+			int f = 0;
 			if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_3k)))
 				f = 3;
 			else if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_4k)))
 				f = 4;
-			else
+			else if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_2k)))
 				f = 2;
-
+			else{
+				this.appendText("Unknown frequency option: "+ item_selected +"\n");
+				System.err.println("Unknown f option: "+ item_selected);
+			}
 			playStatusBackHandler = new ReportStatusHandler(this);
 			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime, f);
 			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
