@@ -63,6 +63,7 @@ public class ReportStatusHandler extends Handler
 	{
 		String pm = Utils.getStringFromABundle(msg.getData());		
 		Bundle b=msg.getData();
+		
 		isBuzy=(GeneralAudioTestActivity.getRecordingState() == GeneralAudioTestActivity.threadState.ACTIVE) &&
 				(GeneralAudioTestActivity.getPlaybackState() == GeneralAudioTestActivity.threadState.ACTIVE);
 		if(isBuzy){
@@ -76,9 +77,14 @@ public class ReportStatusHandler extends Handler
 				if(outfile != null){
 					parentActivity.addXMLFile("DPOAE",outfile.toString());
 					this.printMessage("Added file to package: " + outfile.toString());
+					//Run more test if there are any on the queue
+					if(parentActivity.hasNextTestFrequency()){
+						parentActivity.selectAndRunThread();
+					}
 					
 				}
-				if(GeneralAudioTestActivity.getPackedDataState() == GeneralAudioTestActivity.threadState.INITIALIZED){
+				if(GeneralAudioTestActivity.getPackedDataState() == GeneralAudioTestActivity.threadState.INITIALIZED &&
+						parentActivity.hasNextTestFrequency()==false ){
 					//Call the package thread to compress and package the data, this method, though defined in the
 					// parentActivity (GeneralAudioPulseTesting) is actually being implemented/called from a subclass (i.e., ThreadedRecPlayActivity). 
 					parentActivity.packageThread();

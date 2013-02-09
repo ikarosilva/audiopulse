@@ -83,12 +83,16 @@ import android.widget.TextView;
 	Thread packageDataThread = null;
 	//Parameters will be set close to that from Gorga et al 1993 (JASA 93(4)).
 	private static double sweeps=200;
-    private static double epocTime=0.02048; //epoch time in seconds 
+	private static double epocTime=0.02048; //epoch time in seconds 
 	public static double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
 	private List<Uri> outFiles = new ArrayList<Uri>();
 	public AudioPulseXMLData xmlData=null;
 	private String selected;
+	private ArrayList<Integer> testFrequencies;
+	private boolean isMultiTestInitialized;
+	boolean showPlot=true;
+	int testFreq;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -98,6 +102,9 @@ import android.widget.TextView;
 		//TODO: Move this inside so it gets called only when Sana launches the app!
 		xmlData= new AudioPulseXMLData();//Initial XML Data only when being called from Sana
 		selected = getString(R.string.dpgram_right);
+		testFrequencies = new ArrayList<Integer>();
+		isMultiTestInitialized=false;
+		
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			setContentView(R.layout.sana_thread);
 			Log.v(TAG,"Initializing Sana metadata ");
@@ -124,36 +131,45 @@ import android.widget.TextView;
 
 	}
 
-	private final void selectAndRunThread(){
+	public final void selectAndRunThread(){
 
 		if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
-			Log.v(TAG,"ploting waveform");
 			plotWaveform();
-		} else if(selected.equalsIgnoreCase(getResources().getString(R.string.dpgram_right)) ||
-				selected.equalsIgnoreCase(getResources().getString(R.string.dpgram_left))) {
-			//TODO: plot audiogram results
-			//Generate list of tests to run
-			this.appendText("Starting: " + selected +"\n");
-			List<String> RunTest= new ArrayList<String>();
-
-			//RunTest.add(getResources().getString(R.string.dpoae_2k));
-			//RunTest.add(getResources().getString(R.string.menu_3k));
-			RunTest.add(getResources().getString(R.string.menu_4k));
-			for(String runme: RunTest){
-				Log.v(TAG,"Running thread: " + runme + " from test: " + selected);
-				this.appendText("Running Test: " + runme + " \n");
-				playRecordThread(runme,false);
-			}
-			
-		}
-		else {
-			//In this case we are assuming we are doing a single test only
-			//ie: dpoae4kHz, dpoae2kHz, soae, etc...
+		} else {
 			emptyText(); //Clear text for new stimuli test and spectral plotting
-			playRecordThread(selected,true);
+			if(selected.equalsIgnoreCase(getResources().getString(R.string.soae)) ){
+				testFrequencies.add(-1);
+			}else if(selected.equalsIgnoreCase(getResources().getString(R.string.dpgram_left)) ||
+					selected.equalsIgnoreCase(getResources().getString(R.string.dpgram_right))){
+				if( isMultiTestInitialized ==false){
+					testFrequencies.add(2);
+					testFrequencies.add(3);
+					testFrequencies.add(4);
+					isMultiTestInitialized=true;
+				}
+				showPlot=false;
+			}
+			else if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_3k)))
+				testFrequencies.add(3);
+			else if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_4k)))
+				testFrequencies.add(4);
+			else if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_2k)))
+				testFrequencies.add(4);
+			else{
+				this.appendText("Unknown frequency option: "+ selected +"\n");
+				System.err.println("Unknown f option: "+ selected);
+			}
+			testFreq= testFrequencies.get(0);
+			testFrequencies.remove(0);
+			appendLine("Testing frequency: " + testFreq + " kHz \n");
+			playRecordThread(selected,showPlot,testFreq);
 		} 
 	}
-	
+
+	public boolean hasNextTestFrequency(){
+		return (! testFrequencies.isEmpty());
+	}
+
 	private void AnalyzeData(){
 		this.appendText("analyzing results from test " + selected+ " \n");
 		Log.v(TAG,"analyzing results from test " + selected);
@@ -171,15 +187,15 @@ import android.widget.TextView;
 		DPGramresults.putDoubleArray("noiseFloor",noiseFloor);
 		DPGramresults.putDoubleArray("f1Data",f1Data);
 		DPGramresults.putDoubleArray("f2Data",f2Data);
-		
+
 		//TODO: condition on left/right
 		this.appendText("setting xmldata properties\n");
 		Log.v(TAG,"setting xmldata properties ");
-		
+
 		xmlData.setDPOAELeftEarGram("response="+DPOAEData.toString()+";noise=" + noiseFloor.toString() + ";f1=" + 
 				f1Data + ";f2=" + f2Data.toString());
 	}
-	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum)
+	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum, int frequency)
 	{
 
 		//Ignore playing thread when obtaining SOAEs
@@ -188,9 +204,10 @@ import android.widget.TextView;
 
 
 		recordStatusBackHandler = new ReportStatusHandler(this);
-		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected);
+		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected, frequency);
 
-		if(item_selected.equalsIgnoreCase(getResources().getString(R.string.soae)) ){
+		if(frequency==-1 ){
+			//SOAE case
 			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
 			rRun.setExpectedFrequency(0);
 			recordThread = new Thread(rRun);	
@@ -198,20 +215,8 @@ import android.widget.TextView;
 			execSvc.execute( recordThread );
 			execSvc.shutdown();
 		}else{
-			//quick hack. depracated anyway.
-			int f = 0;
-			if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_3k)))
-				f = 3;
-			else if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_4k)))
-				f = 4;
-			else if (item_selected.equalsIgnoreCase(getResources().getString(R.string.menu_2k)))
-				f = 2;
-			else{
-				this.appendText("Unknown frequency option: "+ item_selected +"\n");
-				System.err.println("Unknown f option: "+ item_selected);
-			}
 			playStatusBackHandler = new ReportStatusHandler(this);
-			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime, f);
+			PlayThreadRunnable pRun = new PlayThreadRunnable(playStatusBackHandler,playTime, frequency);
 			ExecutorService execSvc = Executors.newFixedThreadPool( 2 );
 			playThread = new Thread(pRun);
 			rRun.setExpectedFrequency(pRun.stimulus.expectedResponse);
@@ -221,10 +226,7 @@ import android.widget.TextView;
 			execSvc.execute( recordThread );
 			execSvc.execute( playThread );
 			execSvc.shutdown();	
-			
 		}
-		//TODO: this is not where the endTest should be called.
-		//endTest();
 		return rRun;
 	}
 
@@ -250,7 +252,7 @@ import android.widget.TextView;
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	public void addXMLFile(String key, String fileName){
 		this.xmlData.setSingleElement(key,fileName);
 	}
