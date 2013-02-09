@@ -212,8 +212,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	//Need to overwrite this method in the child class in order to used the package the data
 	//througth the ReportStatusHandler callback methods
 	 public PackageDataThreadRunnable packageThread(){
-		 Log.v(TAG,"packageThread being called from" +TAG +
-				 " this should not happen!!");
+		//TODO: make this abstract and push implementation to subclass
 		 return null;
 	 }
 	 public void addXMLFile(String key, String fileName){
@@ -226,6 +225,16 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	}
 	public static GeneralAudioTestActivity.threadState getPlaybackState() {
 		return GeneralAudioTestActivity.playbackstate;
+	}
+
+	
+	public boolean hasNextTestFrequency(){
+		//TODO: make this abstract and push implementation to subclass
+		return false;
+	}
+
+	public void selectAndRunThread(){
+		//TODO: make this abstract and push implementation to subclass
 	}
 	
 	

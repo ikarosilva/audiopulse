@@ -82,6 +82,7 @@ public class RecordThreadRunnable implements Runnable
 	Handler mainThreadHandler = null;
 	private Bundle results;
 	public int clipped;
+	private int testFrequency; //Used for DPOAE
 	
 	//TODO: handle external storage unavailability
 	private static File root = Environment.getExternalStorageDirectory();
@@ -102,12 +103,13 @@ public class RecordThreadRunnable implements Runnable
 
 	}
 
-	public RecordThreadRunnable(Handler h, double playTime,Context context, String itemSelected)
+	public RecordThreadRunnable(Handler h, double playTime,Context context, String itemSelected, int frequency)
 	{
 		Log.v(TAG,"constructing record thread");
 		mainThreadHandler = h;
 		Buffer_Size=(int) (playTime*sampleRate); 
 		samples = new short[Buffer_Size];
+		testFrequency=frequency;
 		initRecord();
 		this.context=context;
 		testType = itemSelected;
@@ -131,7 +133,7 @@ public class RecordThreadRunnable implements Runnable
 		// Write file to disk
 		// Define file name here because inform finish is adding the Uri to the message bundle 
 		// TODO Does the bundling need to happen post SHortfile.writeFile
-		String fileName="AP_" + testType + new Date().toString()+".raw";
+		String fileName="AP_" + testType + "-" + testFrequency + "kHz-" +new Date().toString()+".raw";
 		outFile = new File(root, fileName.replace(" ","-").replace(":", "-") ); 
 		
 		Log.d(TAG, "outFile => "+ outFile.getAbsolutePath());
