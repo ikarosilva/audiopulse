@@ -160,9 +160,6 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	public static GeneralAudioTestActivity.threadState getRecordingState(){
 		return GeneralAudioTestActivity.recordingstate;
 	}
-	public static void setPackedDataState(GeneralAudioTestActivity.threadState state){
-		GeneralAudioTestActivity.packedDataState=state;
-	}
 	public static GeneralAudioTestActivity.threadState getTestState(){
 		return GeneralAudioTestActivity.testState;
 	}
@@ -170,6 +167,9 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		GeneralAudioTestActivity.testState=state;
 	}
 	
+	public static void setPackedDataState(GeneralAudioTestActivity.threadState state){
+		GeneralAudioTestActivity.packedDataState=state;
+	}
 	public static GeneralAudioTestActivity.threadState getPackedDataState(){
 		return GeneralAudioTestActivity.packedDataState;
 	}
@@ -215,9 +215,8 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		//TODO: make this abstract and push implementation to subclass
 		 return null;
 	 }
-	 public void addXMLFile(String key, String fileName){
-		 Log.v(TAG,"packageThread being called from" +TAG +
-				 " this should not happen!!");
+	 public void addFileToPackage(String key, String fileName){
+		//TODO: make this abstract and push implementation to subclass;
 	 }
 
 	public static void setPlaybackState(GeneralAudioTestActivity.threadState state) {

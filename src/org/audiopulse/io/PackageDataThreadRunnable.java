@@ -74,7 +74,7 @@ public class PackageDataThreadRunnable implements Runnable
 	private File outFile =null;
 	private AudioPulseXMLData xmlData;
 
-	public PackageDataThreadRunnable(Handler h, AudioPulseXMLData xmlData,Context context)
+	public  PackageDataThreadRunnable(Handler h, AudioPulseXMLData xmlData,Context context)
 	{
 		Log.v(TAG,"constructing packagedata thread");
 		mainThreadHandler = h;
@@ -106,21 +106,21 @@ public class PackageDataThreadRunnable implements Runnable
 		informFinish();
 	}
 
-	public void informMiddle(String str)
+	public synchronized void informMiddle(String str)
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
 		m.setData(Utils.getStringAsABundle(str));
 		this.mainThreadHandler.sendMessage(m);
 	}
 
-	public void informStart()
+	public synchronized void informStart()
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
 		m.setData(Utils.getStringAsABundle("Compressing & packaging Data for transmission"));
 		GeneralAudioTestActivity.setPackedDataState(GeneralAudioTestActivity.threadState.ACTIVE);
 		this.mainThreadHandler.sendMessage(m);
 	}
-	public void informFinish()
+	public synchronized void informFinish()
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
 		results= new Bundle();
@@ -166,12 +166,19 @@ public class PackageDataThreadRunnable implements Runnable
 		} finally {
 			zos.close();
 		}
-		
+
+		//Delete the file once they have been compressed and packed
+		for (String fileName : fileList) {
+			if(fileName.endsWith(".raw")){
+				File file=new File(fileName);
+				file.delete();
+			}
+		}
 		return new File(zipFileName);
 
 	}
 
-	public File getOutFile(){
+	public synchronized File getOutFile(){
 
 		return outFile;
 	}

@@ -200,24 +200,21 @@ public class PlayThreadRunnable implements Runnable
 		int ind=0;
 		int endbuffer;
 		int nWrite=1;
-		int total=0;
 		track.play();
 		long st = System.currentTimeMillis();
 		while(dataLeft>0){
 			endbuffer=(frameSize<dataLeft) ? frameSize: dataLeft;	
 			nWrite=track.write( samples,ind*frameSize,endbuffer);
 			if (nWrite == AudioTrack.ERROR_INVALID_OPERATION || nWrite == AudioTrack.ERROR_BAD_VALUE) {
-				Log.e(TAG, "Audio read failed: " + nWrite);
+				//Log.e(TAG, "Audio read failed: " + nWrite);
 				break;
 			}
-			Log.v(TAG,"wrote " + nWrite + " samples ( " + (long) 100*nWrite/endbuffer + " %)");
+			//Log.v(TAG,"wrote " + nWrite + " samples ( " + (long) 100*nWrite/endbuffer + " %)");
 			dataLeft -= endbuffer;
-			Log.v(TAG, "data left to play: " + dataLeft);
+			//Log.v(TAG, "data left to play: " + dataLeft);
 			ind++;	
-			total+=nWrite;
 		}
 		real_play_time = System.currentTimeMillis()-st;
-		Log.v(TAG,"play time " + real_play_time/1000 + " seconds" + " total samples: " + total);
 	}
 
 }
