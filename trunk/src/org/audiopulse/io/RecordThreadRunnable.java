@@ -171,9 +171,7 @@ public class RecordThreadRunnable implements Runnable
 		mAudio.release();
 		Message m = this.mainThreadHandler.obtainMessage();
 		results= new Bundle();
-		//TODO: Convert strings to key values and define them as public constant on top of the class.
-		String msg="Rec time= " + record_time/1000 + " seconds. RMS = " + recordRMS +
-				"  Frequency= "+ expectedFrequency;
+		String msg="Test frequency completed.";
 		results.putString("message", msg);
 		results.putShortArray("samples",samples);
 		results.putFloat("recSampleRate",sampleRate);

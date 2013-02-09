@@ -40,6 +40,7 @@
 package org.audiopulse.io;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,9 +48,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.audiopulse.activities.GeneralAudioTestActivity;
+import org.audiopulse.utilities.DPOAEAnalysis;
 
 import android.content.Context;
 import android.net.Uri;
@@ -66,6 +69,7 @@ public class PackageDataThreadRunnable implements Runnable
 	private static final String TAG="PackageDataThreadRunnable";
 	Handler mainThreadHandler = null;
 	private Bundle results;
+	ArrayList<Double[]> dpoaeData;
 
 	//TODO: handle external storage unavailability
 	private static File root = Environment.getExternalStorageDirectory();
@@ -76,7 +80,7 @@ public class PackageDataThreadRunnable implements Runnable
 
 	public  PackageDataThreadRunnable(Handler h, AudioPulseXMLData xmlData,Context context)
 	{
-		Log.v(TAG,"constructing packagedata thread");
+		//Log.v(TAG,"constructing packagedata thread");
 		mainThreadHandler = h;
 		this.context=context;
 		this.xmlData=xmlData;
@@ -85,9 +89,30 @@ public class PackageDataThreadRunnable implements Runnable
 	public synchronized void run()
 	{
 		informStart();
-		// Write file to disk
+		//Log.v(TAG,"Analyzing directory: " +root.getAbsolutePath());	
+		//informMiddle("Analyzing results...");
+		try {
+			dpoaeData=DPOAEAnalysis.runAnalysis(root.getAbsolutePath());
+		} catch (Exception e1) {
+			informMiddle("Analyzing failed!! " + e1.getMessage());
+			//Log.v(TAG,"Analyzis failed: " + e1.getMessage());
+			e1.printStackTrace();
+		}
+		if(dpoaeData.size() == 4){
+			//Send results as CSV
+			ArrayList<String> labels=new ArrayList<String>();
+			labels.add("f1Data");labels.add("f2Data");labels.add("DPOAEData");labels.add("noiseFloor");
+			for(int lid=0;lid<labels.size();lid++){
+				String value ="";
+				for(int flds=0;flds<dpoaeData.get(lid).length;flds++)
+					value +=","+dpoaeData.get(lid)[flds];		
+				value=value.replaceFirst(",","");
+				xmlData.setSingleElement(labels.get(lid), value);
+				//Log.v(TAG,labels.get(lid) + " = " + value);
+			}
+
+		}
 		// Define file name here because inform finish is adding the Uri to the message bundle 
-		// TODO Does the bundling need to happen post SHortfile.writeFile	
 		if(xmlData == null){
 			informMiddle("No metadata! Results will not be saved!");
 		} else {
@@ -116,7 +141,7 @@ public class PackageDataThreadRunnable implements Runnable
 	public synchronized void informStart()
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
-		m.setData(Utils.getStringAsABundle("Compressing & packaging Data for transmission"));
+		m.setData(Utils.getStringAsABundle("Analyzing & packaging Data"));
 		GeneralAudioTestActivity.setPackedDataState(GeneralAudioTestActivity.threadState.ACTIVE);
 		this.mainThreadHandler.sendMessage(m);
 	}
@@ -124,12 +149,10 @@ public class PackageDataThreadRunnable implements Runnable
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
 		results= new Bundle();
-		// TODO use the final zip file uri instead of the raw file
 		Uri output = (outFile != null)? Uri.fromFile(outFile):
 			Uri.EMPTY;
 		Log.d(TAG, "Output Uri: " + output);
 		results.putParcelable("outfile", output);
-
 		m.setData(results);
 		GeneralAudioTestActivity.setPackedDataState(GeneralAudioTestActivity.threadState.COMPLETE);
 		this.mainThreadHandler.sendMessage(m);
@@ -143,7 +166,7 @@ public class PackageDataThreadRunnable implements Runnable
 		xmlFileName= root + "/" +  xmlFileName.replace(" ","-").replace(":", "-");
 		xmlData.writeXMLFile(xmlFileName);
 		Log.v(TAG,"xmldata is :" + xmlData.getElements().toString());
-		//TODO: Generate list of files to compress and send to zip
+
 		List<String> fileList= xmlData.getFileList();
 		fileList.add(xmlFileName);
 
@@ -176,6 +199,40 @@ public class PackageDataThreadRunnable implements Runnable
 		}
 		return new File(zipFileName);
 
+	}
+
+	public static String unpackData(String inputFile) throws Exception {
+		//Unzips data into the zip file directory - Should not be used by the Android Client...
+		if(! inputFile.endsWith(".zip")){
+			throw new Exception("Input File is NOT a zipped file: " + inputFile);
+		}
+		String outFile = inputFile.replace(".zip",""); 
+		byte[] buffer = new byte[1024];
+		try{
+			File outFolder = new File(outFile);
+			if(!outFolder.exists()){
+				outFolder.mkdir();
+			}
+			ZipInputStream zis =new ZipInputStream(new FileInputStream(inputFile));
+			ZipEntry entry = zis.getNextEntry();
+			while(entry!=null){
+				String fileName = entry.getName();
+				File newFile = new File(outFile + File.separator + fileName);
+				new File(newFile.getParent()).mkdirs();
+				FileOutputStream fos = new FileOutputStream(newFile);             
+				int length;
+				while ((length = zis.read(buffer)) > 0) {
+					fos.write(buffer, 0, length);
+				}
+				fos.close();   
+				entry = zis.getNextEntry();
+			}
+			zis.closeEntry();
+			zis.close();
+		}catch(IOException ex){
+			ex.printStackTrace(); 
+		}  
+		return outFile;	
 	}
 
 	public synchronized File getOutFile(){

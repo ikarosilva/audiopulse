@@ -130,6 +130,39 @@ public class SignalProcessing {
 		return Pxx;
 	}
 
+	public static boolean isclipped(short[] rawData, double Fs) {
+		// TODO: Crude method to detect clipping of the waveform by 
+		//using a moving window and checking if all samples in that window
+		//are the same value. We are essentially checking if the signal 
+		//has any "flat-regions" of any sort (the playback can be clipped 
+		//while the recording can still be ok).
+		
+		double winSize=0.01; //window size in milliseconds
+		int window=(int) Math.round(Fs*winSize);
+		double sum=0;
+		double lastSample=0;
+		double currentSample=0;
+		boolean clipped=false;
+		for(int i=0;i<rawData.length;i++){
+			currentSample=Math.abs(rawData[i]);
+			if(i> (window-1)){
+				lastSample=Math.abs(rawData[i-window]);
+				sum-=lastSample;
+				sum+=currentSample;
+				//TODO : Maybe allow for some uncertainty around 1 because
+				//play back can be clipped but rec noise may mask some of it.
+				if(sum/(currentSample*window) == 1){
+					clipped=true;
+					break;
+				}
+			}else {
+				//Initial transient stage, filling the filter
+				sum+=currentSample;
+			}
+		}
+		return clipped;
+	}
+
 	/*
 	public static double[] getDPOAEResults(Bundle audioBundle, RecordThreadRunnable rRun){
 		short[] audioBuffer = audioBundle.getShortArray("samples");

@@ -75,7 +75,6 @@ public class ReportStatusHandler extends Handler
 				Uri outfile=b.getParcelable(RecordThreadRunnable.RECFILEKEY);
 				if(outfile != null){
 					parentActivity.addFileToPackage("DPOAE",outfile.toString());
-					this.printMessage("Added file to package: " + outfile.toString());
 					//Run more test if there are any on the queue
 					if(parentActivity.hasNextTestFrequency()){
 						parentActivity.setRecordingState(GeneralAudioTestActivity.threadState.INITIALIZED);
@@ -89,7 +88,6 @@ public class ReportStatusHandler extends Handler
 					GeneralAudioTestActivity.getRecordingState() == GeneralAudioTestActivity.threadState.COMPLETE){
 				//Call the package thread to compress and package the data, this method, though defined in the
 				// parentActivity (GeneralAudioPulseTesting) is actually being implemented/called from a subclass (i.e., ThreadedRecPlayActivity). 
-				Log.v(TAG,"packaging data");
 				parentActivity.packageThread();
 			}
 			//parentActivity.appendData(b);
