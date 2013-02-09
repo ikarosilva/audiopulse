@@ -115,7 +115,7 @@ public class RecordThreadRunnable implements Runnable
 		testType = itemSelected;
 	}
 	
-	public void setExpectedFrequency(double eFrequency){
+	public synchronized void setExpectedFrequency(double eFrequency){
 		expectedFrequency=eFrequency;
 	}
 
@@ -136,7 +136,7 @@ public class RecordThreadRunnable implements Runnable
 		String fileName="AP_" + testType + "-" + testFrequency + "kHz-" +new Date().toString()+".raw";
 		outFile = new File(root, fileName.replace(" ","-").replace(":", "-") ); 
 		
-		Log.d(TAG, "outFile => "+ outFile.getAbsolutePath());
+		Log.d(TAG, "data will be saved to outFile => "+ outFile.getAbsolutePath());
 		//informMiddle("Saving file: "+ outFile.getAbsolutePath());
 		try {
 			ShortFile.writeFile(outFile,samples);
@@ -151,14 +151,14 @@ public class RecordThreadRunnable implements Runnable
 
 	}
 
-	public void informMiddle(String str)
+	public synchronized void informMiddle(String str)
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
 		m.setData(Utils.getStringAsABundle(str));
 		this.mainThreadHandler.sendMessage(m);
 	}
 
-	public void informStart()
+	public synchronized void informStart()
 	{
 		//Message m = this.mainThreadHandler.obtainMessage();
 		//m.setData(Utils.getStringAsABundle("Recording for: " + (double) Buffer_Size/sampleRate +" s"));
@@ -166,7 +166,7 @@ public class RecordThreadRunnable implements Runnable
 		GeneralAudioTestActivity.setRecordingState(GeneralAudioTestActivity.threadState.ACTIVE);
 		//this.mainThreadHandler.sendMessage(m);
 	}
-	public void informFinish()
+	public synchronized void informFinish()
 	{
 		mAudio.release();
 		Message m = this.mainThreadHandler.obtainMessage();
@@ -192,7 +192,7 @@ public class RecordThreadRunnable implements Runnable
 		this.mainThreadHandler.sendMessage(m);
 	}
 
-	private void initRecord(){
+	private synchronized void initRecord(){
 		//Log.v(TAG,"Initialized record track");
 		try {
 			soundCardBufferSize=AudioRecord.getMinBufferSize(sampleRate,channelConfig,audioFormat);
@@ -264,9 +264,9 @@ public class RecordThreadRunnable implements Runnable
 
 		mAudio.stop();
 		record_time = System.currentTimeMillis()-st;
-		Log.v(TAG,"low level recording took: " + record_time/1000);
+		//Log.v(TAG,"low level recording took: " + record_time/1000);
 		recordRMS=SignalProcessing.rms(samples);
-		Log.v(TAG,"recording RMS= " + recordRMS);		
+		//Log.v(TAG,"recording RMS= " + recordRMS);		
 	}
 
 	// outFile added as raw output to pass to Sana

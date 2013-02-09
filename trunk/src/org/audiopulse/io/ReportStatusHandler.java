@@ -63,7 +63,6 @@ public class ReportStatusHandler extends Handler
 	{
 		String pm = Utils.getStringFromABundle(msg.getData());		
 		Bundle b=msg.getData();
-		
 		isBuzy=(GeneralAudioTestActivity.getRecordingState() == GeneralAudioTestActivity.threadState.ACTIVE) &&
 				(GeneralAudioTestActivity.getPlaybackState() == GeneralAudioTestActivity.threadState.ACTIVE);
 		if(isBuzy){
@@ -72,30 +71,32 @@ public class ReportStatusHandler extends Handler
 		}else if (pm != null){
 			this.printMessage(pm);
 			if (GeneralAudioTestActivity.getRecordingState() == GeneralAudioTestActivity.threadState.COMPLETE){
-				//If it is the end of a recording, get the file name for the data and append to metinfomation object
+				//If it is the end of a recording, get the file name for the data and append to meta information object
 				Uri outfile=b.getParcelable(RecordThreadRunnable.RECFILEKEY);
 				if(outfile != null){
-					parentActivity.addXMLFile("DPOAE",outfile.toString());
+					parentActivity.addFileToPackage("DPOAE",outfile.toString());
 					this.printMessage("Added file to package: " + outfile.toString());
 					//Run more test if there are any on the queue
 					if(parentActivity.hasNextTestFrequency()){
+						parentActivity.setRecordingState(GeneralAudioTestActivity.threadState.INITIALIZED);
+						parentActivity.setPlaybackState(GeneralAudioTestActivity.threadState.INITIALIZED);
+						Log.v(TAG,"Running frequecy test");
 						parentActivity.selectAndRunThread();
 					}
-					
 				}
-				if(GeneralAudioTestActivity.getPackedDataState() == GeneralAudioTestActivity.threadState.INITIALIZED &&
-						parentActivity.hasNextTestFrequency()==false ){
-					//Call the package thread to compress and package the data, this method, though defined in the
-					// parentActivity (GeneralAudioPulseTesting) is actually being implemented/called from a subclass (i.e., ThreadedRecPlayActivity). 
-					parentActivity.packageThread();
-				}
+			}				
+			if(GeneralAudioTestActivity.getPackedDataState() == GeneralAudioTestActivity.threadState.INITIALIZED &&
+					GeneralAudioTestActivity.getRecordingState() == GeneralAudioTestActivity.threadState.COMPLETE){
+				//Call the package thread to compress and package the data, this method, though defined in the
+				// parentActivity (GeneralAudioPulseTesting) is actually being implemented/called from a subclass (i.e., ThreadedRecPlayActivity). 
+				Log.v(TAG,"packaging data");
+				parentActivity.packageThread();
 			}
 			//parentActivity.appendData(b);
 			if(b.getBoolean("showSpectrum") ==true){
 				this.plotAudioSpectrum(b);
 			}
 		}
-
 	}
 
 	private void printMessage(String str)

@@ -101,7 +101,14 @@ public class AudioPulseXMLData {
 		elements=elements2;
 	}
 	public void setSingleElement(String key,String value) {
-		elements.put(key, value);
+		//If key already exist append a serial number to it
+		int count=0;
+		String tmpKey=key; //needs this otherwise code concatenates numbers
+		while(elements.containsKey(tmpKey)){
+			count++;
+			tmpKey=key + count;
+		}
+		elements.put(tmpKey, value);
 	}
 	
 	public ArrayList<String> getFileList(){

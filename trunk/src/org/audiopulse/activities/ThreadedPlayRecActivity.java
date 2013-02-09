@@ -149,19 +149,21 @@ import android.widget.TextView;
 				}
 				showPlot=false;
 			}
+			else if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_2k)))
+				testFrequencies.add(2);
 			else if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_3k)))
 				testFrequencies.add(3);
 			else if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_4k)))
-				testFrequencies.add(4);
-			else if (selected.equalsIgnoreCase(getResources().getString(R.string.menu_2k)))
 				testFrequencies.add(4);
 			else{
 				this.appendText("Unknown frequency option: "+ selected +"\n");
 				System.err.println("Unknown f option: "+ selected);
 			}
+			//Remove Test Frequency from QUEUE and run it
 			testFreq= testFrequencies.get(0);
 			testFrequencies.remove(0);
 			appendLine("Testing frequency: " + testFreq + " kHz \n");
+			Log.v(TAG,"running =" + testFreq);
 			playRecordThread(selected,showPlot,testFreq);
 		} 
 	}
@@ -206,6 +208,7 @@ import android.widget.TextView;
 		recordStatusBackHandler = new ReportStatusHandler(this);
 		RecordThreadRunnable rRun = new RecordThreadRunnable(recordStatusBackHandler,playTime,context,item_selected, frequency);
 
+		Log.v(TAG,"executing threads!! in playRecordThread");
 		if(frequency==-1 ){
 			//SOAE case
 			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
@@ -230,7 +233,7 @@ import android.widget.TextView;
 		return rRun;
 	}
 
-	public PackageDataThreadRunnable packageThread()
+	public synchronized PackageDataThreadRunnable packageThread()
 	{
 		PackageDataThreadRunnable pRun=null;
 		if(xmlData != null){
@@ -253,7 +256,7 @@ import android.widget.TextView;
 
 	}
 
-	public void addXMLFile(String key, String fileName){
+	public void addFileToPackage(String key, String fileName){
 		this.xmlData.setSingleElement(key,fileName);
 	}
 
