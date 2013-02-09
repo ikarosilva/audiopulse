@@ -51,7 +51,8 @@ public class SignalProcessing {
 	public static double dB2lin(double a) {
 		return Math.pow(10, a/20);
 	}
-
+	
+	@Deprecated //use double[][] getSpectrum(short[] x) instead (the first column is frequency indices
 	public static double[] getSpectrum(short[] x){
 		FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
 		//Calculate the size of averaged waveform
@@ -84,6 +85,51 @@ public class SignalProcessing {
 		return Pxx;
 	}
 	
+	public static double[][] getSpectrum(short[] x, double Fs, int SPEC_N){
+		FastFourierTransformer FFT = new 
+				FastFourierTransformer(DftNormalization.STANDARD);
+		//Calculate the size of averaged waveform
+		//based on the maximum desired frequency for FFT analysis
+
+		//Calculate the number of sweeps given the epoch time
+		int sweeps=Math.round(x.length/SPEC_N);
+		double[] winData=new double[SPEC_N];
+		Complex[] tmpFFT=new Complex[SPEC_N];
+		double[][] Pxx = new double[2][SPEC_N/2];
+		double tmpPxx;
+		double SpectrumResolution = Fs/SPEC_N;
+		double REFMAX=(double) Short.MAX_VALUE; //Normalizing value
+
+		//Break FFT averaging into SPEC_N segments for averaging
+		//Calculate spectrum, variation based on
+		//http://www.mathworks.com/support/tech-notes/1700/1702.html
+
+		//Perform windowing and running average on the power spectrum
+		//averaging is done by filling a buffer (windData) of size SPECN_N at offset i*SPEC_N
+		//until the end of the data.
+		for (int i=0; i < sweeps; i++){
+			if(i*SPEC_N+SPEC_N > x.length)
+				break;
+			for (int k=0;k<SPEC_N;k++){
+				winData[k]= ((double)x[i*SPEC_N + k]/REFMAX)*SpectralWindows.hamming(k,SPEC_N);
+			}
+			tmpFFT=FFT.transform(winData,TransformType.FORWARD);
+			for(int k=0;k<(SPEC_N/2);k++){
+				tmpPxx = tmpFFT[k].abs()/(double)SPEC_N;
+				tmpPxx*=tmpPxx; //Not accurate for the DC & Nyquist, but we are not using it!
+				Pxx[1][k]=( (i*Pxx[1][k]) + tmpPxx )/((double) i+1); //averaging
+			}
+		}
+
+		//Convert to dB
+		for(int i=0;i<Pxx[0].length;i++){
+			Pxx[0][i]=SpectrumResolution*i;
+			Pxx[1][i]=10*Math.log10(Pxx[1][i]);
+		}
+
+		return Pxx;
+	}
+
 	/*
 	public static double[] getDPOAEResults(Bundle audioBundle, RecordThreadRunnable rRun){
 		short[] audioBuffer = audioBundle.getShortArray("samples");
