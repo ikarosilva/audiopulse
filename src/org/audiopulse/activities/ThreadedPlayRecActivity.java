@@ -172,31 +172,57 @@ import android.widget.TextView;
 		return (! testFrequencies.isEmpty());
 	}
 
-	private void AnalyzeData(){
-		this.appendText("analyzing results from test " + selected+ " \n");
-		Log.v(TAG,"analyzing results from test " + selected);
-		//TODO: Extract these results from data!
-		double[] DPOAEData={7.206, -7, 5.083, 13.1,3.616, 17.9,2.542, 11.5,1.818, 17.1};
-		double[] noiseFloor={7.206, -7-10,5.083, 13.1-10,3.616, 17.9-10,2.542, 11.5-10,1.818, 17.1-10};
-		double[] f1Data={7.206, 64,5.083, 64,3.616, 64,2.542, 64,1.818, 64};
-		double[] f2Data={7.206, 54.9,5.083, 56.6,3.616, 55.6,2.542, 55.1,1.818, 55.1};
-
-		//double[] Pxx=SignalProcessing.getDPOAEResults(audioBundle);
-
+	public void AnalyzeData(Bundle analyzedResults){
+		
+		double[] DPOAEData=new double[8];
+		double[] noiseFloor=new double[8];
+		double[] f1Data=new double[8];
+		double[] f2Data=new double[8];	
+		String[] data=null;
+		
+			Log.v(TAG,"analyzedResults= " + analyzedResults.toString());
+			
+			//The key values in the Bundle should match those in the 
+			//from the labels ArrayList on PackageData.run()
+			data=analyzedResults.getString("DPOAEData").split(",");
+			if(data.length==0 || data ==null){
+				Log.v(TAG,"No DPOAE data, exiting analysis");
+				return; //No DPOAE data from procedure
+			}	
+			Log.v(TAG,"dpoae data=" + data.toString());
+			
+			for(int dataInd=0;dataInd<data.length;dataInd++)
+				DPOAEData[dataInd]=Double.parseDouble(data[dataInd]);	
+			Log.v(TAG,"extracted DPOAE");
+			
+			data=analyzedResults.getString("noiseFloor").split(",");
+			for(int dataInd=0;dataInd<data.length;dataInd++)
+				noiseFloor[dataInd]=Double.parseDouble(data[dataInd]);
+			Log.v(TAG,"extracted noiseFloor");
+	
+			data=analyzedResults.getString("f1Data").split(",");
+			for(int dataInd=0;dataInd<data.length;dataInd++)
+				f1Data[dataInd]=Double.parseDouble(data[dataInd]);
+			Log.v(TAG,"extracted f1data");
+			
+			data=analyzedResults.getString("f2Data").split(",");
+			for(int dataInd=0;dataInd<data.length;dataInd++)
+				f2Data[dataInd]=Double.parseDouble(data[dataInd]);
+			Log.v(TAG,"extracted f2data");
+				
 		Bundle DPGramresults= new Bundle();
 		DPGramresults.putString("title",selected);
 		DPGramresults.putDoubleArray("DPOAEData",DPOAEData);
 		DPGramresults.putDoubleArray("noiseFloor",noiseFloor);
 		DPGramresults.putDoubleArray("f1Data",f1Data);
 		DPGramresults.putDoubleArray("f2Data",f2Data);
-
-		//TODO: condition on left/right
-		this.appendText("setting xmldata properties\n");
-		Log.v(TAG,"setting xmldata properties ");
-
-		xmlData.setDPOAELeftEarGram("response="+DPOAEData.toString()+";noise=" + noiseFloor.toString() + ";f1=" + 
-				f1Data + ";f2=" + f2Data.toString());
+		Log.v(TAG,"created bundle");
+		
+		Log.v(TAG,"calling audigram plot");
+		plotAudiogram(DPGramresults);
+		
 	}
+	
 	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum, int frequency)
 	{
 
@@ -237,7 +263,6 @@ import android.widget.TextView;
 	{
 		PackageDataThreadRunnable pRun=null;
 		if(xmlData != null){
-			Log.v(TAG,"Analyzing and packaging XML data");
 			//Only Package data if called from Sana App
 			Context context=this.getApplicationContext();		
 			packageStatusBackHandler = new ReportStatusHandler(this);

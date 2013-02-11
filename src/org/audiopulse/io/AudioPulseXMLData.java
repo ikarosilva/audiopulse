@@ -93,6 +93,20 @@ public class AudioPulseXMLData {
 		//for now results is a CSV string with semi-colons delimiting rows
 		elements.put(keyDPOAELeftEarGram, results);
 	}
+	public ArrayList<String> getFileList(){
+		
+		ArrayList<String> fileList=new ArrayList<String>();
+		String tmp=null;
+		Set<String> keys = elements.keySet();
+		for(String thisKey : keys){
+			if (elements.get(thisKey).endsWith(".raw") ){
+				tmp=elements.get(thisKey).replace("file://","");
+				fileList.add(tmp);
+			}
+		}
+		return fileList;
+	}
+
 	public HashMap<String,String> getElements(){
 		return elements;
 	}
@@ -111,20 +125,6 @@ public class AudioPulseXMLData {
 		elements.put(tmpKey, value);
 	}
 	
-	public ArrayList<String> getFileList(){
-		
-		ArrayList<String> fileList=new ArrayList<String>();
-		String tmp=null;
-		Set<String> keys = elements.keySet();
-		for(String thisKey : keys){
-			if (elements.get(thisKey).endsWith(".raw") ){
-				tmp=elements.get(thisKey).replace("file://","");
-				fileList.add(tmp);
-			}
-		}
-		return fileList;
-	}
-
 	/////---METHOD FOR READING Called by a constructor---	 
 	private void readXMLFile(String file) throws XmlPullParserException, IOException, AudioPulseXmlException {
 
@@ -193,5 +193,9 @@ public class AudioPulseXMLData {
 		} catch (IOException e) {
 			throw new AudioPulseXmlException("Could not create XML file for writing: " + e.getMessage());
 		}
+	}
+
+	public String getSingleElement(String key) {
+		return elements.get(key);
 	}
 }
