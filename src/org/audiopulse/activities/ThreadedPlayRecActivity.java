@@ -82,7 +82,7 @@ import android.widget.TextView;
 	Thread recordThread = null;
 	Thread packageDataThread = null;
 	//Parameters will be set close to that from Gorga et al 1993 (JASA 93(4)).
-	private static double sweeps=20;
+	private static double sweeps=200;
 	private static double epocTime=0.02048; //epoch time in seconds 
 	public static double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
 	ScheduledThreadPoolExecutor threadPool=new ScheduledThreadPoolExecutor(2);
