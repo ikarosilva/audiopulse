@@ -156,11 +156,6 @@ public class DPOAEActivity extends GeneralAudioTestActivity
 		
 	}
 	
-	private void plotAudiogram(Bundle dPGramresults) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	protected void startMockTest(){
 		String path =Constants.MEDIA_PATH +"DPOAE.jpg";
 		File data = new File(path);

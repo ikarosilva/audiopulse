@@ -88,12 +88,16 @@ public class ReportStatusHandler extends Handler
 					GeneralAudioTestActivity.getRecordingState() == GeneralAudioTestActivity.threadState.COMPLETE){
 				//Call the package thread to compress and package the data, this method, though defined in the
 				// parentActivity (GeneralAudioPulseTesting) is actually being implemented/called from a subclass (i.e., ThreadedRecPlayActivity). 
+				Log.v(TAG,"Packing data");
 				parentActivity.packageThread();
 			}
 			//parentActivity.appendData(b);
 			if(b.getBoolean("showSpectrum") ==true){
 				this.plotAudioSpectrum(b);
 			}
+		} else if (GeneralAudioTestActivity.getPackedDataState() == GeneralAudioTestActivity.threadState.COMPLETE){
+			Log.v(TAG,"plotting rresults from analysis");
+			parentActivity.AnalyzeData(b);
 		}
 	}
 

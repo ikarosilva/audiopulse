@@ -71,6 +71,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	public static final String TAG="GeneralAudioTestActivity";
 
 	private Bundle audioResultsBundle;
+	private Bundle resultsBundle;
 
 	static final int STIMULUS_DIALOG_ID = 0;
 	Bundle audioBundle = new Bundle();
@@ -195,6 +196,15 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		startActivity(intent);
 	}
 
+	//plot audiogram
+	public void plotAudiogram(Bundle resultsBundle) {
+		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
+		intent.putExtras(resultsBundle);
+		this.resultsBundle=resultsBundle;
+		Log.v(TAG,"Bundled set");
+		startActivity(intent);
+	}
+	
 	//plot recorded waveform
 	public void plotWaveform() {
 		//TODO: Add check for not null audioResultsBundle (notify user that to run stimulus if they press this option before running anything).
@@ -234,6 +244,11 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 
 	public void selectAndRunThread(){
 		//TODO: make this abstract and push implementation to subclass
+	}
+
+	public void AnalyzeData(Bundle analysisResults) {
+		//TODO: make this abstract and push implementation to subclass
+		
 	}
 	
 	

@@ -89,26 +89,24 @@ public class PackageDataThreadRunnable implements Runnable
 	public synchronized void run()
 	{
 		informStart();
-		//Log.v(TAG,"Analyzing directory: " +root.getAbsolutePath());	
-		//informMiddle("Analyzing results...");
+		ArrayList<String> labels=new ArrayList<String>();
+		labels.add("f1Data");labels.add("f2Data");labels.add("DPOAEData");labels.add("noiseFloor");
+		
 		try {
 			dpoaeData=DPOAEAnalysis.runAnalysis(root.getAbsolutePath());
 		} catch (Exception e1) {
 			informMiddle("Analyzing failed!! " + e1.getMessage());
-			//Log.v(TAG,"Analyzis failed: " + e1.getMessage());
+			Log.v(TAG,"Analyzis failed: " + e1.getMessage());
 			e1.printStackTrace();
 		}
 		if(dpoaeData.size() == 4){
 			//Send results as CSV
-			ArrayList<String> labels=new ArrayList<String>();
-			labels.add("f1Data");labels.add("f2Data");labels.add("DPOAEData");labels.add("noiseFloor");
 			for(int lid=0;lid<labels.size();lid++){
 				String value ="";
 				for(int flds=0;flds<dpoaeData.get(lid).length;flds++)
 					value +=","+dpoaeData.get(lid)[flds];		
 				value=value.replaceFirst(",","");
 				xmlData.setSingleElement(labels.get(lid), value);
-				//Log.v(TAG,labels.get(lid) + " = " + value);
 			}
 
 		}
@@ -128,7 +126,7 @@ public class PackageDataThreadRunnable implements Runnable
 				informMiddle("Unable to package data: "+ e.getMessage());
 			}
 		}
-		informFinish();
+		informFinish(labels);
 	}
 
 	public synchronized void informMiddle(String str)
@@ -145,7 +143,7 @@ public class PackageDataThreadRunnable implements Runnable
 		GeneralAudioTestActivity.setPackedDataState(GeneralAudioTestActivity.threadState.ACTIVE);
 		this.mainThreadHandler.sendMessage(m);
 	}
-	public synchronized void informFinish()
+	public synchronized void informFinish(ArrayList<String> resultLabels)
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
 		results= new Bundle();
@@ -153,6 +151,8 @@ public class PackageDataThreadRunnable implements Runnable
 			Uri.EMPTY;
 		Log.d(TAG, "Output Uri: " + output);
 		results.putParcelable("outfile", output);
+		for(String key: resultLabels)
+			results.putString(key,xmlData.getSingleElement(key));
 		m.setData(results);
 		GeneralAudioTestActivity.setPackedDataState(GeneralAudioTestActivity.threadState.COMPLETE);
 		this.mainThreadHandler.sendMessage(m);
