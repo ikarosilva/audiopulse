@@ -1,5 +1,5 @@
 /* ===========================================================
- * SanaAudioPulse : a free platform for teleaudiology.
+ * SanaAudioPulse : a free platform for Teleaudiology.
  *              
  * ===========================================================
  *
@@ -97,7 +97,8 @@ public class PlotAudiogramView extends DemoView {
 		//TODO: These are normative values. Maybe be best to move these values
 		//into an resource folder where they can be easily modified in the future.
 
-		//TODO: Add this dataset to the graph
+		//FIXME: Add this dataset to the graph, when the results are properly
+		//calibrated
 		YIntervalSeries normativeRange = new YIntervalSeries("Normative Range");
 		int[] NUB={-10, -5, -5, -5, -4};
 		int[] NLB={-15, -10, -13, -15, -13};
@@ -129,10 +130,6 @@ public class PlotAudiogramView extends DemoView {
 			series2.add(noiseFloor[i*2], noiseFloor[i*2+1]);
 			series3.add(f1Data[i*2], f1Data[i*2+1]);
 			series4.add(f2Data[i*2], f2Data[i*2+1]);
-			Log.v(TAG,"Added DPOAE: "+ DPOAEData[i*2]  + " , " + DPOAEData[i*2+1]);
-			Log.v(TAG,"Added f1Data: "+ f1Data[i*2]  + " , " + f1Data[i*2+1]);
-			Log.v(TAG,"Added f2Data: "+ f2Data[i*2]  + " , " + f2Data[i*2+1]);
-			Log.v(TAG,"Added noiseFloor: "+ noiseFloor[i*2]  + " , " + noiseFloor[i*2+1]);
 		}
 
 		XYSeriesCollection dataset = new XYSeriesCollection();
@@ -166,15 +163,17 @@ public class PlotAudiogramView extends DemoView {
 		DeviationRenderer renderer = new DeviationRenderer(true, false);
 		renderer.setSeriesStroke(0, 3.0f);
 		renderer.setSeriesStroke(1, 3.0f);
+		renderer.setSeriesStroke(2, 3.0f);
+		renderer.setSeriesStroke(3, 3.0f);
 
-		renderer.setSeriesPaintType(0, new SolidColor(Color.rgb(0, 0, 255)));
-		renderer.setSeriesFillPaintType(0, new SolidColor(Color.rgb(250, 100, 100)));
-		renderer.setSeriesPaintType(1, new SolidColor(Color.rgb(150, 150, 150)));
-		renderer.setSeriesFillPaintType(1, new SolidColor(Color.rgb(150, 150, 150)));
-		renderer.setSeriesPaintType(2, new SolidColor(Color.rgb(100, 100, 250)));
-		renderer.setSeriesFillPaintType(2, new SolidColor(Color.rgb(100, 100, 250)));
-		renderer.setSeriesPaintType(3, new SolidColor(Color.rgb(100, 250, 100)));
-		renderer.setSeriesFillPaintType(3, new SolidColor(Color.rgb(100, 250, 100)));
+		renderer.setSeriesPaintType(0, new SolidColor(Color.GREEN));
+		renderer.setSeriesFillPaintType(0, new SolidColor(Color.GREEN));
+		renderer.setSeriesPaintType(1, new SolidColor(Color.BLUE));
+		renderer.setSeriesFillPaintType(1, new SolidColor(Color.BLUE));
+		renderer.setSeriesPaintType(2, new SolidColor(Color.RED));
+		renderer.setSeriesFillPaintType(2, new SolidColor(Color.RED));
+		renderer.setSeriesPaintType(3, new SolidColor(Color.GRAY));
+		renderer.setSeriesFillPaintType(3, new SolidColor(Color.GRAY));
 		plot.setRenderer(renderer);
 
 		return chart;

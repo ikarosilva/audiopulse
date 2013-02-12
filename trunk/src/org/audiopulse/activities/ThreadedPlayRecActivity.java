@@ -97,17 +97,16 @@ import android.widget.TextView;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// Check if sana is starting the application
 		String caller = this.getCallingPackage();
-		//TODO: Move this inside so it gets called only when Sana launches the app!
 		xmlData= new AudioPulseXMLData();//Initial XML Data only when being called from Sana
 		selected = getString(R.string.dpgram_right);
 		testFrequencies = new ArrayList<Integer>();
 		isMultiTestInitialized=false;
 
+		//Check if Sana launched the app!
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			setContentView(R.layout.sana_thread);
-			Log.v(TAG,"Initializing Sana metadata ");
+		
 			// Sana observation meta data - from Sana API ObservationActivity
 			initMetaData();
 			selectAndRunThread();
@@ -260,7 +259,6 @@ import android.widget.TextView;
 	{
 		PackageDataThreadRunnable pRun=null;
 		if(xmlData != null){
-			//Only Package data if called from Sana App
 			Context context=this.getApplicationContext();		
 			packageStatusBackHandler = new ReportStatusHandler(this);
 			pRun = new PackageDataThreadRunnable(recordStatusBackHandler,xmlData,context);

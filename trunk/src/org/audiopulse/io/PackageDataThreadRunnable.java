@@ -147,6 +147,7 @@ public class PackageDataThreadRunnable implements Runnable
 	{
 		Message m = this.mainThreadHandler.obtainMessage();
 		results= new Bundle();
+		//Send results to Sana
 		Uri output = (outFile != null)? Uri.fromFile(outFile):
 			Uri.EMPTY;
 		Log.d(TAG, "Output Uri: " + output);

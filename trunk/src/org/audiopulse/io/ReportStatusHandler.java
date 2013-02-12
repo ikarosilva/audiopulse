@@ -91,13 +91,16 @@ public class ReportStatusHandler extends Handler
 				Log.v(TAG,"Packing data");
 				parentActivity.packageThread();
 			}
-			//parentActivity.appendData(b);
+			
 			if(b.getBoolean("showSpectrum") ==true){
 				this.plotAudioSpectrum(b);
 			}
 		} else if (GeneralAudioTestActivity.getPackedDataState() == GeneralAudioTestActivity.threadState.COMPLETE){
-			Log.v(TAG,"plotting rresults from analysis");
+			Log.v(TAG,"plotting results from analysis");
 			parentActivity.AnalyzeData(b);
+			//Return data to Sana
+			Log.v(TAG,"AP data sent to Sana:" + b.describeContents());
+			parentActivity.appendData(b);
 		}
 	}
 
