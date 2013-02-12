@@ -58,9 +58,9 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
         Bundle audioBundle = getIntent().getExtras();
     	String title=audioBundle.getString("title");
     	double[] DPOAEData=audioBundle.getDoubleArray("DPOAEData");
-    	double[] noiseFloor=audioBundle.getDoubleArray("noiseFloor");;
-    	double[] f1Data=audioBundle.getDoubleArray("f1Data");;
-    	double[] f2Data=audioBundle.getDoubleArray("f2Data");;
+    	double[] noiseFloor=audioBundle.getDoubleArray("noiseFloor");
+    	double[] f1Data=audioBundle.getDoubleArray("f1Data");
+    	double[] f2Data=audioBundle.getDoubleArray("f2Data");
     	Log.v(TAG,"extracted DPOAE data from bundle");
     	
 		PlotAudiogramView mView = new PlotAudiogramView(this,title,DPOAEData,noiseFloor,f1Data,f2Data);
