@@ -189,14 +189,6 @@ public class PackageDataThreadRunnable implements Runnable
 		} finally {
 			zos.close();
 		}
-
-		//Delete the file once they have been compressed and packed
-		for (String fileName : fileList) {
-			if(fileName.endsWith(".raw")){
-				File file=new File(fileName);
-				file.delete();
-			}
-		}
 		return new File(zipFileName);
 
 	}

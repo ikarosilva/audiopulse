@@ -3,10 +3,8 @@ package org.audiopulse.utilities;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.audiopulse.io.PackageDataThreadRunnable;
 import org.audiopulse.io.ShortFile;
 import org.audiopulse.utilities.SignalProcessing;
 
@@ -26,11 +24,11 @@ public class DPOAEAnalysis {
 
 	static boolean headless = false;
 	static final String TAG="DPOAEAnalysis";
-	
+
 	public static void setHeadless(boolean headless){
 		DPOAEAnalysis.headless = headless; 
 	}
-	
+
 	public static double[][] getSpectrum(short[] x, double Fs, int epochTime){
 		return SignalProcessing.getSpectrum(x, Fs,epochTime);
 	}
@@ -83,9 +81,9 @@ public class DPOAEAnalysis {
 			{ return filename.endsWith(".raw"); }
 		} );
 	}
-	
+
 	public static  ArrayList<Double[]> runAnalysis(String dataDir) throws Exception {
-		
+
 		//Set parameters according to the procedures defined by
 		//Gorga et al 1993,"Otoacoustic Emissions from Normal-hearing and hearing-impaired subject: distortion product responses
 		double Fs=16000, F2=0, F1=0,Fres=0;	 //Frequency of the expected response
@@ -106,7 +104,7 @@ public class DPOAEAnalysis {
 		int FresIndex;
 		short[] rawData=null;
 		ArrayList<Double[]> finalData=new ArrayList<Double []>();
-		
+
 		for(int i=0;i<oaeFiles.length;i++){
 			String outFileName=oaeFiles[i].getAbsolutePath();		
 			//TODO: Right now the analysis is based on the Handbook of Otoacoustic Emissions Book by Hall
@@ -123,7 +121,7 @@ public class DPOAEAnalysis {
 				F2=4000;F1=F2/1.2;Fres=(2*F1)-F2;
 				fIndex=2*2;
 			}else{
-				System.out.println("Unexpected DPOAE File Name!");
+				Log.v(TAG,"Unexpected DPOAE File Name: " +  outFileName);
 			}
 			rawData = ShortFile.readFile(oaeFiles[i].getAbsolutePath());
 
@@ -154,18 +152,13 @@ public class DPOAEAnalysis {
 
 			noiseFloor[fIndex]=F2;
 			noiseFloor[fIndex+1]=getNoiseLevel(XFFT,FresIndex);
-			 
+			//Delete the file once they have been compressed and packed and analyzed
+			if(oaeFiles[i].getName().endsWith(".raw")){
+				oaeFiles[i].delete();
+			}
+
 		}	
-		/*
-		System.out.println("2kHz:\t" + "DPOAE= " + DPOAEData[1] 
-				+ "\tDPOAE - Noise= " +((double)Math.round((DPOAEData[1]-noiseFloor[1])*10)/10));
-		System.out.println("3kHz:\t" + "DPOAE= " + DPOAEData[3]
-				+ "\tDPOAE - Noise= " +((double)Math.round((DPOAEData[3]-noiseFloor[3])*10)/10));
-		System.out.println("4kHz:\t" + "DPOAE= " + DPOAEData[5]
-				+ "\tDPOAE - Noise= " +((double)Math.round((DPOAEData[5]-noiseFloor[5])*10)/10 ));
-		System.out.println("Analysis complete! ");
-		*/
-		
+
 		//Send data as an double array
 		//Log.v(TAG,"f1[0]=" + f1Data[0]+"f1[1]=" + f1Data[1]+"f1[2]=" + f1Data[2]);
 		finalData.add(f1Data);
@@ -173,7 +166,7 @@ public class DPOAEAnalysis {
 		finalData.add(DPOAEData);
 		finalData.add(noiseFloor);
 		return finalData;
-		
+
 	}
 }
 
