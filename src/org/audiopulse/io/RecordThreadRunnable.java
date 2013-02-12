@@ -137,7 +137,7 @@ public class RecordThreadRunnable implements Runnable
 		outFile = new File(root, fileName.replace(" ","-").replace(":", "-") ); 
 		
 		Log.d(TAG, "data will be saved to outFile => "+ outFile.getAbsolutePath());
-		//informMiddle("Saving file: "+ outFile.getAbsolutePath());
+		
 		try {
 			ShortFile.writeFile(outFile,samples);
 		} catch (IOException e) {	
@@ -147,7 +147,7 @@ public class RecordThreadRunnable implements Runnable
 		
 		//Finish up
 		informFinish();
-		//informMiddle("Finished!");
+		
 
 	}
 
@@ -162,7 +162,6 @@ public class RecordThreadRunnable implements Runnable
 	{
 		//Message m = this.mainThreadHandler.obtainMessage();
 		//m.setData(Utils.getStringAsABundle("Recording for: " + (double) Buffer_Size/sampleRate +" s"));
-		//m.arg1=RecordThreadRunnable.MSG_INDEX;
 		GeneralAudioTestActivity.setRecordingState(GeneralAudioTestActivity.threadState.ACTIVE);
 		//this.mainThreadHandler.sendMessage(m);
 	}
