@@ -104,7 +104,7 @@ import android.widget.TextView;
 		selected = getString(R.string.dpgram_right);
 		testFrequencies = new ArrayList<Integer>();
 		isMultiTestInitialized=false;
-		
+
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			setContentView(R.layout.sana_thread);
 			Log.v(TAG,"Initializing Sana metadata ");
@@ -173,56 +173,53 @@ import android.widget.TextView;
 	}
 
 	public void AnalyzeData(Bundle analyzedResults){
-		
-		double[] DPOAEData=new double[8];
-		double[] noiseFloor=new double[8];
-		double[] f1Data=new double[8];
-		double[] f2Data=new double[8];	
+
+		double NtestF=3;
+		double[] DPOAEData=new double[(int) (NtestF*2)];
+		double[] noiseFloor=new double[(int) (NtestF*2)];
+		double[] f1Data=new double[(int) (NtestF*2)];
+		double[] f2Data=new double[(int) (NtestF*2)];	
 		String[] data=null;
-		
-			Log.v(TAG,"analyzedResults= " + analyzedResults.toString());
-			
-			//The key values in the Bundle should match those in the 
-			//from the labels ArrayList on PackageData.run()
-			data=analyzedResults.getString("DPOAEData").split(",");
-			if(data.length==0 || data ==null){
-				Log.v(TAG,"No DPOAE data, exiting analysis");
-				return; //No DPOAE data from procedure
-			}	
-			Log.v(TAG,"dpoae data=" + data.toString());
-			
-			for(int dataInd=0;dataInd<data.length;dataInd++)
-				DPOAEData[dataInd]=Double.parseDouble(data[dataInd]);	
-			Log.v(TAG,"extracted DPOAE");
-			
-			data=analyzedResults.getString("noiseFloor").split(",");
-			for(int dataInd=0;dataInd<data.length;dataInd++)
-				noiseFloor[dataInd]=Double.parseDouble(data[dataInd]);
-			Log.v(TAG,"extracted noiseFloor");
-	
-			data=analyzedResults.getString("f1Data").split(",");
-			for(int dataInd=0;dataInd<data.length;dataInd++)
-				f1Data[dataInd]=Double.parseDouble(data[dataInd]);
-			Log.v(TAG,"extracted f1data");
-			
-			data=analyzedResults.getString("f2Data").split(",");
-			for(int dataInd=0;dataInd<data.length;dataInd++)
-				f2Data[dataInd]=Double.parseDouble(data[dataInd]);
-			Log.v(TAG,"extracted f2data");
-				
+
+		Log.v(TAG,"analyzedResults= " + analyzedResults.toString());
+
+		//The key values in the Bundle should match those in the 
+		//from the labels ArrayList on PackageData.run()
+		data=analyzedResults.getString("DPOAEData").split(",");
+		if(data.length==0 || data ==null){
+			Log.v(TAG,"No DPOAE data, exiting analysis");
+			return; //No DPOAE data from procedure
+		}	
+
+
+		for(int dataInd=0;dataInd<data.length;dataInd++)
+			DPOAEData[dataInd]=Double.parseDouble(data[dataInd]);	
+
+		data=analyzedResults.getString("noiseFloor").split(",");
+		for(int dataInd=0;dataInd<data.length;dataInd++)
+			noiseFloor[dataInd]=Double.parseDouble(data[dataInd]);
+
+		data=analyzedResults.getString("f1Data").split(",");
+		for(int dataInd=0;dataInd<data.length;dataInd++)
+			f1Data[dataInd]=Double.parseDouble(data[dataInd]);
+
+
+		data=analyzedResults.getString("f2Data").split(",");
+		for(int dataInd=0;dataInd<data.length;dataInd++)
+			f2Data[dataInd]=Double.parseDouble(data[dataInd]);
+
+
 		Bundle DPGramresults= new Bundle();
 		DPGramresults.putString("title",selected);
 		DPGramresults.putDoubleArray("DPOAEData",DPOAEData);
 		DPGramresults.putDoubleArray("noiseFloor",noiseFloor);
 		DPGramresults.putDoubleArray("f1Data",f1Data);
 		DPGramresults.putDoubleArray("f2Data",f2Data);
-		Log.v(TAG,"created bundle");
-		
-		Log.v(TAG,"calling audigram plot");
+
 		plotAudiogram(DPGramresults);
-		
+
 	}
-	
+
 	private RecordThreadRunnable playRecordThread(String item_selected, boolean showSpectrum, int frequency)
 	{
 
