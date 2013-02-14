@@ -44,9 +44,9 @@ public class DPOAECalibrationProcedure extends TestProcedure{
 		tone2 = converter.setOutputLevel(tone2, 65);
 				
 		double A1 = calibrateTone(tone1);
-		informUI("f1 amplitude: " + String.format("%.1f dB SPL",A1));
+		logToUI("f1 amplitude: " + String.format("%.1f dB SPL",A1));
 		double A2 = calibrateTone(tone2);
-		informUI("f1 amplitude: " + String.format("%.1f dB SPL",A2));
+		logToUI("f1 amplitude: " + String.format("%.1f dB SPL",A2));
 	}
 	
 	private double calibrateTone(double[] tone) {

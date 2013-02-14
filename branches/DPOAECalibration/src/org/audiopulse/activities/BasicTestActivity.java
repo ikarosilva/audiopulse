@@ -57,44 +57,49 @@ public class BasicTestActivity extends AudioPulseActivity implements Callback
 {
 	public static final String TAG="BasicTestActivity";
 	
-	private TestProcedure testProcedure = null;		//test procedure to exectue
+	protected TextView testLog;
+	protected TestProcedure testProcedure = null;		//test procedure to execute
 	//use: testProcedure = new TestProcedure(this)
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.basic_test_layout);
+		testLog = (TextView)this.findViewById(R.id.testLog);
 	}
 
 	//begin test. Generally, this function is called by a ButtonView in the layout.
 	public void startTest(View callingView)
 	{
-//		appendText("Starting Test Procedure");
-//		if (testProcedure==null)
+		appendText("Starting Test Procedure");
+		if (testProcedure==null) {
 //			appendText("No proecdure set!");
-//		else
-//			new Thread( testProcedure ).start();
-		
-		appendText("Starting DPOAE Calibration");
-		testProcedure = new DPOAECalibrationProcedure(this);
-		Thread runThread = new Thread(testProcedure);
-		runThread.setPriority(Thread.MAX_PRIORITY);
-		runThread.start();
+			//FIXME: don't do this. Just doing it now for convenience.
+			appendText("Starting DPOAE Calibration");
+			testProcedure = new DPOAECalibrationProcedure(this);
+			Thread runThread = new Thread(testProcedure);
+			runThread.setPriority(Thread.MAX_PRIORITY);
+			runThread.start();
+		} else {
+			new Thread( testProcedure ).start();
+		}
 
 	}
 
 	public void appendText(String str){
-		TextView tv = getTextView(); 
-		tv.setText(tv.getText() + "\n" + str);
+		if (testLog != null) {
+			testLog.setText(testLog.getText() + "\n" + str);
+		} else {
+			Log.e(TAG, "No test log element!");
+		}
 	}
 
 	public void emptyText(){
-		TextView tv = getTextView();
-		tv.setText("");
-	}
-
-	private TextView getTextView(){
-		return (TextView)this.findViewById(R.id.testLog);
+		if (testLog != null) {
+			testLog.setText("");
+		} else {
+			Log.e(TAG, "No test log element!");
+		}
 	}
 
 	//plot recorded signal spectrum

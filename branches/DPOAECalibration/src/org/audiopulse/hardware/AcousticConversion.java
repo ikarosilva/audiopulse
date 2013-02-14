@@ -55,8 +55,10 @@ public class AcousticConversion {
 		}
 		if (r==0)								//avoid log(0), return min value instead
 			return Double.MIN_VALUE;
-		r /= N;										//convert to mean-squared
-		r *= (VPerDU_input*VPerDU_input);			//convert to volts^2
-		return 10*Math.log10(r*1e6) + SPL1uV;		//convert to dB SPL (using uV reference)
+		r = Math.sqrt(r*VPerDU_input/N);
+		return getInputLevel(r);
+	}
+	public double getInputLevel(double rms) {
+		return 20*Math.log10(rms*1e6) + SPL1uV;
 	}
 }

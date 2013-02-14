@@ -15,7 +15,7 @@ public abstract class TestProcedure implements Runnable {
 		this.uiThreadHandler = new Handler(parent);
 	}
 	
-	public void informUI(String str)
+	public void logToUI(String str)
 	{
 		Message m = this.uiThreadHandler.obtainMessage();
 		m.setData(Utils.getStringAsABundle(str));
