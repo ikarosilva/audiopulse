@@ -14,4 +14,9 @@
     <string name="calibration_output">Output</string>
     <string name="calibration_intput">Input</string>
     <string name="calibration_input_level">Input level</string>
+    <string name="calibration_input_rms">RMS</string>
+    <string name="calibration_input_pp">Peak-peak</string>
+    <string name="calibration_input_min">Min</string>
+    <string name="calibration_input_max">Max</string>
+    <string name="calibration_input_clipped">% clip</string>
 </resources>

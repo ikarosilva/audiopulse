@@ -5,7 +5,7 @@ import org.audiopulse.utilities.SignalProcessing;
 public class AcousticConversion {
 	//TODO: replace these parameters with a MobilePhone and a AcousticDevice object.
 	private double VPerDU_output = 1;		//V for 1 amplitude at outpu
-	private double VPerDU_input = 0.01;		//V for 1 amplitude at input
+	private double VPerDU_input = 0.020;		//V for 1 amplitude at input
 	private double SPL1V = 72;				//dB SPL for 1V rms electrical signal
 	private double SPL1uV = 0;				//db SPL for 1uV rms micorphone electrical signal
 	
@@ -55,10 +55,10 @@ public class AcousticConversion {
 		}
 		if (r==0)								//avoid log(0), return min value instead
 			return Double.MIN_VALUE;
-		r = Math.sqrt(r*VPerDU_input/N);
+		r = Math.sqrt(r/N);		//convert to rms DU
 		return getInputLevel(r);
 	}
 	public double getInputLevel(double rms) {
-		return 20*Math.log10(rms*1e6) + SPL1uV;
+		return 20*Math.log10(rms*VPerDU_input*1e6) + SPL1uV;		//SPL = dBuV + SPL1uV
 	}
 }
