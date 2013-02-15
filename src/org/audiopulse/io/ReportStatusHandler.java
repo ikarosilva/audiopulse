@@ -47,6 +47,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+@Deprecated //AudioPulseActivity now implements Handler.Callback, use a regular Handler object instead
 public class ReportStatusHandler extends Handler
 {
 	public static final String TAG = "ReportStatusHandler";

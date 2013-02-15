@@ -42,63 +42,66 @@ import android.util.Log;
 
 // Useful functions for converting audio signals between double (for math) and short (for playback)
 
-//TODO: bi-directional! For recorded shorts, convert to doubles.
 public class AudioSignal {
-	public final static String TAG="AudioSignal";
+	public static final String TAG="AudioSignal";
 	
-	
-	//get short vector for playback buffer from stereo input
-	//mono or stereo interleaved output
-	public static short[] getAudioTrackData(double[][] doubleData, boolean stereoOutput) {
-		//TODO: check 2-channel, same length
-		
-		short[] bufferData;
-		if (stereoOutput) { //return stereo signal: interleave
-			bufferData = interleave(convertToShort(doubleData));
-		} else { //return mono signal
-			bufferData = convertToShort(convertToMono(doubleData));
-		}
-		
-		return bufferData;
-	}
-
-	//get short vector for playback buffer from mono input
-	//mono or stereo interleaved output
-	public static short[] getAudioTrackData(double[] doubleData, boolean stereoOutput) {
-		//TODO: check 2-channel, same length
-		
-		short[] bufferData;
-		if (stereoOutput) { //return stereo signal: interleave duplicate
-			short[] shortVector = convertToShort(doubleData);
-			bufferData = interleave(shortVector,shortVector);
-		} else { //return mono signal
-			bufferData = convertToShort(doubleData);
-		}
-		
-		return bufferData;
-	}
-	
-
-	//convert double vector to short, scale appropriately.
-	private static short[] convertToShort(double[] doubleVector) {
-		short[] shortVector = new short [doubleVector.length];
-		for (int n=0;n<doubleVector.length;n++) {
-			shortVector[n] = convertToShort(doubleVector[n]);
+	//convert a mono double vector to shorts
+	public static short[] convertMonoToShort(double[] signal) {
+		short[] shortVector = new short [signal.length];
+		for (int n=0;n<signal.length;n++) {
+			shortVector[n] = convertSampleToShort(signal[n]);
 		}
 		return shortVector;
 	}
-	private static short[][] convertToShort(double[][] doubleVector) {
-		//TODO: check 2-channel, same length
-		short[][] shortVector = new short [doubleVector.length][doubleVector[0].length];
-		for (int chan=0; chan<=doubleVector.length;chan++)
-			for (int n=0;n<doubleVector[0].length;n++) {
-				shortVector[chan][n] = convertToShort(doubleVector[chan][n]);
-		}
-		return shortVector;
+	public static short[] convertStereoToShort(double[][] signal) {
+		confirmValidStereoSignal(signal);
+		
+		short[] left = convertMonoToShort(signal[0]);
+		short[] right = convertMonoToShort(signal[1]);
+		
+		return interleave(left,right);
 	}
+	public static double[] convertMonoToDouble(short[] signal) {
+		double[] doubleVector = new double[signal.length];
+		for (int n=0;n<signal.length;n++) {
+			doubleVector[n] = convertSampleToDouble(signal[n]);
+		}
+		return doubleVector;
+	}
+	public static double[][] convertStereoToDouble(short[] signal) {
+		if ((signal.length & 1) == 1)
+			throw new IllegalArgumentException("Input stereo-interleaved vector must have an even number of samples");
+		
+		double[][] doubleVector = new double[2][signal.length/2];
+		for (int n=0; n<signal.length; n+=2) {
+			doubleVector[0][n/2] = convertSampleToDouble(signal[n]);
+			doubleVector[1][n/2] = convertSampleToDouble(signal[n+1]);
+		}
+		return doubleVector;
+	}
+	
+	public static double[] convertToMono(double[][] signal) {
+		confirmValidStereoSignal(signal);
+		
+		int N = signal[0].length;
+		double[] monoSignal = new double [N];
+
+		for (int n=0;n<N; n++) {
+			monoSignal[n] += 1/2 * (signal[0][n] + signal[1][n]);
+		}
+		
+		return monoSignal;
+	}
+	public static double[][] convertToStereo(double[] signal) {
+		double[][] stereoSignal = new double[2][];
+		stereoSignal[0] = signal.clone();
+		stereoSignal[1] = signal.clone();
+		return stereoSignal;
+	}
+	
 	
 	//scale and convert a single sample to short.
-	private static short convertToShort(double sample) {
+	public static short convertSampleToShort(double sample) {
 		if(Math.abs(sample)>1){	
 			Log.w(TAG,"Digital (short) audio signal is being clipped!!");
 			return (short) (Short.MAX_VALUE * (Math.signum(sample)));
@@ -106,36 +109,29 @@ public class AudioSignal {
 			return (short) (Short.MAX_VALUE * (sample));
 		}
 	}
-	
-	//interleave 2xN data into 1x2N vector
-	private static short[] interleave(short[][] data) {
-		return interleave(data[0],data[1]);
+	public static double convertSampleToDouble(short sample) {
+		return ((double)sample) / ((double)Short.MAX_VALUE);
 	}
 	
 	//interleave left and right vectors into stereo interleaved
 	//left and right should be equal length (truncates if not)
-	private static short[] interleave(short[] left, short[] right) {
-		int N = Math.min(left.length, right.length);  //safe handling: choose minimum length. Really they should be equal.
-		short[] playBuffer = new short [2*N];
+	public static short[] interleave(short[] left, short[] right) {
+		if (left.length != right.length)
+			throw new IllegalArgumentException("Cannot interleave vectors of unequal length");
+		
+		int N = left.length;
+		short[] interleaved = new short [2*N];
 		for (int n=0; n<N; n++) {
-			playBuffer[2*n] = left[n];
-			playBuffer[2*n+1] = right[n];
+			interleaved[2*n] = left[n];
+			interleaved[2*n+1] = right[n];
 		}
-		return playBuffer;
+		return interleaved;
 	}
 	
-	public static double[] convertToMono(double[][] stereoData) {
-		//TODO: check 2-channel, same length
-		
-		int N = stereoData[0].length;
-		double[] monoSignal = new double [N];
-
-		for (int n=0;n<N; n++) {
-			monoSignal[n] += 1/2 * (stereoData[0][n] + stereoData[1][n]);
-		}
-		
-		return monoSignal;
-	
+	//throw IllegalArgumentException if signal is not a valid stereo signal
+	private static void confirmValidStereoSignal (double[][] signal) {
+		if (signal.length != 2 || signal[0].length != signal[1].length)
+			throw new IllegalArgumentException("Stereo data must be 2 vectors of equal length");
 	}
 	
 }

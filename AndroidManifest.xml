@@ -57,7 +57,10 @@
                 <action android:name="org.audiopulse.CAPTURE_MENU"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activities.DeviceCalibrationActivity"
+        <activity android:name="org.audiopulse.activities.InputCalibrationActivity"
+        	android:configChanges="orientation|keyboardHidden">
+        </activity>
+        <activity android:name=".activities.BasicTestActivity"
         	android:configChanges="orientation|keyboardHidden">
         </activity>
         </application>

@@ -45,10 +45,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.audiopulse.R;
+import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.io.AudioStreamer;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
+import org.audiopulse.io.Utils;
+import org.audiopulse.tests.DPOAECalibrationProcedure;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
 import org.audiopulse.utilities.SpectralWindows;
@@ -59,8 +62,11 @@ import org.audiopulse.utilities.ThreadedToneGenerator;
 
 import android.content.Context;
 import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -72,7 +78,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class DeviceCalibrationActivity extends GeneralAudioTestActivity implements OnSeekBarChangeListener, OnItemSelectedListener 
+public class OutputCalibrationActivity extends BasicTestActivity
+									implements OnSeekBarChangeListener, OnItemSelectedListener 
 
 {
 	public static final String TAG="DeviceCalibrationActivity";
@@ -93,7 +100,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	double[] clickFrequencies = {5, 10, 20, 30, 40};
 	double[] amplitudes = {.2, .4, .6, .8, 1};
 	
-	private static final int sampleFrequency = 44100; 		//TODO: make this app-wide
+	public final int sampleFrequency = 44100; 		//TODO: make this app-wide
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -102,7 +109,7 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		
 		//create audio streaming device with 1/4 second buffer
 		player = new AudioStreamer(sampleFrequency, sampleFrequency/4);
-
+		
 		Spinner sourceSpinner = (Spinner) findViewById(R.id.calibration_source);
 		sourceSpinner.setOnItemSelectedListener(this);
 		
@@ -118,6 +125,8 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 				
 		attachSource();
 	}
+	
+	
     
 	public void toggleSound(View view) {
 		if (((ToggleButton)view).isChecked()) {
@@ -130,7 +139,6 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	}
 	
 	public void startTest(View callingView){
-		//TODO: implement this
 	}
 	
 	//Read source from spinner, create this source as new.
@@ -153,8 +161,8 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 		player.attachSource(source);	//attach to player object
 		
 		if (wasPlaying) player.start();
-
 		Log.d(TAG,"Source created: " + sourceName);
+		
 	}
 	
 	//update source parameters from UI values
@@ -246,5 +254,5 @@ public class DeviceCalibrationActivity extends GeneralAudioTestActivity implemen
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// do nothing
 	}
-	
+		
 }
