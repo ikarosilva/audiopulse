@@ -10,6 +10,7 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+//TODO: make sure we can set STATIC or STREAM
 public class PlayRecordManager{
 	private boolean recordEnabled;
 	private boolean playbackEnabled;

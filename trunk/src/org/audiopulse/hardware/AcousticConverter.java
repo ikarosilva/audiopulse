@@ -3,7 +3,7 @@ package org.audiopulse.hardware;
 import org.audiopulse.utilities.SignalProcessing;
 
 public class AcousticConverter {
-	//TODO: replace these parameters with a MobilePhone and a AcousticDevice object.
+	//TODO: put this into a resource file
 	private double VPerDU_output = 1;		//V for 1 amplitude at outpu
 	private double VPerDU_input = 0.020;		//V for 1 amplitude at input
 	private double SPL1V = 72;				//dB SPL for 1V rms electrical signal

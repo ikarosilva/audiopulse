@@ -25,19 +25,24 @@ public abstract class TestProcedure implements Runnable {
 	}
 	
 	public void start() {
+		//TODO: lock resources, set volume, turn on airplane mode, etc
 		testThread = new Thread(this);
 		testThread.setPriority(Thread.MAX_PRIORITY);
 		testThread.start();
+		//TODO: release resources
 	}
 	
+	//Subclasses to implement run(), which performs the test procedure
 	public abstract void run();	
 	
 	//TODO: other messaging utilities
+	//Print message to testLog TextView
 	public void logToUI(String str)
 	{
 		this.sendMessage(Utils.getStringAsABundle(str));
 	}
 	
+	//send message to parent Activity
 	public void sendMessage(Bundle data) {
 		Message m = this.uiThreadHandler.obtainMessage();
 		m.setData(data);
