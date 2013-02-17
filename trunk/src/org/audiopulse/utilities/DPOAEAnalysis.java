@@ -3,6 +3,7 @@ package org.audiopulse.utilities;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.audiopulse.io.ShortFile;
@@ -82,7 +83,7 @@ public class DPOAEAnalysis {
 		} );
 	}
 
-	public static  ArrayList<Double[]> runAnalysis(String dataDir) throws Exception {
+	public static  ArrayList<Double[]> runAnalysis(String dataDir) {
 
 		//Set parameters according to the procedures defined by
 		//Gorga et al 1993,"Otoacoustic Emissions from Normal-hearing and hearing-impaired subject: distortion product responses
@@ -111,25 +112,32 @@ public class DPOAEAnalysis {
 			//These parameters (F1,F2,Fres) should be loaded dynamically based on the protocol description
 			//on the acompanying XML File
 			Log.v(TAG,"Running analysis for: " + outFileName);
-			if(outFileName.contains("-2kHz")){
+			if(outFileName.contains("AP_DPGram-Left-Ear-2kHz")){
 				F2=2000;F1=F2/1.2;Fres=(2*F1)-F2;	
 				fIndex=0*2;//index are all even, data amp goes in the odd indeces
-			}else if(outFileName.contains("-3kHz")){
+			}else if(outFileName.contains("AP_DPGram-Left-Ear-3kHz")){
 				F2=3000;F1=F2/1.2;Fres=(2*F1)-F2;
 				fIndex=1*2;
-			}else if(outFileName.contains("-4kHz")){
+			}else if(outFileName.contains("AP_DPGram-Left-Ear-4kHz")){
 				F2=4000;F1=F2/1.2;Fres=(2*F1)-F2;
 				fIndex=2*2;
 			}else{
 				Log.v(TAG,"Unexpected DPOAE File Name: " +  outFileName);
 			}
-			rawData = ShortFile.readFile(oaeFiles[i].getAbsolutePath());
-
+			Log.v(TAG,"Reading file: " + oaeFiles[i].getAbsolutePath());
+			try {
+				rawData = ShortFile.readFile(oaeFiles[i].getAbsolutePath());
+			} catch (Exception e) {
+				Log.v(TAG,"Could not read data from file: " +  e.getMessage());
+				e.printStackTrace();
+			}
+			
 			//Check to see if any clipping occurred
 			if(SignalProcessing.isclipped(rawData,Fs)){
 				Log.v(TAG,"Error: clipping occured in:" + outFileName);
 				System.err.println("Error: clipping occured in:" + outFileName);
 			}	
+			Log.v(TAG,"Estimating spectrum");
 			double[][] XFFT= DPOAEAnalysis.getSpectrum(rawData,Fs,epochTime);
 			tmpResult=getResponse(XFFT,F1,tolerance);
 			results[0]=tmpResult[1];
@@ -150,10 +158,12 @@ public class DPOAEAnalysis {
 			DPOAEData[fIndex]=F2;
 			DPOAEData[fIndex+1]=Double.valueOf(Math.round(results[2]));
 
+			Log.v(TAG,"Estimating noise floor");
 			noiseFloor[fIndex]=F2;
 			noiseFloor[fIndex+1]=getNoiseLevel(XFFT,FresIndex);
 			//Delete the file once they have been compressed and packed and analyzed
 			if(oaeFiles[i].getName().endsWith(".raw")){
+				Log.v(TAG,"Deleting temporary file:" +oaeFiles[i].getName());
 				oaeFiles[i].delete();
 			}
 
@@ -161,6 +171,7 @@ public class DPOAEAnalysis {
 
 		//Send data as an double array
 		//Log.v(TAG,"f1[0]=" + f1Data[0]+"f1[1]=" + f1Data[1]+"f1[2]=" + f1Data[2]);
+		Log.v(TAG,"sending results back");
 		finalData.add(f1Data);
 		finalData.add(f2Data);
 		finalData.add(DPOAEData);
