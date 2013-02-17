@@ -93,7 +93,7 @@ public class TestMenuActivity extends AudioPulseActivity
         				//TODO: put this in the menu
         				Bundle tests = new Bundle();
         				tests.putString("testName",itemText);
-        				Intent testIntent = new Intent(TestMenuActivity.this, BasicTestActivity.class);
+        				Intent testIntent = new Intent(TestMenuActivity.this, TestActivity.class);
         				testIntent.putExtras(tests);
         				startActivity(testIntent);
         			}

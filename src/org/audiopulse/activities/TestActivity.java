@@ -40,12 +40,11 @@
 package org.audiopulse.activities;
 
 import org.audiopulse.R;
-import org.audiopulse.io.Utils;
 import org.audiopulse.tests.DPOAECalibrationProcedure;
 import org.audiopulse.tests.TestProcedure;
 
 import android.os.Bundle;
-import android.os.Handler.Callback;
+import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
@@ -53,7 +52,7 @@ import android.widget.TextView;
 
 //GeneralAudioTestActivity is a template for all tests; all test activities should extend GeneralAudioTestActivity.
 //FIXME: for now implementing my debugging procedures here. FIgure out our structure, and make the appropriate structural changes.
-public class BasicTestActivity extends AudioPulseActivity implements Callback
+public class TestActivity extends AudioPulseActivity implements Handler.Callback
 {
 	public static final String TAG="BasicTestActivity";
 	
@@ -68,13 +67,14 @@ public class BasicTestActivity extends AudioPulseActivity implements Callback
 		testLog = (TextView)this.findViewById(R.id.testLog);
 	}
 
-	//begin test. Generally, this function is called by a ButtonView in the layout.
+	//Begin test -- this function is called by the button in the default layout
 	public void startTest(View callingView)
 	{
 		appendText("Starting Test Procedure");
 		if (testProcedure==null) {
 //			appendText("No TestProecdure set!");
 			//FIXME: don't do this. Just doing it now for convenience.
+			//maybe define a DebuggingTestActivity?
 			appendText("Starting DPOAE Calibration");
 			testProcedure = new DPOAECalibrationProcedure(this);
 			testProcedure.start();
@@ -102,44 +102,21 @@ public class BasicTestActivity extends AudioPulseActivity implements Callback
 
 	//plot recorded signal spectrum
 	public void plotSpectrum(Bundle audioResultsBundle) {
-//		Intent intent = new Intent(this.getApplicationContext(), PlotSpectralActivity.class);
-//		intent.putExtras(audioResultsBundle);
-//		this.audioResultsBundle=audioResultsBundle;
-//		startActivity(intent);
-		//FIXME
+		//TODO
 	}
 
 	//plot recorded waveform
-	public void plotWaveform() {
-//		//TODO: Add check for not null audioResultsBundle (notify user that to run stimulus if they press this option before running anything).
-//		Intent intent = new Intent(this.getApplicationContext(), PlotWaveformActivity.class);
-//		intent.putExtras(audioResultsBundle);
-//		startActivity(intent);
-		//FIXME
+	public void plotWaveform(Bundle audioResultsBundle) {
+		//TODO
 	}
 
-	public void appendData(Bundle b) {
-		//TODO: something?
-	}
-
-	public boolean handleMessage(Message msg) 
-	{
-		//FIXME: make this a more general test message handler
-		Log.v(TAG,"Handling received message");
-		String pm = Utils.getStringFromABundle(msg.getData());		
-		Bundle b=msg.getData();
-		if(b.getLong("N") == 0L){
-			appendText(pm);
-		}else{
-			// Thread should be done so we are sending data back to
-			// parent
-			// Need this so parent has bundled file uri to return to Sana.
-			appendData(b);
-			if(b.getBoolean("showSpectrum") ==true){
-				plotSpectrum(b);
-			}
-		}
-		return true;	//TODO: make return value appropriate
+	//TODO: expand on this for other message types. Implement nested class NativeMessageHandler? 
+	//default implementation for handling messages from TestProecdure objects
+	public boolean handleMessage(Message msg) {
+		Bundle data = msg.getData();
+		String pm = data.getString("log");
+		appendText(pm);
+		return true;
 	}
 
 }
