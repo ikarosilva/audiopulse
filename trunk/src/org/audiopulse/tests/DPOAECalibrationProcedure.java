@@ -1,6 +1,6 @@
 package org.audiopulse.tests;
 
-import org.audiopulse.activities.BasicTestActivity;
+import org.audiopulse.activities.TestActivity;
 import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
@@ -18,15 +18,16 @@ public class DPOAECalibrationProcedure extends TestProcedure{
 	
 	private double f1 = 1000, f2 = 2000;
 	private double fdp = 3000;
-	private int fs = 44100;
 	private double duration = 0.5;
 	
 	private AcousticConverter converter = new AcousticConverter();
 	
-	public DPOAECalibrationProcedure(BasicTestActivity parentActivity) {
+	public DPOAECalibrationProcedure(TestActivity parentActivity) {
 		super(parentActivity);
 		// TODO Auto-generated constructor stub
 	}
+	
+	@Override
 	public void run() {
 		//Since (if) we can't synchronize input & output samples, we must calibrate timing
 		//ourselves by looking for the onset and offset of the recorded test signal
@@ -43,17 +44,17 @@ public class DPOAECalibrationProcedure extends TestProcedure{
 		//5. Determine level between onset & offset
 		//6. Save result.
 		
-		tone = Signals.tone(fs, f1, duration);
+		tone = Signals.tone(playbackSampleFrequency, f1, duration);
 		tone = converter.setOutputLevel(tone, A0);
 		A = calibrateTone(tone);
 		logToUI("f1 gain: " + String.format("%.1f dB",A-A0));
 
-		tone = Signals.tone(fs, f2, duration);
+		tone = Signals.tone(playbackSampleFrequency, f2, duration);
 		tone = converter.setOutputLevel(tone, A0);
 		A = calibrateTone(tone);
 		logToUI("f2 gain: " + String.format("%.1f dB",A-A0));
 
-		tone = Signals.tone(fs, fdp, duration);
+		tone = Signals.tone(playbackSampleFrequency, fdp, duration);
 		tone = converter.setOutputLevel(tone, A0);
 		A = calibrateTone(tone);
 		logToUI("dp gain: " + String.format("%.1f dB",A-A0));
@@ -61,8 +62,10 @@ public class DPOAECalibrationProcedure extends TestProcedure{
 	}
 	
 	private double calibrateTone(double[] tone) {
-		testIO.setStimulus(AudioSignal.convertToStereo(tone));
-		double[] x = testIO.playAndRecord();
+		testIO.setPlaybackAndRecording(playbackSampleFrequency, AudioSignal.convertToStereo(tone), 
+				recordingSampleFrequency, 100, 100);
+		testIO.start();
+		double[] x = testIO.getResult();
 		double A = converter.getInputLevel(x);
 		return A;
 	}

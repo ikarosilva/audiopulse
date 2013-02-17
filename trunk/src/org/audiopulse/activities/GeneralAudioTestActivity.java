@@ -57,7 +57,10 @@ import android.view.View;
 import android.widget.TextView;
 
 //GeneralAudioTestActivity is a template for all tests; all test activities should extend GeneralAudioTestActivity.
-
+@Deprecated 
+/* Use BasicTestActivity as the base class, which handles a much smaller scope
+ * of functions limited primarily to UI stuff only. 
+ */
 public abstract class GeneralAudioTestActivity extends AudioPulseActivity 
 {
 	public static final String TAG="GeneralAudioTestActivity";

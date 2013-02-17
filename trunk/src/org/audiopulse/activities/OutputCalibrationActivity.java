@@ -78,7 +78,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class OutputCalibrationActivity extends BasicTestActivity
+public class OutputCalibrationActivity extends TestActivity
 									implements OnSeekBarChangeListener, OnItemSelectedListener 
 
 {

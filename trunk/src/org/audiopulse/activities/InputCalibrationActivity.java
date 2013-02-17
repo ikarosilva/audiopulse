@@ -51,7 +51,7 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.TextView;
 
-public class InputCalibrationActivity extends BasicTestActivity implements Handler.Callback
+public class InputCalibrationActivity extends TestActivity implements Handler.Callback
 
 {
 	public static final String TAG="InputCalibrationActivity";

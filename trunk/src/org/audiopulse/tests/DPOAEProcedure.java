@@ -1,6 +1,6 @@
 package org.audiopulse.tests;
 
-import org.audiopulse.activities.BasicTestActivity;
+import org.audiopulse.activities.TestActivity;
 import org.audiopulse.activities.DPOAEActivity;
 import org.audiopulse.hardware.MobilePhone;
 import org.audiopulse.utilities.DPOAESignal;
@@ -12,7 +12,7 @@ import org.audiopulse.utilities.DPOAESignal.protocolHOAE;
 //TODO: put full DPOAE functionality here, fix things as needed
 public class DPOAEProcedure extends TestProcedure {
 
-	public DPOAEProcedure(BasicTestActivity parent) {
+	public DPOAEProcedure(TestActivity parent) {
 		super(parent);
 		// TODO Auto-generated constructor stub
 	}
