@@ -83,14 +83,12 @@ public class PlayRecordManager {
 			numSamplesToRecord = preroll + numSamplesToPlay + postroll;
 			initializeRecorder(numSamplesToRecord);
 			
-			//FIXME - this callback is only getting evaluated after the
-			// activity is it queuing on a busy thread?
 			//set up recorder to trigger playback after preroll
 			recordListener = new AudioRecord.OnRecordPositionUpdateListener() {
 				public void onMarkerReached(AudioRecord recorder) {
 					Log.v("recordLoop","Notification marker reached!" );
 					if (playbackEnabled) {
-						//triggerPlayback();
+						triggerPlayback();
 					} 
 				}
 				public void onPeriodicNotification(AudioRecord recorder) {
@@ -127,30 +125,18 @@ public class PlayRecordManager {
 			return;
 		}
 		
-//		if (recordingEnabled) {
-//			//start recording in new thread.
-//			//if playback is enabled, recorder will trigger it.
-//			recordingThread.start();
-//		} else {
-//			//no recorder to trigger playback, so start playback ourselves
-//			triggerPlayback();
-//		}
+		if (recordingEnabled) {
+			//start recording in new thread.
+			//if playback is enabled, recorder will trigger it.
+			recordingThread.start();
+		} else {
+			//no recorder to trigger playback, so start playback ourselves
+			triggerPlayback();
+		}
 
-		//FIXME - can't get recorder callback to be called in time, why not?
-		//trying to use that as the way to trigger the playback thread.
-		//maybe it's just as good to do this with a built-in delay to playbackThread
-
-		recordingThread.start();
-		triggerPlayback();
 		
 		//FIXME - how do we set playbackComplete using MODE_STATIC?
 		//maybe use a callback, but that's not working out so well for the recorder.
-		//TODO - do we want to wait on this thread, or just trigger and exit here,
-		//letting the TestProcedure decide how to wait
-		// -- I think it's a good idea to limit what can be done, and not risk
-		//    concurrency issues or CPU limitations during a testIO run, so
-		//    maybe waiting in this thread is good
-		//wait until IO completes or interrupted
 		try {
 			while (!isIoComplete()) {
 				Log.d(TAG,"Waiting for IO completion...");
