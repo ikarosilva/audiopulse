@@ -277,12 +277,6 @@ public class PlayRecordManager {
 			//TODO: do this only in MODE_STREAM
 			playbackThread = new Thread( new Runnable() {
 				public void run() {
-					try {
-						Thread.sleep(prerollInMillis);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 					playbackLoop();
 				}
 			}, "PlaybackThread");
