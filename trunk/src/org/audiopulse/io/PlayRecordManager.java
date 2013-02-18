@@ -23,7 +23,7 @@ public class PlayRecordManager {
 	
 	private int playbackSampleRate;
 	private int recordingSampleRate;
-	private int playerBufferLength = 512;
+	private int playerBufferLength = 4096;			//length of buffer to write in one chucnk
 	private int recorderBufferLength = 4096;		//length of recording buffer
 	private int recorderReadLength = 512;			//# samples to read at a time from recording buffer
 	
@@ -37,8 +37,9 @@ public class PlayRecordManager {
 	
 	private short[] recordedData;
 	private double[] recordedAudio;
+	private short[] stimulusData;
 	
-	private volatile boolean stopRecording;
+	private volatile boolean stopRequest;
 	private volatile boolean stopPlayback;
 	
 	private Thread recordingThread = new Thread();
@@ -49,13 +50,14 @@ public class PlayRecordManager {
 	//set to playback only, specify stimulus
 	public void setPlaybackOnly(int playbackSampleFreq, double[][] stimulus) {
 		synchronized (playbackThread) {
-			playbackEnabled = true;
-			playbackCompleted = false;
-			this.playbackSampleRate = playbackSampleFreq;		
-			initializePlayer(stimulus);
+			this.playbackEnabled = true;
+			this.playbackCompleted = false;
+			this.playbackSampleRate = playbackSampleFreq;
+			this.stimulusData = AudioSignal.convertStereoToShort(stimulus);
+			initializePlayer();
 		}
 		synchronized (recordingThread) {
-			recordingEnabled = false;
+			this.recordingEnabled = false;
 		}
 		
 	}
@@ -66,29 +68,30 @@ public class PlayRecordManager {
 			int recordingSampleFreq, int prerollInMillis, int postrollInMillis) {
 
 		//figure out time intervals in samples
-		preroll = prerollInMillis * recordingSampleFreq / 1000;
-		postroll = postrollInMillis * recordingSampleFreq / 1000;
+		this.preroll = prerollInMillis * recordingSampleFreq / 1000;
+		this.postroll = postrollInMillis * recordingSampleFreq / 1000;
 
 		synchronized (playbackThread) {
-			playbackEnabled = true;
-			playbackCompleted = false;
+			this.playbackEnabled = true;
+			this.playbackCompleted = false;
 			this.playbackSampleRate = playbackSampleFreq;
-			initializePlayer(stimulus, prerollInMillis);			
+			this.stimulusData = AudioSignal.convertStereoToShort(stimulus);
+			initializePlayer();			
 		}
 		synchronized (recordingThread) {
-			recordingEnabled = true;
-			recordingCompleted = false;
+			this.recordingEnabled = true;
+			this.recordingCompleted = false;
 			this.recordingSampleRate = recordingSampleFreq;
+			this.numSamplesToRecord = preroll + numSamplesToPlay + postroll;
 			
-			numSamplesToRecord = preroll + numSamplesToPlay + postroll;
-			initializeRecorder(numSamplesToRecord);
+			initializeRecorder();
 			
-			//set up recorder to trigger playback after preroll
+			//define listener for recorder that will trigger playback after preroll
 			recordListener = new AudioRecord.OnRecordPositionUpdateListener() {
 				public void onMarkerReached(AudioRecord recorder) {
 					Log.v("recordLoop","Notification marker reached!" );
 					if (playbackEnabled) {
-						triggerPlayback();
+						playbackThread.start();
 					} 
 				}
 				public void onPeriodicNotification(AudioRecord recorder) {
@@ -105,46 +108,41 @@ public class PlayRecordManager {
 	//set to record only, specify recording time
 	public void setRecordingOnly(int recordingSampleFrequency, int recordTimeInMillis) {
 		synchronized (playbackThread) {
-			playbackEnabled = false;
+			this.playbackEnabled = false;
 		}
 		synchronized (recordingThread) {
-			recordingEnabled = true;
-			recordingCompleted = false;
+			this.recordingEnabled = true;
+			this.recordingCompleted = false;
 			this.recordingSampleRate = recordingSampleFrequency;
-			
-			//determine recording time in samples
-			numSamplesToRecord = recordTimeInMillis * recordingSampleFrequency / 1000;
-			initializeRecorder(numSamplesToRecord);
+			this.numSamplesToRecord = recordTimeInMillis * recordingSampleFrequency / 1000;
+
+			initializeRecorder();
 		}
 	}
 	
 	//start playback and/or recording
 	public synchronized void start() {
-		if (!recordingEnabled && !playbackEnabled) {
+		//start IO
+		if (recordingEnabled) {
+			recordingThread.start();	//recorder will trigger playback if enabled.
+		} else if (playbackEnabled) {
+			playbackThread.start();
+		} else {
 			Log.w(TAG,"No recording or playback set, doing nothing!");
 			return;
 		}
-		
-		if (recordingEnabled) {
-			//start recording in new thread.
-			//if playback is enabled, recorder will trigger it.
-			recordingThread.start();
-		} else {
-			//no recorder to trigger playback, so start playback ourselves
-			triggerPlayback();
-		}
 
-		
+		//wait for completion before returning control
 		//FIXME - how do we set playbackComplete using MODE_STATIC?
-		//maybe use a callback, but that's not working out so well for the recorder.
 		try {
 			while (!isIoComplete()) {
 				Log.d(TAG,"Waiting for IO completion...");
 				this.wait();
+				Log.d(TAG,"start() thread woken up, checking if we're done.");
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			Log.w(TAG,"IO interrupted");
+			Log.w(TAG,"start thread interrupted");
 		}
 			
 	}
@@ -160,9 +158,11 @@ public class PlayRecordManager {
 		try {
 			while (!isIoComplete()) {
 				this.wait();
+				Log.d(TAG,"getRestuls thread woken up, checking if we're done.");
 			}
 			return recordedAudio;
 		} catch (InterruptedException e) {
+			Log.d(TAG,"Interrupted at getResults");
 			e.printStackTrace();
 			return null;
 		}
@@ -171,23 +171,23 @@ public class PlayRecordManager {
 	
 	
 
-	//determine how to trigger playback depending on player mode
-	private void triggerPlayback() {
-		if (playerMode==AudioTrack.MODE_STATIC){
-			player.play();
-			playbackCompleted = true; //FIXME
-		} else { //MODE_STREAM
-			playbackThread.start();
-		}
-	}
+//	//determine how to trigger playback depending on player mode
+//	private void triggerPlayback() {
+//		if (playerMode==AudioTrack.MODE_STATIC){
+//			player.play();
+//			playbackCompleted = true; //FIXME
+//		} else { //MODE_STREAM
+//			playbackThread.start();
+//		}
+//	}
 
 	private void recordLoop() {
 		synchronized (recordingThread) {
-			stopRecording = false;
+			stopRequest = false;
 			recorder.startRecording();
 			//recording loop
 			for (int n=0; n<numSamplesToRecord; ) {
-				if (stopRecording) {
+				if (stopRequest) {	//TODO: should this be done via an interrupt?
 					//TODO: message successful stop, cleanup?
 					break;
 				}
@@ -203,8 +203,9 @@ public class PlayRecordManager {
 				
 			}
 			recorder.stop();
-			recordingCompleted = true;
+			Log.d(TAG,"Done recordingLoop");
 			recordedAudio = AudioSignal.convertMonoToDouble(recordedData);
+			recordingCompleted = true;
 			doneLoop();
 		}
 	}
@@ -213,11 +214,18 @@ public class PlayRecordManager {
 		synchronized (playbackThread) {
 			stopPlayback = false;
 			player.play();
-			for (int n=0; n>numSamplesToPlay;) {
-				//TODO: implement this for MODE_STREAM
-				n+= numSamplesToPlay;		//TODO: remove
+			for (int n=0; n<numSamplesToPlay;) {
+				int remainingSamples = numSamplesToPlay - n;
+				int writeSize=(playerBufferLength<=remainingSamples) ? playerBufferLength : remainingSamples;
+				int nWritten = player.write(stimulusData, n, writeSize);
+				if (nWritten==AudioTrack.ERROR_BAD_VALUE || nWritten==AudioTrack.ERROR_INVALID_OPERATION) {
+					Log.e(TAG, "Audio write failed: " + nWritten);
+					//TODO: send a useful message to main activity informing of failure
+				}
+				n+= nWritten;
 			}
-			player.stop();
+			player.pause();
+			Log.d(TAG,"Done playbackLoop");
 			playbackCompleted = true;
 			doneLoop();
 		}
@@ -236,45 +244,41 @@ public class PlayRecordManager {
 	
 	//determine if play and record (if enabled) are completed
 	private boolean isIoComplete() {
+		Log.d(TAG,"Playback " + 
+				(playbackEnabled?"enabled, ":"disabled, ") +
+				(playbackCompleted?"complete.":"not complete."));
+		Log.d(TAG,"Recording " + 
+				(recordingEnabled?"enabled, ":"disabled, ") +
+				(recordingCompleted?"complete.":"not complete."));
 		return ((!playbackEnabled || playbackCompleted) &&
 				(!recordingEnabled || recordingCompleted));
 	}
 	
 	//prepare the AudioPlayer with user-specified parameters
-	private void initializePlayer(double[][] stimulus) {
-		initializePlayer(stimulus, 0);
-	} //TODO: clean this up
-	private void initializePlayer(double[][] stimulus, final int prerollInMillis) {
-		
-		//create a local copy of stimulus before potentially waiting for lock
-		short[] writeData = AudioSignal.convertStereoToShort(stimulus);
+	private void initializePlayer() {
 		
 		synchronized (playbackThread) {
 			if (player!=null) player.release();
 			
 			//check input stimulus
 			numPlayedSamples = 0;
-			numSamplesToPlay = stimulus[0].length;
-			if (stimulus[1].length != numSamplesToPlay)
-				throw new IllegalArgumentException("Invalid stereo stimulus: buffers must be the same length.");
+			numSamplesToPlay = stimulusData.length;
 			
 			//set up AudioTrack object (interface to playback hardware)
-			playerMode = AudioTrack.MODE_STATIC;	//TODO: determine this at runtime
-			//TODO: allow mode_stream, implement playback buffer loop
+			playerMode = AudioTrack.MODE_STREAM;	//TODO: MODE_STATIC? Google bug?
 			player = new AudioTrack(AudioManager.STREAM_MUSIC,
 					  playbackSampleRate,
 					  AudioFormat.CHANNEL_OUT_STEREO,
 					  AudioFormat.ENCODING_PCM_16BIT,
-					  numSamplesToPlay*4,
+					  numSamplesToPlay*2,		//*2 to convert to bytes
 					  playerMode);
-			int nRead = player.write(writeData,0,writeData.length);
+			int nRead = player.write(stimulusData,0,stimulusData.length);
 			if (nRead == AudioTrack.ERROR_BAD_VALUE
 					|| nRead == AudioTrack.ERROR_INVALID_OPERATION) {
 				//TODO: figure it out
 			}
 			
 			//set up Thread that will handle playback loop in MODE_STREAM
-			//TODO: do this only in MODE_STREAM
 			playbackThread = new Thread( new Runnable() {
 				public void run() {
 					playbackLoop();
@@ -284,7 +288,7 @@ public class PlayRecordManager {
 	}
 	
 	//prepare the AudioRecorder with user-specified parameters
-	private void initializeRecorder(int numSamplesToRecord) {
+	private void initializeRecorder() {
 		synchronized (recordingThread) {
 			if (recorder!=null) recorder.release();
 			

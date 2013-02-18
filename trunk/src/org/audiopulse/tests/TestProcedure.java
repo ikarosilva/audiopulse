@@ -74,7 +74,7 @@ public abstract class TestProcedure implements Runnable{
 	//call from Activity to perform test in a new thread
 	public final void start() {
 		//TODO: lock resources, set volume, turn on airplane mode, etc
-		workingThread = new Thread( this );
+		workingThread = new Thread( this , "TestMainThread");
 		workingThread.setPriority(Thread.MAX_PRIORITY);
 		workingThread.start();
 //		try {
