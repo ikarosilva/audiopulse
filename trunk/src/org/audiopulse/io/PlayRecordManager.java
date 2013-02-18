@@ -90,7 +90,7 @@ public class PlayRecordManager {
 				public void onMarkerReached(AudioRecord recorder) {
 					Log.v("recordLoop","Notification marker reached!" );
 					if (playbackEnabled) {
-						triggerPlayback();
+						//triggerPlayback();
 					} 
 				}
 				public void onPeriodicNotification(AudioRecord recorder) {
