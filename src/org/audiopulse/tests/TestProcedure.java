@@ -77,14 +77,14 @@ public abstract class TestProcedure implements Runnable{
 		workingThread = new Thread( this );
 		workingThread.setPriority(Thread.MAX_PRIORITY);
 		workingThread.start();
-		try {
-			workingThread.join();
-		} catch (InterruptedException e) {
-			Log.e(TAG,"Test interrupted!");
-			e.printStackTrace();
-			
-			//TODO: something!!
-		}
+//		try {
+//			workingThread.join();
+//		} catch (InterruptedException e) {
+//			Log.e(TAG,"Test interrupted!");
+//			e.printStackTrace();
+//			
+//			//TODO: something!!
+//		}
 		
 		//TODO: release resources
 	}
