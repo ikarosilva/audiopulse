@@ -54,6 +54,7 @@ public class PlayRecordManager {
 			this.playbackCompleted = false;
 			this.playbackSampleRate = playbackSampleFreq;
 			this.stimulusData = AudioSignal.convertStereoToShort(stimulus);
+			this.numSamplesToPlay = stimulus[0].length;
 			initializePlayer();
 		}
 		synchronized (recordingThread) {
@@ -76,13 +77,18 @@ public class PlayRecordManager {
 			this.playbackCompleted = false;
 			this.playbackSampleRate = playbackSampleFreq;
 			this.stimulusData = AudioSignal.convertStereoToShort(stimulus);
+			this.numSamplesToPlay = stimulus[0].length;
 			initializePlayer();			
 		}
 		synchronized (recordingThread) {
 			this.recordingEnabled = true;
 			this.recordingCompleted = false;
 			this.recordingSampleRate = recordingSampleFreq;
-			this.numSamplesToRecord = preroll + numSamplesToPlay + postroll;
+			this.numSamplesToRecord = preroll + stimulus[0].length + postroll;
+			//FIXME - don't assume sample rates are the same! numSamplesToRecord should be based on timing, not sample numbers
+			//FIXME - recording loop terminating before playback loop?
+			//hack: just increase number of record samples for now
+			this.numSamplesToRecord*=2;
 			
 			initializeRecorder();
 			
@@ -183,6 +189,7 @@ public class PlayRecordManager {
 
 	private void recordLoop() {
 		synchronized (recordingThread) {
+			Log.d(TAG,"Starting record loop: " + numSamplesToRecord + " samples to record.");
 			stopRequest = false;
 			recorder.startRecording();
 			//recording loop
@@ -214,8 +221,10 @@ public class PlayRecordManager {
 		synchronized (playbackThread) {
 			stopPlayback = false;
 			player.play();
-			for (int n=0; n<numSamplesToPlay;) {
-				int remainingSamples = numSamplesToPlay - n;
+			int numSamplesToWrite = stimulusData.length;
+			Log.d(TAG,"Starting record loop: " + numSamplesToWrite + " samples to write.");
+			for (int n=0; n<numSamplesToWrite;) {
+				int remainingSamples = numSamplesToWrite - n;
 				int writeSize=(playerBufferLength<=remainingSamples) ? playerBufferLength : remainingSamples;
 				int nWritten = player.write(stimulusData, n, writeSize);
 				if (nWritten==AudioTrack.ERROR_BAD_VALUE || nWritten==AudioTrack.ERROR_INVALID_OPERATION) {
