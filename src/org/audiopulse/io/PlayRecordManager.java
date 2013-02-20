@@ -32,8 +32,8 @@ public class PlayRecordManager {
 	private int numSamplesToRecord;				//total # samples to record
 	private int preroll;						//# samples between record start and play start
 	private int postroll;						//# samples between play end and record end
-	private volatile int numPlayedSamples;				//# samples played so far
-	private volatile int numRecordedSamples;				//# sample recorded so far
+	private volatile int numSamplesPlayed;				//# samples played so far
+	private volatile int numSamplesRecorded;				//# sample recorded so far
 	
 	private short[] recordedData;
 	private double[] recordedAudio;
@@ -78,7 +78,7 @@ public class PlayRecordManager {
 			this.playbackSampleRate = playbackSampleFreq;
 			this.stimulusData = AudioSignal.convertStereoToShort(stimulus);
 			this.numSamplesToPlay = stimulus[0].length;
-			initializePlayer();			
+			initializePlayer();
 		}
 		synchronized (recordingThread) {
 			this.recordingEnabled = true;
@@ -86,22 +86,18 @@ public class PlayRecordManager {
 			this.recordingSampleRate = recordingSampleFreq;
 			this.numSamplesToRecord = preroll + stimulus[0].length + postroll;
 			//FIXME - don't assume sample rates are the same! numSamplesToRecord should be based on timing, not sample numbers
-			//FIXME - recording loop terminating before playback loop?
-			//hack: just increase number of record samples for now
-			this.numSamplesToRecord*=2;
-			
 			initializeRecorder();
 			
 			//define listener for recorder that will trigger playback after preroll
 			recordListener = new AudioRecord.OnRecordPositionUpdateListener() {
 				public void onMarkerReached(AudioRecord recorder) {
-					Log.v("recordLoop","Notification marker reached!" );
 					if (playbackEnabled) {
+						Log.d(TAG,"Playback trigged at " + numSamplesRecorded + " recorded samples");
 						playbackThread.start();
 					} 
 				}
 				public void onPeriodicNotification(AudioRecord recorder) {
-					Log.v("recordLoop","Notification period marker reached!" );						
+					//unused
 				}
 			};
 			recorder.setRecordPositionUpdateListener(recordListener);
@@ -150,6 +146,8 @@ public class PlayRecordManager {
 			e.printStackTrace();
 			Log.w(TAG,"start thread interrupted");
 		}
+		
+		Log.d(TAG,"We're done, returning control.");
 			
 	}
 	
@@ -174,40 +172,26 @@ public class PlayRecordManager {
 		}
 		
 	}
-	
-	
-
-//	//determine how to trigger playback depending on player mode
-//	private void triggerPlayback() {
-//		if (playerMode==AudioTrack.MODE_STATIC){
-//			player.play();
-//			playbackCompleted = true; //FIXME
-//		} else { //MODE_STREAM
-//			playbackThread.start();
-//		}
-//	}
 
 	private void recordLoop() {
 		synchronized (recordingThread) {
 			Log.d(TAG,"Starting record loop: " + numSamplesToRecord + " samples to record.");
 			stopRequest = false;
-			recorder.startRecording();
 			//recording loop
-			for (int n=0; n<numSamplesToRecord; ) {
+			for (numSamplesRecorded=0; numSamplesRecorded<numSamplesToRecord; ) {
 				if (stopRequest) {	//TODO: should this be done via an interrupt?
 					//TODO: message successful stop, cleanup?
 					break;
 				}
 				
-				int remainingSamples = numSamplesToRecord - n;
+				int remainingSamples = numSamplesToRecord - numSamplesRecorded;
 				int requestSize=(recorderReadLength<=remainingSamples) ? recorderReadLength : remainingSamples;
-				int nRead=recorder.read(recordedData,n,requestSize);
+				int nRead=recorder.read(recordedData,numSamplesRecorded,requestSize);
 				if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
 					Log.e(TAG, "Audio read failed: " + nRead);
 					//TODO: send a useful message to main activity informing of failure
 				}
-				n += nRead;
-				
+				numSamplesRecorded += nRead;
 			}
 			recorder.stop();
 			Log.d(TAG,"Done recordingLoop");
@@ -220,18 +204,17 @@ public class PlayRecordManager {
 	private void playbackLoop() {
 		synchronized (playbackThread) {
 			stopPlayback = false;
-			player.play();
 			int numSamplesToWrite = stimulusData.length;
-			Log.d(TAG,"Starting record loop: " + numSamplesToWrite + " samples to write.");
-			for (int n=0; n<numSamplesToWrite;) {
-				int remainingSamples = numSamplesToWrite - n;
+			Log.d(TAG,"Starting play loop: " + numSamplesToWrite + " samples to write.");
+			for (numSamplesPlayed=0; numSamplesPlayed<numSamplesToWrite;) {
+				int remainingSamples = numSamplesToWrite - numSamplesPlayed;
 				int writeSize=(playerBufferLength<=remainingSamples) ? playerBufferLength : remainingSamples;
-				int nWritten = player.write(stimulusData, n, writeSize);
+				int nWritten = player.write(stimulusData, numSamplesPlayed, writeSize);
 				if (nWritten==AudioTrack.ERROR_BAD_VALUE || nWritten==AudioTrack.ERROR_INVALID_OPERATION) {
 					Log.e(TAG, "Audio write failed: " + nWritten);
 					//TODO: send a useful message to main activity informing of failure
 				}
-				n+= nWritten;
+				numSamplesPlayed+= nWritten;
 			}
 			player.pause();
 			Log.d(TAG,"Done playbackLoop");
@@ -253,12 +236,6 @@ public class PlayRecordManager {
 	
 	//determine if play and record (if enabled) are completed
 	private boolean isIoComplete() {
-		Log.d(TAG,"Playback " + 
-				(playbackEnabled?"enabled, ":"disabled, ") +
-				(playbackCompleted?"complete.":"not complete."));
-		Log.d(TAG,"Recording " + 
-				(recordingEnabled?"enabled, ":"disabled, ") +
-				(recordingCompleted?"complete.":"not complete."));
 		return ((!playbackEnabled || playbackCompleted) &&
 				(!recordingEnabled || recordingCompleted));
 	}
@@ -270,7 +247,7 @@ public class PlayRecordManager {
 			if (player!=null) player.release();
 			
 			//check input stimulus
-			numPlayedSamples = 0;
+			numSamplesPlayed = 0;
 			numSamplesToPlay = stimulusData.length;
 			
 			//set up AudioTrack object (interface to playback hardware)
@@ -286,6 +263,7 @@ public class PlayRecordManager {
 					|| nRead == AudioTrack.ERROR_INVALID_OPERATION) {
 				//TODO: figure it out
 			}
+			player.play();
 			
 			//set up Thread that will handle playback loop in MODE_STREAM
 			playbackThread = new Thread( new Runnable() {
@@ -301,23 +279,24 @@ public class PlayRecordManager {
 		synchronized (recordingThread) {
 			if (recorder!=null) recorder.release();
 			
-			numRecordedSamples = 0;
+			numSamplesRecorded = 0;
 			recordedData = new short[numSamplesToRecord];
 			
 			//set up AudioRecord object (interface to recording hardware)
 			int minBuffer = AudioRecord.getMinBufferSize(
 					recordingSampleRate,
-					AudioFormat.CHANNEL_CONFIGURATION_STEREO,
+					AudioFormat.CHANNEL_CONFIGURATION_MONO,
 					AudioFormat.ENCODING_PCM_16BIT
 					);
 			int bufferSizeInBytes = 2 * recorderBufferLength;
 			if (bufferSizeInBytes < minBuffer) bufferSizeInBytes = minBuffer;
 			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
 					recordingSampleRate,
-					AudioFormat.CHANNEL_CONFIGURATION_STEREO,
+					AudioFormat.CHANNEL_CONFIGURATION_MONO,
 					AudioFormat.ENCODING_PCM_16BIT,
 					bufferSizeInBytes);
-			
+			recorder.startRecording();
+
 			//set up thread that will run recording loop
 			recordingThread = new Thread( new Runnable() {
 				public void run() {
