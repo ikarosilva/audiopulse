@@ -18,8 +18,6 @@ public class PlayRecordManager {
 	private AudioRecord recorder;
 	private boolean recordingEnabled = false;
 	private boolean playbackEnabled = false;
-	private volatile boolean recordingCompleted;
-	private volatile boolean playbackCompleted;
 	
 	private int playbackSampleRate;
 	private int recordingSampleRate;
@@ -30,18 +28,20 @@ public class PlayRecordManager {
 	private int numSamplesToPlay;					//total # samples in playback
 	private int playerMode;						//MODE_STATIC or MODE_STREAM
 	private int numSamplesToRecord;				//total # samples to record
-	private int preroll;						//# samples between record start and play start
-	private int postroll;						//# samples between play end and record end
 	private volatile int numSamplesPlayed;				//# samples played so far
 	private volatile int numSamplesRecorded;				//# sample recorded so far
 	
+	private int preroll, postroll;
 	private short[] recordedData;
 	private double[] recordedAudio;
 	private short[] stimulusData;
 	
 	private volatile boolean stopRequest;
-	private volatile boolean stopPlayback;
-	
+	private volatile boolean playbackStarted;
+	private volatile boolean playbackCompleted;
+	private volatile boolean recordingStarted;
+	private volatile boolean recordingCompleted;
+
 	private Thread recordingThread = new Thread();
 	private Thread playbackThread = new Thread();
 	
@@ -122,6 +122,13 @@ public class PlayRecordManager {
 		}
 	}
 	
+	private void enablePlayback() {
+		
+	}
+	private void enableRecording() {
+		
+	}
+	
 	//start playback and/or recording
 	public synchronized void start() {
 		//start IO
@@ -173,6 +180,7 @@ public class PlayRecordManager {
 		
 	}
 
+	//run within recordingThread to read samples from hardware buffer
 	private void recordLoop() {
 		synchronized (recordingThread) {
 			Log.d(TAG,"Starting record loop: " + numSamplesToRecord + " samples to record.");
@@ -201,12 +209,18 @@ public class PlayRecordManager {
 		}
 	}
 	
+	//run within playbackThread to write samples to hardware output buffer
 	private void playbackLoop() {
 		synchronized (playbackThread) {
-			stopPlayback = false;
+			stopRequest = false;
 			int numSamplesToWrite = stimulusData.length;
 			Log.d(TAG,"Starting play loop: " + numSamplesToWrite + " samples to write.");
 			for (numSamplesPlayed=0; numSamplesPlayed<numSamplesToWrite;) {
+				if (stopRequest) {	//TODO: should this be done via an interrupt?
+					//TODO: message successful stop, cleanup?
+					break;
+				}
+				
 				int remainingSamples = numSamplesToWrite - numSamplesPlayed;
 				int writeSize=(playerBufferLength<=remainingSamples) ? playerBufferLength : remainingSamples;
 				int nWritten = player.write(stimulusData, numSamplesPlayed, writeSize);
@@ -223,7 +237,7 @@ public class PlayRecordManager {
 		}
 	}
 	
-	//If all tasks are done, notify anyone waiting on this PlayRecordManager
+	//Check if play&record are done, notify if so.
 	private void doneLoop() {
 		Log.d(TAG,"Done a loop, checking conditions...");
 		if (isIoComplete()) {
@@ -252,20 +266,21 @@ public class PlayRecordManager {
 			
 			//set up AudioTrack object (interface to playback hardware)
 			playerMode = AudioTrack.MODE_STREAM;	//TODO: MODE_STATIC? Google bug?
+			int minBuffer = AudioTrack.getMinBufferSize(
+					playbackSampleRate, 
+					AudioFormat.CHANNEL_OUT_STEREO,
+					AudioFormat.ENCODING_PCM_16BIT);
+			int bufferSizeInBytes = 2 * playerBufferLength;
+			if (bufferSizeInBytes < minBuffer) bufferSizeInBytes = minBuffer;
 			player = new AudioTrack(AudioManager.STREAM_MUSIC,
 					  playbackSampleRate,
 					  AudioFormat.CHANNEL_OUT_STEREO,
 					  AudioFormat.ENCODING_PCM_16BIT,
-					  numSamplesToPlay*2,		//*2 to convert to bytes
+					  bufferSizeInBytes,
 					  playerMode);
-			int nRead = player.write(stimulusData,0,stimulusData.length);
-			if (nRead == AudioTrack.ERROR_BAD_VALUE
-					|| nRead == AudioTrack.ERROR_INVALID_OPERATION) {
-				//TODO: figure it out
-			}
 			player.play();
 			
-			//set up Thread that will handle playback loop in MODE_STREAM
+			//set up Thread that will run playback loop
 			playbackThread = new Thread( new Runnable() {
 				public void run() {
 					playbackLoop();
