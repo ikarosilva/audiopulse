@@ -63,9 +63,8 @@ public class DPOAECalibrationProcedure extends TestProcedure{
 	
 	private double calibrateTone(double[] tone) {
 		testIO.setPlaybackAndRecording(playbackSampleFrequency, AudioSignal.convertToStereo(tone), 
-				recordingSampleFrequency, 100, 100);
-		testIO.start();
-		double[] x = testIO.getResult();
+				recordingSampleFrequency);
+		double[] x = testIO.acquire();
 		double A = converter.getInputLevel(x);
 		return A;
 	}
