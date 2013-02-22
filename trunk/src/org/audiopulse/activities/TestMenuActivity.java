@@ -89,6 +89,8 @@ public class TestMenuActivity extends AudioPulseActivity
         				
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.tests_device_calibration))) {
         				startActivity(new Intent(TestMenuActivity.this, InputCalibrationActivity.class));
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_teoae))) {
+        				startActivity(new Intent(TestMenuActivity.this, TEOAEActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_debug))) {
         				//TODO: put this in the menu
         				Bundle tests = new Bundle();
