@@ -61,6 +61,9 @@
         <activity android:name="org.audiopulse.activities.InputCalibrationActivity"
         	android:configChanges="orientation|keyboardHidden">
         </activity>
+        <activity android:name="org.audiopulse.activities.TEOAEActivity"
+        	android:configChanges="orientation|keyboardHidden">
+        </activity>
         <activity android:name="org.audiopulse.activities.TestActivity"
         	android:configChanges="orientation|keyboardHidden">
         </activity>
