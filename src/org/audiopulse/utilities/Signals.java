@@ -72,4 +72,34 @@ public class Signals {
 		return fadeIn(sampleFrequency,fadeDuration,fadeOut(sampleFrequency,fadeDuration,x));
 	}
 	
+	public synchronized static double[] clickKempMethod(double sampleFrequency, double totalDurationInSeconds) {
+		//Constructs click stimuli for non-linear reponse extraction using 
+		//3 click at one level and a fourth click at 3x the level
+		//The sweepDurationinSeconds is the duration of a single epoch (trial) *including* the click's duration
+		
+		//TODO: Add proper reference to the choice of stimulus parameters
+		final double clickDurationInSeconds=0.004;
+		final double sweepDurationInSeconds=0.05;
+		
+		final int N = (int) (totalDurationInSeconds * sampleFrequency);
+		final int clickN= (int) (clickDurationInSeconds * sampleFrequency);
+		final int sweepN= (int) (sweepDurationInSeconds * sampleFrequency);
+		final int sweeps= (int) Math.floor(N/sweepN);	
+		double[] x = new double[N];
+		int index0, index1, n, m;
+		for (n=0;n<sweeps;n++) {
+			//Sweep loop
+			index0=(int) (n*sweepN);
+			index1=index0+clickN-1;
+			for( m=index0;m<index1;m++){
+				//Click loop
+				if(((n+1)%3)==0){
+					x[m] = -1;
+				}else{
+					x[m] = (double) 1/3;
+				}	
+			}
+		}
+		return x;
+	}
 }
