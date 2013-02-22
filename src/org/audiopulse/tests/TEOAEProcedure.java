@@ -2,9 +2,11 @@ package org.audiopulse.tests;
 
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.hardware.AcousticConverter;
+import org.audiopulse.utilities.APAnnotations.UnderConstruction;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.Signals;
 
+@UnderConstruction(owner="Ikaro Silva")
 public class TEOAEProcedure extends TestProcedure{
 
 	private final String TAG = "TEOAECalibration";

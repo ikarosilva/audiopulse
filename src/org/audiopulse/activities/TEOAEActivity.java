@@ -41,6 +41,7 @@ package org.audiopulse.activities;
 
 import org.audiopulse.R;
 import org.audiopulse.hardware.AcousticConverter;
+import org.audiopulse.utilities.APAnnotations.UnderConstruction;
 import org.audiopulse.utilities.AudioSignal;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -51,6 +52,7 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.TextView;
 
+@UnderConstruction(owner="Ikaro Silva")
 public class TEOAEActivity extends TestActivity implements Handler.Callback
 
 {
