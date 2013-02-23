@@ -42,18 +42,21 @@ import java.io.*;
 import java.util.Date;
 
 import android.os.Environment;
+import android.util.Log;
 
 
-//TODO: Implement write thread
-//TODO: Create a generic version (APFile)
+public class AudioPulseFileWriter<T extends Number > extends Thread {
 
-//Use AudioPulseWriteFile instead
-
-@Deprecated 
-public class ShortFile {
-
+	private static final String TAG="AudioPulseWriteFile";
 	private static final File root = Environment.getExternalStorageDirectory();
+	private final File outFile;
+	private final T[] data;
 	
+	public AudioPulseFileWriter(File f, T[] d){
+		outFile=f;
+		data=d;
+	}
+
 	public synchronized static File generateFileName(String testType,
 			String testFrequency){
 		String fileName="AP_" + testType + "-" + testFrequency + "kHz-" +new Date().toString()+".raw";
@@ -61,7 +64,7 @@ public class ShortFile {
 		return outFile;
 	}
 	
-	public synchronized static void writeFile(File outFile, short[] samples) throws IOException{
+	public synchronized static <T> void writeFile(File outFile, T[] samples) throws IOException{
 		//Write Short file to disk
 		FileOutputStream fos = null;
 		ObjectOutputStream out = null;
@@ -71,16 +74,15 @@ public class ShortFile {
 		out.flush();
 		out.close();
 	}
-
-	public synchronized static short[] readFile(String file) throws IOException, ClassNotFoundException{
-		//Read Short file from disk	
-		FileInputStream nFile = new FileInputStream(file);
-		ObjectInputStream in = new ObjectInputStream(nFile);
-		short[] data=null;
-		data = (short[]) in.readObject();
-		in.close();
-		return data;
+	
+	public void run(){
+		Log.v(TAG,"Writing file: " + outFile);
+		try {
+			AudioPulseFileWriter.writeFile(outFile, data);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-
 
 }
