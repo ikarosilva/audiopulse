@@ -39,10 +39,15 @@
 
 package org.audiopulse.activities;
 
+import java.io.File;
+
 import org.audiopulse.R;
 import org.audiopulse.hardware.AcousticConverter;
+import org.audiopulse.io.AudioPulseFileWriter;
 import org.audiopulse.utilities.APAnnotations.UnderConstruction;
 import org.audiopulse.utilities.AudioSignal;
+import org.sana.android.Constants;
+
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -56,8 +61,7 @@ import android.widget.TextView;
 public class TEOAEActivity extends TestActivity implements Handler.Callback
 
 {
-	public static final String TAG="TEOAEActivity";
-	
+	private static final String TAG="TEOAEActivity";
 	private InputProcessor recorder;
 	public final int sampleFrequency = 44100; 		//TODO: make this app-wide
 
@@ -99,11 +103,11 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 		private volatile boolean requestStop = false;
 		
 		private int computeLength = 4096;
-		private int runningBufferLength = 10000;
+		private int runningBufferLength = sampleFrequency;
 		private int readLength = 1024;
 		
 		private int bufferIndex = 0;		//current index into runningBuffer
-		private double[] runningBuffer;		//dump read samples into this buffer
+		private Short[] runningBuffer;		//dump read samples into this buffer
 		
 		//constructor
 		public InputProcessor(TEOAEActivity parentActivity) {
@@ -132,7 +136,7 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 		//start the record handling
 		public void run() {
 			Log.d(TAG,"Starting TEOAERecording");
-			runningBuffer = new double[runningBufferLength];
+			runningBuffer = new Short[runningBufferLength];
 			short[] frameBuffer = new short[readLength];
 			recorder.startRecording();
 			requestStop = false;
@@ -146,28 +150,27 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 				}
 				
 				//copy read frame into runningBuffer
-				//TODO: we don't need to read every data sample if we only compute on a few of them
 				for (int n=0; n<nRead ; n++) {
-					runningBuffer[bufferIndex] = AudioSignal.convertSampleToDouble(frameBuffer[n]);
+					runningBuffer[bufferIndex] = frameBuffer[n];
 					bufferIndex++;
 					if (bufferIndex >= runningBufferLength) {
 						Log.d(TAG,"End of buffer reached.");
+						this.stop();
 						break;
 					}
-				}
-				//if we've reached the end of runningBuffer (hack method of timing for now), perform compute
-				if (bufferIndex>=runningBufferLength) {
+				}	
+			if (bufferIndex>=runningBufferLength) {
 					bufferIndex = 0;
-					final int start = runningBufferLength-computeLength;
-//					//compute in new thread to not interrupt recording process
-//					new Thread( new Runnable() {
-//						public void run() {
-//						}
-//					}).start();					
-				}
-				
+					final int start = runningBufferLength-computeLength;				
+			}
 			}
 			recorder.stop();
+			//Save data to disk
+			File file= AudioPulseFileWriter.generateFileName("TEOAE","click");
+			Log.d(TAG,"Saving file to disk:" + file.getName());
+			Thread fileWriter=new AudioPulseFileWriter(file,runningBuffer);
+			fileWriter.start();
+			
 		}
 		
 		public void stop() {
