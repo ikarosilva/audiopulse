@@ -39,12 +39,24 @@
 
 package org.audiopulse.io;
 import java.io.*;
+import java.util.Date;
+
+import android.os.Environment;
 
 
 
 public class ShortFile {
 
-	public static void writeFile(File outFile, short[] samples) throws IOException{
+	private static final File root = Environment.getExternalStorageDirectory();
+	
+	public synchronized static File generateFileName(String testType,
+			String testFrequency){
+		String fileName="AP_" + testType + "-" + testFrequency + "kHz-" +new Date().toString()+".raw";
+		File outFile = new File(root, fileName.replace(" ","-").replace(":", "-") );
+		return outFile;
+	}
+	
+	public synchronized static void writeFile(File outFile, short[] samples) throws IOException{
 		//Write Short file to disk
 		FileOutputStream fos = null;
 		ObjectOutputStream out = null;
@@ -55,7 +67,7 @@ public class ShortFile {
 		out.close();
 	}
 
-	public static short[] readFile(String file) throws IOException, ClassNotFoundException{
+	public synchronized static short[] readFile(String file) throws IOException, ClassNotFoundException{
 		//Read Short file from disk	
 		FileInputStream nFile = new FileInputStream(file);
 		ObjectInputStream in = new ObjectInputStream(nFile);
