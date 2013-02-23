@@ -53,6 +53,7 @@ public class AudioSignal {
 		}
 		return shortVector;
 	}
+	//convert stereo double vector to stereo-interleaved shorts
 	public static short[] convertStereoToShort(double[][] signal) {
 		confirmValidStereoSignal(signal);
 		
@@ -61,6 +62,7 @@ public class AudioSignal {
 		
 		return interleave(left,right);
 	}
+	//convert mono short vector to double
 	public static double[] convertMonoToDouble(short[] signal) {
 		double[] doubleVector = new double[signal.length];
 		for (int n=0;n<signal.length;n++) {
@@ -68,6 +70,7 @@ public class AudioSignal {
 		}
 		return doubleVector;
 	}
+	//convert stereo-interleaved short vector to double
 	public static double[][] convertStereoToDouble(short[] signal) {
 		if ((signal.length & 1) == 1)
 			throw new IllegalArgumentException("Input stereo-interleaved vector must have an even number of samples");
@@ -80,6 +83,7 @@ public class AudioSignal {
 		return doubleVector;
 	}
 	
+	//Convert stereo double to mono (via channel mean)
 	public static double[] convertToMono(double[][] signal) {
 		confirmValidStereoSignal(signal);
 		
@@ -92,15 +96,27 @@ public class AudioSignal {
 		
 		return monoSignal;
 	}
+	//Convert mono double vector to stereo (duplicate)
 	public static double[][] convertToStereo(double[] signal) {
 		double[][] stereoSignal = new double[2][];
 		stereoSignal[0] = signal.clone();
 		stereoSignal[1] = signal.clone();
 		return stereoSignal;
 	}
+	//Create stereo signal with given mono signal in left channel, zeros in right
+	public static double[][] monoToStereoLeft(double[] monoSignal) {
+		double[][] stereoSignal = new double[2][monoSignal.length];
+		stereoSignal[0] = monoSignal.clone();
+		return stereoSignal;
+	}
+	//Create stereo signal with given mono signal in left channel, zeros in left
+	public static double[][] monoToStereoRight(double[] monoSignal) {
+		double[][] stereoSignal = new double[2][monoSignal.length];
+		stereoSignal[1] = monoSignal.clone();
+		return stereoSignal;
+	}
 	
-	
-	//scale and convert a single sample to short.
+	//scale and convert a single double sample to short.
 	public static short convertSampleToShort(double sample) {
 		if(Math.abs(sample)>1){	
 			Log.w(TAG,"Digital (short) audio signal is being clipped!!");
@@ -109,12 +125,12 @@ public class AudioSignal {
 			return (short) (Short.MAX_VALUE * (sample));
 		}
 	}
+	//scale and convert a single short sample to double
 	public static double convertSampleToDouble(short sample) {
 		return ((double)sample) / ((double)Short.MAX_VALUE);
 	}
 	
-	//interleave left and right vectors into stereo interleaved
-	//left and right should be equal length (truncates if not)
+	//interleave left and right vectors into stereo interleaved for stereo playback
 	public static short[] interleave(short[] left, short[] right) {
 		if (left.length != right.length)
 			throw new IllegalArgumentException("Cannot interleave vectors of unequal length");
