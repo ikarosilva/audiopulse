@@ -51,15 +51,20 @@ public class AudioPulseFileWriter<T extends Number > extends Thread {
 	private static final File root = Environment.getExternalStorageDirectory();
 	private final File outFile;
 	private final T[] data;
+	private final static String fileExtension=".raw";
 	
 	public AudioPulseFileWriter(File f, T[] d){
 		outFile=f;
 		data=d;
 	}
 
+	public static String getFileExtension(){
+		return fileExtension;
+	}
+	
 	public synchronized static File generateFileName(String testType,
 			String testFrequency){
-		String fileName="AP_" + testType + "-" + testFrequency + "kHz-" +new Date().toString()+".raw";
+		String fileName="AP_" + testType + "-" + testFrequency + "kHz-" +new Date().toString()+fileExtension;
 		File outFile = new File(root, fileName.replace(" ","-").replace(":", "-") );
 		return outFile;
 	}
