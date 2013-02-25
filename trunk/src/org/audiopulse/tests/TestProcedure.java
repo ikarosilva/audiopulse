@@ -42,11 +42,9 @@ package org.audiopulse.tests;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.io.PlayRecordManager;
-import org.audiopulse.io.Utils;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Message;
 import android.util.Log;
 
@@ -54,13 +52,13 @@ public abstract class TestProcedure implements Runnable{
 	//run() should implement entire test procedure, including calibration and analysis
 	public abstract void run();
 	
-	private static final String TAG = "TestProcedure";
+	private final String TAG = "TestProcedure";
 	
 	private Handler uiThreadHandler;	//handler back to TestActivity
 	private Thread workingThread;		//main worker thread to perform test
 	
 	protected PlayRecordManager testIO;
-	protected AcousticConverter levels;
+	protected AcousticConverter hardware;
 	protected int playbackSampleFrequency = 44100;
 	protected int recordingSampleFrequency = 44100;
 	//TODO: get sample freqs from app data
@@ -68,7 +66,7 @@ public abstract class TestProcedure implements Runnable{
 	public TestProcedure (TestActivity parent) {
 		this.uiThreadHandler = new Handler(parent);
 		testIO = new PlayRecordManager();
-		levels = new AcousticConverter();
+		hardware = new AcousticConverter();
 	}
 	
 	//call from Activity to perform test in a new thread
@@ -77,22 +75,11 @@ public abstract class TestProcedure implements Runnable{
 		workingThread = new Thread( this , "TestMainThread");
 		workingThread.setPriority(Thread.MAX_PRIORITY);
 		workingThread.start();
-//		try {
-//			workingThread.join();
-//		} catch (InterruptedException e) {
-//			Log.e(TAG,"Test interrupted!");
-//			e.printStackTrace();
-//			
-//			//TODO: something!!
-//		}
-		
 		//TODO: release resources
 	}
 	
 		
-	//TODO: other messaging utilities?
-	
-	//send arbitrary message to parent Activity
+	//send a message to parent Activity
 	protected void sendMessage(Bundle data) {
 		Message m = this.uiThreadHandler.obtainMessage();
 		m.setData(data);
@@ -102,6 +89,7 @@ public abstract class TestProcedure implements Runnable{
 	//Print message to testLog TextView
 	protected void logToUI(String str)
 	{
+		Log.i(TAG,str);
 		Bundle data = new Bundle();
 		data.putString("log", str);
 		sendMessage(data);
