@@ -39,19 +39,19 @@
 
 package org.audiopulse.tests;
 
+import java.util.LinkedList;
+
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.io.PlayRecordManager;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 public abstract class TestProcedure implements Runnable{
-	//run() should implement entire test procedure, including calibration and analysis
-	public abstract void run();
-	
 	private final String TAG = "TestProcedure";
 	
 	private Handler uiThreadHandler;	//handler back to TestActivity
@@ -71,17 +71,92 @@ public abstract class TestProcedure implements Runnable{
 	
 	//call from Activity to perform test in a new thread
 	public final void start() {
-		//TODO: lock resources, set volume, turn on airplane mode, etc
+		if (!getAudioResources()) {
+			Log.e(TAG,"Failed to get audio focus!");
+			//TODO: treat this more seriously
+		}
 		workingThread = new Thread( this , "TestMainThread");
 		workingThread.setPriority(Thread.MAX_PRIORITY);
 		workingThread.start();
-		//TODO: release resources
+		releaseAudioResources();
 	}
 	
+	//run() should implement entire test procedure, including calibration and analysis
+	public abstract void run();
+
+	
+	protected boolean getAudioResources() {
+		//TODO
+//		 requestAudioFocus (AudioManager.OnAudioFocusChangeListener l, int streamType, int durationHint)
+//		Context.getSystemService(Context.AUDIO_SERVICE)
+//		if (isBluetoothA2dpOn()) {
+//		    // Adjust output for Bluetooth.
+//		} else if (isSpeakerphoneOn()) {
+//		    // Adjust output for Speakerphone.
+//		} else if (isWiredHeadsetOn()) {
+//		    // Adjust output for headsets
+//		} else { 
+//		    // If audio plays and noone can hear it, is it still playing?
+//		}
+//		private class NoisyAudioStreamReceiver extends BroadcastReceiver {
+//		    @Override
+//		    public void onReceive(Context context, Intent intent) {
+//		        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+//		            // Pause the playback
+//		        }
+//		    }
+//		}
+//
+//		private IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+//
+//		    registerReceiver(myNoisyAudioStreamReceiver(), intentFilter);
+		return true;
+	}
+	protected void releaseAudioResources() {
+		//TODO
+//		abandonAudioFocus(AudioManager.OnAudioFocusChangeListener l)
+//	    unregisterReceiver(myNoisyAudioStreamReceiver);
+	}
+	
+	//useful calibration routines for any test
+	protected void calibrateChrip() {
+		//TODO
+	}
+	protected void calibrateNoise() {
+		//TODO
+	}
+	protected void calibrateClicks(double peakLevel, double intervalInMillis) {
+		//TODO
+	}
+	
+	
+	//this doesn't seem to add enough to justify putting here, costs readability & flexibility in subclasses.
+//	private abstract interface TestParameters {
+//		//implementations of this interface should have internal
+//		//members such as tone frequency, level, etc.
+//		public double[][] createStimulus(double sanmpleFrequency, AcousticConverter hardware);
+//	}
+//	private LinkedList<TestParameters> testList;
+//	public boolean addTest(TestParameters params) {
+//		return testList.add(params);
+//	}
+//	public void clearTests() {
+//		testList.clear();
+//	}
+//	public TestParameters nextTest() {
+//		return testList.poll();
+//	}
+//	
 		
 	//send a message to parent Activity
+	@Deprecated
 	protected void sendMessage(Bundle data) {
 		Message m = this.uiThreadHandler.obtainMessage();
+		m.setData(data);
+		this.uiThreadHandler.sendMessage(m);
+	}
+	protected void sendMessage(int what, Bundle data) {
+		Message m = this.uiThreadHandler.obtainMessage(what);
 		m.setData(data);
 		this.uiThreadHandler.sendMessage(m);
 	}
@@ -92,7 +167,11 @@ public abstract class TestProcedure implements Runnable{
 		Log.i(TAG,str);
 		Bundle data = new Bundle();
 		data.putString("log", str);
-		sendMessage(data);
+		sendMessage(TestActivity.MESSAGES.LOG,data);
+	}
+	
+	protected void clearLog() {
+		sendMessage(TestActivity.MESSAGES.CLEAR_LOG,null);
 	}
 	
 	

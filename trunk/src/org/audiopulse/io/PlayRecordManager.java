@@ -22,6 +22,7 @@ public class PlayRecordManager {
 	
 	private int playbackSampleRate;
 	private int recordingSampleRate;
+	//TODO: make these length in ms
 	private int playerBufferLength = 4096;			//length of buffer to write in one chucnk
 	private int recorderBufferLength = 4096;		//length of recording buffer
 	private int recorderReadLength = 512;			//# samples to read at a time from recording buffer
