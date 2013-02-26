@@ -41,6 +41,7 @@ package org.audiopulse.activities;
 
 import org.audiopulse.R;
 import org.audiopulse.tests.DPOAECalibrationProcedure;
+import org.audiopulse.tests.DPOAEProcedure;
 import org.audiopulse.tests.TestProcedure;
 
 import android.os.Bundle;
@@ -54,7 +55,7 @@ import android.widget.TextView;
 //FIXME: for now implementing my debugging procedures here. FIgure out our structure, and make the appropriate structural changes.
 public class TestActivity extends AudioPulseActivity implements Handler.Callback
 {
-	public static final String TAG="BasicTestActivity";
+	public final String TAG="BasicTestActivity";
 	
 	protected TextView testLog;
 	protected TestProcedure testProcedure = null;		//test procedure to execute
@@ -76,7 +77,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 			//FIXME: don't do this. Just doing it now for convenience.
 			//maybe define a DebuggingTestActivity?
 			appendText("Starting DPOAE Calibration");
-			testProcedure = new DPOAECalibrationProcedure(this);
+			testProcedure = new DPOAEProcedure(this);
 			testProcedure.start();
 		} else {
 			testProcedure.start();
@@ -114,9 +115,20 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	//default implementation for handling messages from TestProecdure objects
 	public boolean handleMessage(Message msg) {
 		Bundle data = msg.getData();
-		String pm = data.getString("log");
-		appendText(pm);
+		switch (msg.what) {
+		case MESSAGES.CLEAR_LOG:
+			break;
+		case MESSAGES.LOG:
+			String pm = data.getString("log");
+			appendText(pm);
+			break;
+		}
 		return true;
 	}
 
+	public static class MESSAGES {
+		public static final int CLEAR_LOG = 1;
+		public static final int LOG = 2;
+	}
+	
 }
