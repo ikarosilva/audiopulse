@@ -46,6 +46,7 @@ import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.io.AudioPulseFileWriter;
 import org.audiopulse.utilities.APAnnotations.UnderConstruction;
 import org.audiopulse.utilities.AudioSignal;
+import org.audiopulse.utilities.Signals;
 import org.sana.android.Constants;
 
 import android.media.AudioFormat;
@@ -102,8 +103,8 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 		private AcousticConverter converter = new AcousticConverter();
 		private volatile boolean requestStop = false;
 		
-		private int computeLength = 4096;
-		private int runningBufferLength = sampleFrequency;
+		private int Nsweeps=200; //number of sweeps to collect
+		private int runningBufferLength = (int) (Nsweeps*sampleFrequency*Signals.getclickKempSweepDurationSeconds());
 		private int readLength = 1024;
 		
 		private int bufferIndex = 0;		//current index into runningBuffer
@@ -147,31 +148,27 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 				if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
 					Log.e(TAG, "Audio read failed: " + nRead);
 					//TODO: send a useful message to main activity informing of failure
-				}
-				
+				}			
 				//copy read frame into runningBuffer
 				for (int n=0; n<nRead ; n++) {
 					runningBuffer[bufferIndex] = frameBuffer[n];
 					bufferIndex++;
 					if (bufferIndex >= runningBufferLength) {
 						Log.d(TAG,"End of buffer reached.");
-						this.stop();
 						break;
 					}
 				}	
-			if (bufferIndex>=runningBufferLength) {
+			if (bufferIndex>=runningBufferLength)
 					bufferIndex = 0;
-					final int start = runningBufferLength-computeLength;				
-			}
+				    requestStop = true;
 			}
 			recorder.stop();
-			//Save data to disk
+			//Launch separate thread to save data to disk
 			File file= AudioPulseFileWriter.generateFileName("TEOAE","click");
 			Log.d(TAG,"Saving file to disk:" + file.getName());
-			Thread fileWriter=new AudioPulseFileWriter(file,runningBuffer);
-			fileWriter.start();
+			new AudioPulseFileWriter<Short>(file,runningBuffer).start();
 			
-		}
+		}//end of run
 		
 		public void stop() {
 			requestStop = true;
