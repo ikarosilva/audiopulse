@@ -51,50 +51,72 @@ public class PlayRecordManager {
 	
 	public AudioRecord.OnRecordPositionUpdateListener recordListener;
 	
+	//creator for just playback or recording
+	public PlayRecordManager(int sampleFrequency) {
+		this(sampleFrequency,sampleFrequency);
+	}
+	//creator for playback and recording 
+	public PlayRecordManager(int playbackSampleFrequency, int recordingSampleFrequency) {
+		this.playbackSampleRate = playbackSampleFrequency;
+		this.recordingSampleRate = recordingSampleFrequency;		
+		//TODO: create AudioTrack and AudioRecord objects here
+	}
+	
 	//TODO: have public functions return success, or possibly throw exceptions
 	
-	//set to playback only, specify stimulus
+	@Deprecated
 	public synchronized void setPlaybackOnly(int playbackSampleFreq, double[][] stimulus) {
+		setPlaybackOnly(stimulus);
+	}
+	@Deprecated
+	public synchronized void setPlaybackAndRecording(int playbackSampleFreq, double[][] stimulus, int recordingSampleFreq) {
+		setPlaybackAndRecording(stimulus);
+	}
+	@Deprecated
+	public synchronized void setRecordingOnly(int recordingSampleFrequency, int recordTimeInMillis) {
+		setRecordingOnly(recordTimeInMillis);
+	}
+	
+	//set to playback only, specify stimulus
+	public synchronized void setPlaybackOnly(double[][] stimulus) {
 		
 		synchronized(playbackLock) {
 			synchronized (recordingLock) {
 				this.playbackEnabled = true;
 				this.recordingEnabled = false;
-				initializePlayback(playbackSampleFreq, stimulus);
+				initializePlayback(playbackSampleRate, stimulus);
 				
 			}
 		}		
 	}
 	
 	//set to playback and record, specify stimulus
-	public synchronized void setPlaybackAndRecording(
-			int playbackSampleFreq, double[][] stimulus,
-			int recordingSampleFreq) {
+	public synchronized void setPlaybackAndRecording(double[][] stimulus) {
 
 		//sync recording length to playback length
-		int recordingSampleLength = stimulus[0].length * recordingSampleFreq / playbackSampleFreq;
+		int recordingSampleLength = stimulus[0].length * recordingSampleRate / playbackSampleRate;
 		//but add some padding to allow wiggle-room
-		recordingSampleLength += recordingPadInMillis * recordingSampleFreq / 1000;
+		recordingSampleLength += recordingPadInMillis * recordingSampleRate / 1000;
 		
 		synchronized(playbackLock) {
 			synchronized (recordingLock) {
 				this.playbackEnabled = true;
 				this.recordingEnabled = true;
-				initializePlayback(playbackSampleFreq, stimulus);
-				initializeRecording(recordingSampleFreq, recordingSampleLength);
+				initializePlayback(playbackSampleRate, stimulus);
+				initializeRecording(recordingSampleRate, recordingSampleLength);
 			}
 		}
 	}
 		
 	//set to record only, specify recording time
-	public synchronized void setRecordingOnly(int recordingSampleFrequency, int recordTimeInMillis) {
+	public synchronized void setRecordingOnly(int recordTimeInMillis) {
 		
-		int recordingSampleLength = (recordTimeInMillis * recordingSampleFrequency) / 1000;
+		int recordingSampleLength = (recordTimeInMillis * recordingSampleRate) / 1000;
 		synchronized(playbackLock) {
 			synchronized (recordingLock) {
 				this.playbackEnabled = false;
 				this.recordingEnabled = true;
-				initializeRecording(recordingSampleFrequency, recordingSampleLength);
+				initializeRecording(recordingSampleRate, recordingSampleLength);
 			}
 		}
 	}
@@ -291,7 +313,6 @@ public class PlayRecordManager {
 		return ((!playbackEnabled || playbackCompleted) &&
 				(!recordingEnabled || recordingCompleted));
 	}
-	
 	
 	//initialize everything we need to trigger playback
 	private void initializePlayback(int sampleFrequency, double[][] stimulus) {
