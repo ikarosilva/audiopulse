@@ -52,7 +52,7 @@ import android.os.Message;
 import android.util.Log;
 
 public abstract class TestProcedure implements Runnable{
-	private final String TAG = "TestProcedure";
+	protected String TAG;
 	
 	private Handler uiThreadHandler;	//handler back to TestActivity
 	private Thread workingThread;		//main worker thread to perform test
@@ -64,8 +64,9 @@ public abstract class TestProcedure implements Runnable{
 	//TODO: get sample freqs from app data
 	
 	public TestProcedure (TestActivity parent) {
+		TAG = "TestProcedure";
 		this.uiThreadHandler = new Handler(parent);
-		testIO = new PlayRecordManager();
+		testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
 		hardware = new AcousticConverter();
 	}
 	

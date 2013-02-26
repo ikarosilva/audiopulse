@@ -10,14 +10,14 @@ import org.audiopulse.utilities.Signals;
 
 //TODO: put full DPOAE functionality here, fix things as needed
 public class DPOAEProcedure extends TestProcedure {
-	final String TAG = "DPOAEProcedure";
-	LinkedList<DPOAEParameters> testList = new LinkedList<DPOAEProcedure.DPOAEParameters>();
+	private LinkedList<DPOAEParameters> testList = new LinkedList<DPOAEProcedure.DPOAEParameters>();
 	
 	public DPOAEProcedure(TestActivity parent) {
 		super(parent);
+		TAG = "DPOAEProcedure";
 		testList.add(BiologicParameters.F2k);
-		testList.add(BiologicParameters.F3k);
-		testList.add(BiologicParameters.F4k);
+		//testList.add(BiologicParameters.F3k);
+		//testList.add(BiologicParameters.F4k);
 	}
 
 	@Override
