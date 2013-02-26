@@ -2,6 +2,7 @@ package org.audiopulse.utilities;
 
 import java.util.Random;
 
+
 //class containing static methods to generate useful signals
 public class Signals {
 
@@ -72,19 +73,28 @@ public class Signals {
 		return fadeIn(sampleFrequency,fadeDuration,fadeOut(sampleFrequency,fadeDuration,x));
 	}
 	
+	public synchronized static double getclickKempSweepDurationSeconds() {
+		//Defining this method because it will be used by other classes to set the 
+		//final experiment time based on the desired number of sweeps.
+		final double sweepDurationInSeconds=0.01;
+		return sweepDurationInSeconds;
+		
+	}
 	public synchronized static double[] clickKempMethod(double sampleFrequency, double totalDurationInSeconds) {
 		//Constructs click stimuli for non-linear reponse extraction using 
 		//3 click at one level and a fourth click at 3x the level
 		//The sweepDurationinSeconds is the duration of a single epoch (trial) *including* the click's duration
 		
 		//TODO: Add proper reference to the choice of stimulus parameters
-		final double clickDurationInSeconds=0.004;
-		final double sweepDurationInSeconds=0.05;
+		final double clickDurationInSeconds=getclickKempSweepDurationSeconds();
+		final double sweepDurationInSeconds=0.01;
 		
 		final int N = (int) (totalDurationInSeconds * sampleFrequency);
 		final int clickN= (int) (clickDurationInSeconds * sampleFrequency);
 		final int sweepN= (int) (sweepDurationInSeconds * sampleFrequency);
 		final int sweeps= (int) Math.floor(N/sweepN);	
+		final double maxAmp=-1;
+		final double minAmp=Math.abs(maxAmp)*Math.pow(10,-3/20);  //small clicks are 3 dB lower in amp
 		double[] x = new double[N];
 		int index0, index1, n, m;
 		for (n=0;n<sweeps;n++) {
@@ -92,11 +102,11 @@ public class Signals {
 			index0=(int) (n*sweepN);
 			index1=index0+clickN-1;
 			for( m=index0;m<index1;m++){
-				//Click loop
-				if(((n+1)%3)==0){
-					x[m] = -1;
+				//Click loop,  4th click is the large one
+				if(((n+1)%4)==0){
+					x[m] = minAmp;
 				}else{
-					x[m] = (double) 1/3;
+					x[m] = maxAmp;
 				}	
 			}
 		}
