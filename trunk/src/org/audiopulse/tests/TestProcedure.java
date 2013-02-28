@@ -137,7 +137,9 @@ public abstract class TestProcedure implements Runnable{
 			System.arraycopy(chirp, 0, repeatedChrip, ii*chirp.length, chirp.length);
 			//TODO: right channel also
 		}
-		testIO.setPlaybackAndRecording(AudioSignal.monoToStereoLeft(repeatedChrip));
+		testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(
+				AudioSignal.monoToStereoLeft(repeatedChrip)
+				));
 		double[] input = testIO.acquire();
 		//TODO: analyze input spectral power & phase
 		
