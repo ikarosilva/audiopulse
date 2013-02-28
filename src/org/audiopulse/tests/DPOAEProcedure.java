@@ -42,7 +42,7 @@ public class DPOAEProcedure extends TestProcedure {
 			DPOAEParameters params = testList.poll();
 			logToUI("Running " + params.toString());
 			double[][] probe = params.createStimulus(playbackSampleFrequency, hardware);
-			testIO.setPlaybackAndRecording(probe);
+			testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(probe));
 			results[test] = testIO.acquire();
 		}
 		//TODO: analyze results, store results & analysis

@@ -86,9 +86,18 @@ public class PlayRecordManager {
 		setRecordingOnly(recordTimeInMillis);
 	}
 	
-	//set to playback only, specify stimulus
+	@Deprecated
 	public synchronized void setPlaybackOnly(double[][] stimulus) {
-		
+		setPlaybackOnly(AudioSignal.convertStereoToShort(stimulus));
+	}
+	@Deprecated
+	public synchronized void setPlaybackAndRecording(double[][] stimulus) {
+		setPlaybackAndRecording(AudioSignal.convertStereoToShort(stimulus));
+	}
+	
+	//set to playback only, specify stimulus
+	public synchronized void setPlaybackOnly(short[] stimulus) {
+				
 		synchronized(playbackLock) {
 			synchronized (recordingLock) {
 				this.playbackEnabled = true;
@@ -100,10 +109,12 @@ public class PlayRecordManager {
 	}
 	
 	//set to playback and record, specify stimulus
-	public synchronized void setPlaybackAndRecording(double[][] stimulus) {
+	public synchronized void setPlaybackAndRecording(short[] stimulus) {
 
-		//sync recording length to playback length
-		int recordingSampleLength = stimulus[0].length * recordingSampleRate / playbackSampleRate;
+		//FIXME: switch on mono / stereo to determine playback length
+		
+		//sync recording length to playback length (assumes stereo interleaved)
+		int recordingSampleLength = stimulus.length/2 * recordingSampleRate / playbackSampleRate;
 		//but add some padding in case of small asynchronies to make sure we don't run out of data buffer space
 		recordingSampleLength += recordingPadInMillis * recordingSampleRate / 1000;
 		
@@ -331,12 +342,13 @@ public class PlayRecordManager {
 	}
 	
 	//initialize everything we need to trigger playback
-	private void initializePlayback(int sampleFrequency, double[][] stimulus) {
+	private void initializePlayback(int sampleFrequency, short[] stimulus) {
+		short[] dataToWrite = stimulus.clone();		//clone stimulus before potentially waiting o nsynch lock
 		synchronized (playbackLock) {
 			synchronized (recordingLock) {
 				
 				this.playbackSampleRate = sampleFrequency;
-				this.stimulusData = AudioSignal.convertStereoToShort(stimulus);;
+				this.stimulusData = dataToWrite;
 				this.playbackCompleted = false;
 				
 				if (player!=null) player.release();
