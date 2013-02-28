@@ -44,6 +44,9 @@ import java.util.LinkedList;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.io.PlayRecordManager;
+import org.audiopulse.utilities.AudioSignal;
+import org.audiopulse.utilities.SignalProcessing;
+import org.audiopulse.utilities.Signals;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -87,7 +90,7 @@ public abstract class TestProcedure implements Runnable{
 
 	
 	protected boolean getAudioResources() {
-		//TODO
+		//TODO the following code was copied out of context, but it roughly what we want
 //		 requestAudioFocus (AudioManager.OnAudioFocusChangeListener l, int streamType, int durationHint)
 //		Context.getSystemService(Context.AUDIO_SERVICE)
 //		if (isBluetoothA2dpOn()) {
@@ -120,8 +123,24 @@ public abstract class TestProcedure implements Runnable{
 	}
 	
 	//useful calibration routines for any test
-	protected void calibrateChrip() {
+	protected void calibrateChrip(int fHigh) {
 		//TODO
+		//calibrate left, right separately?
+		double chirpDuration = 0.1;
+		double levelOut = 50;
+		double[] chirp = Signals.chirp(playbackSampleFrequency, 0, fHigh, chirpDuration);
+		chirp = hardware.setOutputLevel(chirp, levelOut);
+		int nReps = 5;
+		double[] repeatedChrip = new double[2*chirp.length * nReps];
+		for (int ii=0;ii<nReps;ii++) {
+			//copy chirp into larger repeatedChrip array
+			System.arraycopy(chirp, 0, repeatedChrip, ii*chirp.length, chirp.length);
+			//TODO: right channel also
+		}
+		testIO.setPlaybackAndRecording(AudioSignal.monoToStereoLeft(repeatedChrip));
+		double[] input = testIO.acquire();
+		//TODO: analyze input spectral power & phase
+		
 	}
 	protected void calibrateNoise() {
 		//TODO

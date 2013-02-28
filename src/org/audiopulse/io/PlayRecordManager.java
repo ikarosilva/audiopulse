@@ -23,9 +23,12 @@ public class PlayRecordManager {
 	private int playbackSampleRate;
 	private int recordingSampleRate;
 	//TODO: make these length in ms
-	private int playerBufferLength = 4096;			//length of buffer to write in one chucnk
-	private int recorderBufferLength = 4096;		//length of recording buffer
-	private int recorderReadLength = 512;			//# samples to read at a time from recording buffer
+	private int playerBufferLengthInMillis = 100;		//length of playback buffer (not stimulus)
+	private int recorderBufferLengthInMillis = 100;		//length of recording buffer (not read size)
+	private int recorderReadLengthInMillis = 25;		//recording buffer read length per operation
+	private int playerBufferLength;
+	private int recorderBufferLength;
+	private int recorderReadLength;
 	
 	private int playerMode;						//MODE_STATIC or MODE_STREAM
 	private volatile int numSamplesPlayed;				//# samples played so far
@@ -33,9 +36,9 @@ public class PlayRecordManager {
 	private int numSamplesToRecord;				//total # samples to record
 	
 	private short[] stimulusData;			//playback data
-	private short[] recordedData;			//direct buffer to write recorded samples to
+	private short[] recordedData;			//short buffer to write recorded samples to
 	private double[] recordedAudio;			//recorded audio converted to double
-	private final int recordingPadInMillis = 1000;			//extra time (ms) for recording buffer to cover sync issues
+	private final int recordingPadInMillis = 1000;			//extra time (ms) for recording buffer to cover sync issues (not necessarily used)
 	
 	private volatile boolean stopRequest;
 	private volatile boolean playbackStarted;
@@ -53,13 +56,19 @@ public class PlayRecordManager {
 	
 	//creator for just playback or recording
 	public PlayRecordManager(int sampleFrequency) {
+		//set sampleFreq as both play and record
 		this(sampleFrequency,sampleFrequency);
 	}
 	//creator for playback and recording 
 	public PlayRecordManager(int playbackSampleFrequency, int recordingSampleFrequency) {
 		this.playbackSampleRate = playbackSampleFrequency;
-		this.recordingSampleRate = recordingSampleFrequency;		
-		//TODO: create AudioTrack and AudioRecord objects here
+		this.recordingSampleRate = recordingSampleFrequency;
+		
+		playerBufferLength = playerBufferLengthInMillis * playbackSampleFrequency / 1000;
+		recorderBufferLength = recorderBufferLengthInMillis * playbackSampleFrequency / 1000;;
+		recorderReadLength = recorderReadLengthInMillis * playbackSampleFrequency / 1000;;
+
+		//TODO: create AudioTrack and AudioRecord objects here?
 	}
 	
 	//TODO: have public functions return success, or possibly throw exceptions
@@ -95,7 +104,7 @@ public class PlayRecordManager {
 
 		//sync recording length to playback length
 		int recordingSampleLength = stimulus[0].length * recordingSampleRate / playbackSampleRate;
-		//but add some padding to allow wiggle-room
+		//but add some padding in case of small asynchronies to make sure we don't run out of data buffer space
 		recordingSampleLength += recordingPadInMillis * recordingSampleRate / 1000;
 		
 		synchronized(playbackLock) {
@@ -125,6 +134,7 @@ public class PlayRecordManager {
 	
 	//start playback and/or recording
 	public synchronized double[] acquire() {
+		
 		//start IO
 		if (recordingEnabled) {
 			recordingThread.start();
@@ -155,7 +165,7 @@ public class PlayRecordManager {
 	public void stop() {
 		Log.i(TAG,"playRecordManager manually stopped!");
 		stopRequest = true;
-		//TODO: use interrupt to stop rogue read() or write() call? would that even work?
+		//TODO: use interrupt on playThread and recordThread, rather than this?
 	}
 	
 	@Deprecated
@@ -218,10 +228,10 @@ public class PlayRecordManager {
 				}
 				numSamplesPlayed+= nWritten;
 			}
-			player.pause();
+			player.pause(); player.flush();
 			Log.d(TAG,"Done playbackLoop");
 			playbackCompleted = true;
-			notifyIOComplete();		//notify this if all IO is done
+			notifyIOComplete();		//notify if all IO is done
 		}
 	}
 
@@ -234,6 +244,7 @@ public class PlayRecordManager {
 			
 			//first, request entire buffer to mark all samples as read
 			int nRead = recorder.read(new short[recorderBufferLength],0,recorderBufferLength);
+			Log.d(TAG,"Read and discarded initial full buffer");
 			
 			//inform playback loop that recording has started
 			recordingStarted = true;
@@ -259,11 +270,12 @@ public class PlayRecordManager {
 				//make sure we don't overflow
 				int remainingSamples = numSamplesToRecord - numSamplesRecorded;
 				if (remainingSamples<recorderReadLength) {
+					//There are two ways we might have hit the end of our recordedDataBuffer:
 					if (!playbackEnabled) {
-						//in this case, we've just reached the end, and should stop
+						//in this case, we've just reached the end of the requested recording time, and should stop
 						requestSize = remainingSamples;
 					} else {
-						//in this case, something went wrong as we should have stopped already
+						//in this case, something went wrong as the playbackLoop should have already told us to stop
 						Log.e(TAG,"Ran out of recording buffer space, IO sync error?");
 						//TODO: throw exception
 //						throw(new IOException("Play/Record sync error: " +
@@ -278,6 +290,10 @@ public class PlayRecordManager {
 				nRead=recorder.read(recordedData,numSamplesRecorded,requestSize);
 				if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
 					Log.e(TAG, "Audio read failed: " + nRead);
+					Log.e(TAG,"Data buffer size: " + recordedData.length);
+					Log.e(TAG,"Curent position: " + numSamplesRecorded);
+					Log.e(TAG,"Requested read size: " + requestSize);
+					
 					//TODO: throw exception?
 					//throw(new IOException("Audio read failed with code " + nRead));
 
@@ -340,6 +356,7 @@ public class PlayRecordManager {
 						  bufferSizeInBytes,
 						  playerMode);
 				player.play();
+				Log.i(TAG,"Player initialized with " + bufferSizeInBytes + "-byte ( " + bufferSizeInBytes*1000/2/playbackSampleRate + "ms) buffer");
 				
 				//set up Thread that will run playback loop
 				playbackThread = new Thread( new Runnable() {
@@ -377,6 +394,7 @@ public class PlayRecordManager {
 						AudioFormat.ENCODING_PCM_16BIT,
 						bufferSizeInBytes);
 				recorder.startRecording();
+				Log.i(TAG,"Recorder initialized with " + bufferSizeInBytes + "-byte ( " + bufferSizeInBytes*1000/2/playbackSampleRate + "ms) buffer");
 
 				//set up thread that will run recording loop
 				recordingThread = new Thread( new Runnable() {
