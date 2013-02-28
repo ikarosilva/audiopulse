@@ -23,6 +23,11 @@ public class DPOAEProcedure extends TestProcedure {
 	@Override
 	public void run() {
 		clearLog();
+		
+		//test:
+		calibrateChrip(4000);
+		
+		
 		int numTests = testList.size();
 		CalibrationParameters[] cal = new CalibrationParameters[numTests];
 		for (int test=0; test<numTests; test++) {
@@ -35,8 +40,7 @@ public class DPOAEProcedure extends TestProcedure {
 			DPOAEParameters params = testList.poll();
 			logToUI("Running " + params.toString());
 			double[][] probe = params.createStimulus(playbackSampleFrequency, hardware);
-			testIO.setPlaybackAndRecording(playbackSampleFrequency, probe, 
-					recordingSampleFrequency);
+			testIO.setPlaybackAndRecording(probe);
 			results[test] = testIO.acquire();
 		}
 		//TODO: analyze results, store results & analysis
@@ -85,8 +89,7 @@ public class DPOAEProcedure extends TestProcedure {
 	
 	//get in-ear gain relative to given, expected level
 	private double calibrateTone(double[][] signal, double spl) {
-		testIO.setPlaybackAndRecording(playbackSampleFrequency, signal, 
-				recordingSampleFrequency);
+		testIO.setPlaybackAndRecording(signal);
 		double[] input = testIO.acquire();
 		double splIn = hardware.getInputLevel(input);
 		return splIn - spl;		
