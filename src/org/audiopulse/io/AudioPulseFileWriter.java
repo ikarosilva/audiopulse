@@ -45,15 +45,15 @@ import android.os.Environment;
 import android.util.Log;
 
 
-public class AudioPulseFileWriter<T extends Number > extends Thread {
+public class AudioPulseFileWriter extends Thread {
 
 	private static final String TAG="AudioPulseWriteFile";
 	private static final File root = Environment.getExternalStorageDirectory();
 	private final File outFile;
-	private final T[] data;
+	private final short[] data;
 	private final static String fileExtension=".raw";
 	
-	public AudioPulseFileWriter(File f, T[] d){
+	public AudioPulseFileWriter(File f, short[] d){
 		outFile=f;
 		data=d;
 	}
@@ -69,23 +69,29 @@ public class AudioPulseFileWriter<T extends Number > extends Thread {
 		return outFile;
 	}
 	
-	public synchronized static <T> void writeFile(File outFile, T[] samples) throws IOException{
+	public synchronized static void writeFile(File outFile, short[] samples) throws Exception {
 		//Write Short file to disk
 		FileOutputStream fos = null;
 		ObjectOutputStream out = null;
-		fos = new FileOutputStream(outFile);
-		out = new ObjectOutputStream(fos);
-		out.writeObject(samples);
-		out.flush();
-		out.close();
+		try {
+			fos = new FileOutputStream(outFile);
+			out = new ObjectOutputStream(fos);
+			out.writeObject(samples);
+			out.flush();
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception(TAG);
+		} 
+		
 	}
 	
 	public void run(){
 		Log.v(TAG,"Writing file: " + outFile);
 		try {
 			AudioPulseFileWriter.writeFile(outFile, data);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
+			Log.v(TAG,"Error: could not acccess file!");
 			e.printStackTrace();
 		}
 	}
