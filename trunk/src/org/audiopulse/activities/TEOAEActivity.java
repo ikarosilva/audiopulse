@@ -108,7 +108,7 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 		private int readLength = 1024;
 		
 		private int bufferIndex = 0;		//current index into runningBuffer
-		private Short[] runningBuffer;		//dump read samples into this buffer
+		private short[] runningBuffer;		//dump read samples into this buffer
 		
 		//constructor
 		public InputProcessor(TEOAEActivity parentActivity) {
@@ -137,7 +137,7 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 		//start the record handling
 		public void run() {
 			Log.d(TAG,"Starting TEOAERecording");
-			runningBuffer = new Short[runningBufferLength];
+			runningBuffer = new short[runningBufferLength];
 			short[] frameBuffer = new short[readLength];
 			recorder.startRecording();
 			requestStop = false;
@@ -166,7 +166,7 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 			//Launch separate thread to save data to disk
 			File file= AudioPulseFileWriter.generateFileName("TEOAE","click");
 			Log.d(TAG,"Saving file to disk:" + file.getName());
-			new AudioPulseFileWriter<Short>(file,runningBuffer).start();
+			new AudioPulseFileWriter(file,runningBuffer).start();
 			
 		}//end of run
 		
