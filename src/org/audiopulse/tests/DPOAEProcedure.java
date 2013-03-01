@@ -31,12 +31,7 @@ public class DPOAEProcedure extends TestProcedure {
 		
 		
 		int numTests = testList.size();
-//		CalibrationParameters[] cal = new CalibrationParameters[numTests];
-//		for (int test=0; test<numTests; test++) {
-//			DPOAEParameters params = testList.get(test);
-//			cal[test] = calibrate(params);
-//		}
-//		
+
 		double[][] results = new double[numTests][];
 		for (int test=0; test<numTests; test++) {
 			DPOAEParameters params = testList.poll();
@@ -47,67 +42,7 @@ public class DPOAEProcedure extends TestProcedure {
 		}
 		//TODO: analyze results, store results & analysis
 	}
-//	
-//	//calibrate one set of DPOAE tones (f1,f2,dp)
-//	private CalibrationParameters calibrate(DPOAEParameters params) {
-//		double[] tone;
-//		//1. For f1, f2, dp: generate test tone
-//		//2. Prepare media playback & recording
-//		//3. Play & record
-//		//4. Look for onset & offset in recording
-//		//5. Determine level between onset & offset
-//		//6. Save result.
-//		
-//		double level = 65;		//linear calibration level (dB SPL)
-//		double duration = 0.4;	//calibration tone duration (s)
-//
-//		//get in-ear gain for f1 tone
-//		tone = Signals.tone(playbackSampleFrequency, params.f1, duration);
-//		tone = hardware.setOutputLevel(tone, level);
-//		double[][] f1Tone = AudioSignal.monoToStereoLeft(tone);
-//		double f1Gain = calibrateTone(f1Tone, level);
-//		logToUI("f1 ("+ String.format("%.0f Hz",params.f1) +") gain: "
-//				+ String.format("%.1f dB",f1Gain));
-//		
-//		//get in-ear gain for f2 tone
-//		tone = Signals.tone(playbackSampleFrequency, params.f2, duration);
-//		tone = hardware.setOutputLevel(tone, level);
-//		double[][] f2Tone = AudioSignal.monoToStereoRight(tone);
-//		double f2Gain = calibrateTone(f2Tone, level);
-//		logToUI("f2 ("+ String.format("%.0f Hz",params.f2) +") gain: "
-//				+ String.format("%.1f dB",f2Gain));
-//		
-//		//get in-ear gain for dp tone
-//		tone = Signals.tone(playbackSampleFrequency, params.dpFreq, duration);
-//		tone = hardware.setOutputLevel(tone, level);
-//		double[][] dpTone = AudioSignal.convertToStereo(tone);
-//		double dpGain = calibrateTone(dpTone, level);
-//		logToUI("DP ("+ String.format("%.0f Hz",params.dpFreq) +") gain: "
-//				+ String.format("%.1f dB",dpGain));
-//		
-//		return new CalibrationParameters(f1Gain, f2Gain, dpGain);
-//
-//	}
-//	
-//	//get in-ear gain relative to given, expected level
-//	private double calibrateTone(double[][] signal, double spl) {
-//		testIO.setPlaybackAndRecording(signal);
-//		double[] input = testIO.acquire();
-//		double splIn = hardware.getInputLevel(input);
-//		return splIn - spl;		
-//	}
-//	
-//	//data for calibration results for a single test frequency
-//	public static class CalibrationParameters {
-//		public final double f1Gain, f2Gain, dpGain;
-//		public CalibrationParameters(double f1Gain, double f2Gain, double dpGain) {
-//			this.f1Gain = f1Gain;
-//			this.f2Gain = f2Gain;
-//			this.dpGain = dpGain;
-//		}
-//		//TODO: delay / phase if needed (are they?)
-//	}
-//	
+
 	//DPOAE parameters from the Bio-Logic OAE Report (2012)
 	public static final class BiologicParameters {
 		private static final String protocol = "Biologic";

@@ -76,11 +76,7 @@ public class TestMenuActivity extends AudioPulseActivity
         				//plotWaveform();
         			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.old_menu))) {
         				startActivity(new Intent(TestMenuActivity.this, ThreadedPlayRecActivity.class));
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.dpgram_right)) ||
-        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpgram_left)) ||
-        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpoae_4k)) ||
-        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpoae_3k)) ||
-        					itemText.equalsIgnoreCase(getResources().getString(R.string.dpoae_2k)) ) {
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE))) {
         				
         				Bundle DPOAERequest= new Bundle();
         				DPOAERequest.putString("testName",itemText);
