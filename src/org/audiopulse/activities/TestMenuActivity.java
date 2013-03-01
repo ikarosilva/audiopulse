@@ -78,10 +78,7 @@ public class TestMenuActivity extends AudioPulseActivity
         				startActivity(new Intent(TestMenuActivity.this, ThreadedPlayRecActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE))) {
         				
-        				Bundle DPOAERequest= new Bundle();
-        				DPOAERequest.putString("testName",itemText);
         				Intent DPOAEIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
-        				DPOAEIntent.putExtras(DPOAERequest);
         				startActivity(DPOAEIntent);
         				
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.tests_device_calibration))) {
@@ -93,11 +90,7 @@ public class TestMenuActivity extends AudioPulseActivity
         				testIntent.putExtras(tests);
         				startActivity(testIntent);
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_debug))) {
-        				//TODO: put this in the menu
-        				Bundle tests = new Bundle();
-        				tests.putString("testName",itemText);
         				Intent testIntent = new Intent(TestMenuActivity.this, TestActivity.class);
-        				testIntent.putExtras(tests);
         				startActivity(testIntent);
         			}
         			

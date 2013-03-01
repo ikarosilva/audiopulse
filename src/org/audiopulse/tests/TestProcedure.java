@@ -59,6 +59,7 @@ public abstract class TestProcedure implements Runnable{
 	
 	private Handler uiThreadHandler;	//handler back to TestActivity
 	private Thread workingThread;		//main worker thread to perform test
+	private Context context;			//
 	
 	protected PlayRecordManager testIO;
 	protected AcousticConverter hardware;
@@ -71,6 +72,7 @@ public abstract class TestProcedure implements Runnable{
 		this.uiThreadHandler = new Handler(parent);
 		testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
 		hardware = new AcousticConverter();
+		context = parent.getApplicationContext();
 	}
 	
 	//call from Activity to perform test in a new thread
@@ -90,6 +92,8 @@ public abstract class TestProcedure implements Runnable{
 
 	
 	protected boolean getAudioResources() {
+		android.media.AudioManager mgr = (android.media.AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
+
 		//TODO the following code was copied out of context, but it roughly what we want
 //		 requestAudioFocus (AudioManager.OnAudioFocusChangeListener l, int streamType, int durationHint)
 //		Context.getSystemService(Context.AUDIO_SERVICE)
@@ -140,7 +144,7 @@ public abstract class TestProcedure implements Runnable{
 		testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(
 				AudioSignal.monoToStereoLeft(repeatedChrip)
 				));
-		double[] input = testIO.acquire();
+		short[] input = testIO.acquire();
 		//TODO: analyze input spectral power & phase
 		
 	}
@@ -170,11 +174,17 @@ public abstract class TestProcedure implements Runnable{
 //	}
 //	
 		
+	
+	//TODO: clean up these messaging functions
 	//send a message to parent Activity
 	@Deprecated
 	protected void sendMessage(Bundle data) {
 		Message m = this.uiThreadHandler.obtainMessage();
 		m.setData(data);
+		this.uiThreadHandler.sendMessage(m);
+	}
+	protected void sendMessage(int what) {
+		Message m = this.uiThreadHandler.obtainMessage(what);
 		this.uiThreadHandler.sendMessage(m);
 	}
 	protected void sendMessage(int what, Bundle data) {
@@ -189,11 +199,11 @@ public abstract class TestProcedure implements Runnable{
 		Log.i(TAG,str);
 		Bundle data = new Bundle();
 		data.putString("log", str);
-		sendMessage(TestActivity.MESSAGES.LOG,data);
+		sendMessage(TestActivity.Messages.LOG,data);
 	}
 	
 	protected void clearLog() {
-		sendMessage(TestActivity.MESSAGES.CLEAR_LOG,null);
+		sendMessage(TestActivity.Messages.CLEAR_LOG);
 	}
 	
 	

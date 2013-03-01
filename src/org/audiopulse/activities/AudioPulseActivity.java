@@ -99,6 +99,7 @@ public class AudioPulseActivity extends ObservationActivity {
 	    return super.onKeyUp(keyCode, event);
 	}
 
+	@Deprecated
 	// Hardware setup prior to test: airplane mode, max volume, input AGC(?)
 	public void beginTest() {
 
@@ -130,6 +131,7 @@ public class AudioPulseActivity extends ObservationActivity {
 		//TODO: disable input AGC?
 	}
 	
+	@Deprecated
 	//restore setting to those prior to beginTest()
 	public void endTest() {
 		Log.v(TAG,"End Test cleanup");

@@ -1,13 +1,23 @@
 package org.audiopulse.tests;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedList;
 
 import org.apache.commons.math3.stat.Frequency;
+import org.audiopulse.activities.GeneralAudioTestActivity;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.hardware.MobilePhone;
+import org.audiopulse.io.ShortFile;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.Signals;
+
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Message;
+import android.util.Log;
 
 //TODO: put full DPOAE functionality here, fix things as needed
 public class DPOAEProcedure extends TestProcedure {
@@ -32,17 +42,39 @@ public class DPOAEProcedure extends TestProcedure {
 		
 		int numTests = testList.size();
 
-		double[][] results = new double[numTests][];
+		double[][] recordedAudio = new double[numTests][];
 		for (int test=0; test<numTests; test++) {
 			DPOAEParameters params = testList.poll();
 			logToUI("Running " + params.toString());
 			double[][] probe = params.createStimulus(playbackSampleFrequency, hardware);
 			testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(probe));
-			results[test] = testIO.acquire();
+			short[] data = testIO.acquire();
+			recordedAudio[test] = AudioSignal.convertMonoToDouble(data);
+			sendMessage(TestActivity.Messages.PROGRESS);
+			
+			//if it doesn't eat up too many resources, we can spawn threads here
+			//to do analysis and saving. This way, the UI can update with results
+			//as the test runs
+			//Set these threads' priority to normal
 		}
-		//TODO: analyze results, store results & analysis
+		sendMessage(TestActivity.Messages.IO_COMPLETE);
+		
+		analyzeResults();
+		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE);
+		
+		saveResults();
+		sendMessage(TestActivity.Messages.PROCEDURE_COMPLETE);
 	}
-
+	
+	private void analyzeResults() {
+		//TODO
+	}
+	
+	private void saveResults() {
+		//TODO: package and save results
+	}
+	
+	
 	//DPOAE parameters from the Bio-Logic OAE Report (2012)
 	public static final class BiologicParameters {
 		private static final String protocol = "Biologic";
@@ -60,6 +92,7 @@ public class DPOAEProcedure extends TestProcedure {
 			new DPOAEParameters(protocol,8000,duration,6516,7969,64.8,54.9);
 	}
 	
+	//Hack the SOAE parameters in here
 	public static final class SOAEParameters {
 		private static final String protocol = "Spontaneous";
 		private static final double duration = 4.3;

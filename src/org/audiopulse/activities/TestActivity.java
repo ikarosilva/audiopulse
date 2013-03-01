@@ -40,8 +40,6 @@
 package org.audiopulse.activities;
 
 import org.audiopulse.R;
-import org.audiopulse.tests.DPOAECalibrationProcedure;
-import org.audiopulse.tests.DPOAEProcedure;
 import org.audiopulse.tests.TestProcedure;
 
 import android.os.Bundle;
@@ -66,9 +64,10 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.basic_test_layout);
 		testLog = (TextView)this.findViewById(R.id.testLog);
-		
-		Bundle request = getIntent().getExtras();
-		testProcedure = (TestProcedure) request.get("test");
+
+		//TODO: can we put a TestProcedure into a bundle? E.g. by implementing Parcelable, but is that worth it?
+//		Bundle request = getIntent().getExtras();
+//		testProcedure = (TestProcedure) request.get("test");
 		
 		String caller = this.getCallingPackage();
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
@@ -124,9 +123,10 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	public boolean handleMessage(Message msg) {
 		Bundle data = msg.getData();
 		switch (msg.what) {
-		case MESSAGES.CLEAR_LOG:
+		case Messages.CLEAR_LOG:
+			emptyText();
 			break;
-		case MESSAGES.LOG:
+		case Messages.LOG:
 			String pm = data.getString("log");
 			appendText(pm);
 			break;
@@ -134,9 +134,13 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		return true;
 	}
 
-	public static class MESSAGES {
-		public static final int CLEAR_LOG = 1;
-		public static final int LOG = 2;
+	public static class Messages {
+		public static final int CLEAR_LOG = 1;				//clear the test log
+		public static final int LOG = 2;					//add to the test log
+		public static final int PROGRESS = 3;				//progress has been made
+		public static final int IO_COMPLETE = 4;			//io phase is complete
+		public static final int ANALYSIS_COMPLETE = 5;		//analysis block complete
+		public static final int PROCEDURE_COMPLETE = 6;		//entire test procedure is complete
 	}
 	
 }

@@ -51,7 +51,6 @@ import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
 import org.audiopulse.io.ReportStatusHandler;
 import org.audiopulse.io.Utils;
-import org.audiopulse.tests.DPOAECalibrationProcedure;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
 import org.audiopulse.utilities.SpectralWindows;

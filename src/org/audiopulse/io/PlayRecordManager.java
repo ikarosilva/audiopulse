@@ -36,7 +36,6 @@ public class PlayRecordManager {
 	
 	private short[] stimulusData;			//playback data
 	private short[] recordedData;			//short buffer to write recorded samples to
-	private double[] recordedAudio;			//recorded audio converted to double
 	private final int recordingPadInMillis = 1000;			//extra time (ms) for recording buffer to cover sync issues (not necessarily used)
 	
 	private volatile boolean stopRequest;
@@ -143,7 +142,7 @@ public class PlayRecordManager {
 	//TODO: allow native write result to file?
 	
 	//start playback and/or recording
-	public synchronized double[] acquire() {
+	public synchronized short[] acquire() {
 		
 		//start IO
 		if (recordingEnabled) {
@@ -167,7 +166,7 @@ public class PlayRecordManager {
 		}
 		
 		Log.d(TAG,"We're done, returning control.");
-		return recordedAudio.clone();
+		return recordedData.clone();
 		
 	}
 	
@@ -318,8 +317,7 @@ public class PlayRecordManager {
 			//keep only the part of the data buffer that we wrote to
 			short[] finishedAudio = new short[numSamplesRecorded];
 			System.arraycopy(recordedData, 0, finishedAudio, 0, numSamplesRecorded);
-			//convert to double
-			recordedAudio = AudioSignal.convertMonoToDouble(finishedAudio);
+			recordedData = finishedAudio;
 			recordingCompleted = true;
 			notifyIOComplete(); 	//notify this if all IO is done
 		}
