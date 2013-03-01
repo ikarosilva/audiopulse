@@ -22,7 +22,6 @@ public class PlayRecordManager {
 	
 	private int playbackSampleRate;
 	private int recordingSampleRate;
-	//TODO: make these length in ms
 	private int playerBufferLengthInMillis = 100;		//length of playback buffer (not stimulus)
 	private int recorderBufferLengthInMillis = 100;		//length of recording buffer (not read size)
 	private int recorderReadLengthInMillis = 25;		//recording buffer read length per operation
@@ -97,12 +96,12 @@ public class PlayRecordManager {
 	
 	//set to playback only, specify stimulus
 	public synchronized void setPlaybackOnly(short[] stimulus) {
-				
+		short[] safeStimulus = stimulus.clone();
 		synchronized(playbackLock) {
 			synchronized (recordingLock) {
 				this.playbackEnabled = true;
 				this.recordingEnabled = false;
-				initializePlayback(playbackSampleRate, stimulus);
+				initializePlayback(playbackSampleRate, safeStimulus);
 				
 			}
 		}		
@@ -110,7 +109,7 @@ public class PlayRecordManager {
 	
 	//set to playback and record, specify stimulus
 	public synchronized void setPlaybackAndRecording(short[] stimulus) {
-
+		short[] safeStimulus = stimulus.clone();
 		//FIXME: switch on mono / stereo to determine playback length
 		
 		//sync recording length to playback length (assumes stereo interleaved)
@@ -122,7 +121,7 @@ public class PlayRecordManager {
 			synchronized (recordingLock) {
 				this.playbackEnabled = true;
 				this.recordingEnabled = true;
-				initializePlayback(playbackSampleRate, stimulus);
+				initializePlayback(playbackSampleRate, safeStimulus);
 				initializeRecording(recordingSampleRate, recordingSampleLength);
 			}
 		}
@@ -343,12 +342,11 @@ public class PlayRecordManager {
 	
 	//initialize everything we need to trigger playback
 	private void initializePlayback(int sampleFrequency, short[] stimulus) {
-		short[] dataToWrite = stimulus.clone();		//clone stimulus before potentially waiting o nsynch lock
 		synchronized (playbackLock) {
 			synchronized (recordingLock) {
 				
 				this.playbackSampleRate = sampleFrequency;
-				this.stimulusData = dataToWrite;
+				this.stimulusData = stimulus;
 				this.playbackCompleted = false;
 				
 				if (player!=null) player.release();
