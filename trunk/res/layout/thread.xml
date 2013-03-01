@@ -8,7 +8,7 @@
         style="@style/menu_style"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
-	    android:entries="@array/old_menu" />
+	    android:entries="@array/main_menu" />
 	<TextView  
 		android:id="@+id/testLog"
 	    android:layout_width="fill_parent" 

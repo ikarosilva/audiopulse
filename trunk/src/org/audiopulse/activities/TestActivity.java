@@ -51,21 +51,34 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-//GeneralAudioTestActivity is a template for all tests; all test activities should extend GeneralAudioTestActivity.
-//FIXME: for now implementing my debugging procedures here. FIgure out our structure, and make the appropriate structural changes.
+//TestActivity is a template for all tests.
 public class TestActivity extends AudioPulseActivity implements Handler.Callback
 {
 	public final String TAG="BasicTestActivity";
 	
 	protected TextView testLog;
-	protected TestProcedure testProcedure = null;		//test procedure to execute
-	//use: testProcedure = new TestProcedure(this)
+	protected TestProcedure testProcedure;
+	
+	private boolean calledBySana;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.basic_test_layout);
 		testLog = (TextView)this.findViewById(R.id.testLog);
+		
+		Bundle request = getIntent().getExtras();
+		testProcedure = (TestProcedure) request.get("test");
+		
+		String caller = this.getCallingPackage();
+		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
+			// Sana observation meta data - from Sana API ObservationActivity
+			initMetaData();
+			calledBySana = true;
+		} else {
+			Log.v(TAG,"Running AudioPulse in standalone mode");
+			calledBySana = false;
+		}
 	}
 
 	//Begin test -- this function is called by the button in the default layout
@@ -73,12 +86,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	{
 		appendText("Starting Test Procedure");
 		if (testProcedure==null) {
-//			appendText("No TestProecdure set!");
-			//FIXME: don't do this. Just doing it now for convenience.
-			//maybe define a DebuggingTestActivity?
-			appendText("Starting DPOAE Calibration");
-			testProcedure = new DPOAEProcedure(this);
-			testProcedure.start();
+			appendText("No TestProecdure set!");
 		} else {
 			testProcedure.start();
 		}

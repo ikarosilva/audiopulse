@@ -2,11 +2,7 @@
 <resources>
     <array name="main_menu">
         <item>@string/old_menu</item>
-        <item>@string/menu_all_right</item>
-        <item>@string/menu_all_left</item>
-        <!-- <item>@string/menu_4k</item>
-        <item>@string/menu_3k</item>
-        <item>@string/menu_2k</item> -->
+        <item>@string/DPOAE</item>
         <item>@string/menu_spontaneous</item>
         <item>@string/menu_iecalibration</item>
         <item>@string/tests_device_calibration</item>
@@ -29,6 +25,7 @@
         -->
     </array>   
     <string name="old_menu">Older test menu</string>
+    <string name="DPOAE">DPOAE</string>
     <string name="menu_all_right">DPGram Right Ear</string>
     <string name="menu_all_left">DPGram Left Ear</string>
     <string name="dpgram_left">DPGram Right Ear</string>
@@ -46,6 +43,7 @@
     <string name="tests_device_calibration">Device Calibration</string>
     <string name="menu_debug">New Test Debugging</string>
     <string name="menu_teoae">TEOAE Test</string>
+    
     <style name="menu_style">
         <item name="android:textColor">@color/foreground</item>
         <item name="android:textSize">24dp</item>
