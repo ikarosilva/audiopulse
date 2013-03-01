@@ -29,8 +29,8 @@
  * -----------------
  * (C) Copyright 2012, by SanaAudioPulse
  *
- * Original Author:  Ikaro Silva
- * Contributor(s):   -;
+ * Original Author:  Andrew Schwartz
+ * Contributor(s):   Ikaro Silva
  *
  * Changes
  * -------
@@ -39,141 +39,31 @@
 
 package org.audiopulse.activities;
 
-import java.io.File;
-
-import org.audiopulse.R;
-import org.audiopulse.hardware.AcousticConverter;
-import org.audiopulse.io.AudioPulseFileWriter;
-import org.audiopulse.utilities.APAnnotations.UnderConstruction;
-import org.audiopulse.utilities.AudioSignal;
-import org.audiopulse.utilities.Signals;
-import org.sana.android.Constants;
-
-import android.media.AudioFormat;
-import android.media.AudioRecord;
-import android.media.MediaRecorder;
-import android.os.Bundle;
+import org.audiopulse.tests.TEOAEProcedure;
 import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.widget.TextView;
+import android.view.View;
 
-@UnderConstruction(owner="Ikaro Silva")
+
+//GeneralAudioTestActivity is a template for all tests; all test activities should extend GeneralAudioTestActivity.
+//FIXME: for now implementing my debugging procedures here. FIgure out our structure, and make the appropriate structural changes.
 public class TEOAEActivity extends TestActivity implements Handler.Callback
-
 {
-	private static final String TAG="TEOAEActivity";
-	private InputProcessor recorder;
-	public final int sampleFrequency = 44100; 		//TODO: make this app-wide
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.input_calibration);
+	public final String TAG="TEOAEActivity";
 	
-		//launch recorder thread
-		recorder = new InputProcessor(this);
-		new Thread (recorder).start();
-	}
-
-	@Override
-	protected void onDestroy() {
-		recorder.stop();
-		super.onDestroy();
-	}
-
-	// implement handleMessage
-	@Override
-	public boolean handleMessage(Message msg) {
-		Log.d(TAG,"Message received! Printing stats");
-		TextView text;
-		
-		//TODO: Get data from procedure and display the results in a graph
-		Bundle data = msg.getData();
-		
-		//double spl = data.getDouble("spl");
-		return true;
-	}
-	
-	//continuously running input monitor
-	private class InputProcessor implements Runnable
+	//Begin test -- this function is called by the button in the default layout
+	public void startTest(View callingView)
 	{
-		private Handler handler;
-		private AudioRecord recorder;
-		private AcousticConverter converter = new AcousticConverter();
-		private volatile boolean requestStop = false;
-		
-		private int Nsweeps=200; //number of sweeps to collect
-		private int runningBufferLength = (int) (Nsweeps*sampleFrequency*Signals.getclickKempSweepDurationSeconds());
-		private int readLength = 1024;
-		
-		private int bufferIndex = 0;		//current index into runningBuffer
-		private short[] runningBuffer;		//dump read samples into this buffer
-		
-		//constructor
-		public InputProcessor(TEOAEActivity parentActivity) {
-			Log.d(TAG,"Creating InputProcessor");
-			int minBuffer = AudioRecord.getMinBufferSize(
-					parentActivity.sampleFrequency,
-					AudioFormat.CHANNEL_IN_MONO,
-					AudioFormat.ENCODING_PCM_16BIT
-					);
-			int bufferSizeInBytes = runningBufferLength * 2;
-			if (bufferSizeInBytes < minBuffer) bufferSizeInBytes = minBuffer;
-			
-			Log.d(TAG,"Recording buffer length: " + bufferSizeInBytes + "bytes");
-			
-			//create AudioRecord object
-			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
-					parentActivity.sampleFrequency,
-					AudioFormat.CHANNEL_IN_MONO,
-					AudioFormat.ENCODING_PCM_16BIT,
-					bufferSizeInBytes);
-			
-			//assign handler to be parent activity (which implements handleMessage)
-			handler = new Handler(parentActivity);
+		appendText("Starting TEOAE Procedure");
+		if (testProcedure==null) {
+//			appendText("No TestProecdure set!");
+			//FIXME: don't do this. Just doing it now for convenience.
+			//maybe define a DebuggingTestActivity?
+			appendText("Starting TEOAE");
+			testProcedure = new TEOAEProcedure(this);
+			testProcedure.start();
+		} else {
+			testProcedure.start();
 		}
-		
-		//start the record handling
-		public void run() {
-			Log.d(TAG,"Starting TEOAERecording");
-			runningBuffer = new short[runningBufferLength];
-			short[] frameBuffer = new short[readLength];
-			recorder.startRecording();
-			requestStop = false;
-			
-			while(!requestStop){ 
-				//read from hardware
-				int nRead=recorder.read(frameBuffer,0,readLength);
-				if (nRead == AudioRecord.ERROR_INVALID_OPERATION || nRead == AudioRecord.ERROR_BAD_VALUE) {
-					Log.e(TAG, "Audio read failed: " + nRead);
-					//TODO: send a useful message to main activity informing of failure
-				}			
-				//copy read frame into runningBuffer
-				for (int n=0; n<nRead ; n++) {
-					runningBuffer[bufferIndex] = frameBuffer[n];
-					bufferIndex++;
-					if (bufferIndex >= runningBufferLength) {
-						Log.d(TAG,"End of buffer reached.");
-						break;
-					}
-				}	
-			if (bufferIndex>=runningBufferLength)
-					bufferIndex = 0;
-				    requestStop = true;
-			}
-			recorder.stop();
-			//Launch separate thread to save data to disk
-			File file= AudioPulseFileWriter.generateFileName("TEOAE","click");
-			Log.d(TAG,"Saving file to disk:" + file.getName());
-			new AudioPulseFileWriter(file,runningBuffer).start();
-			
-		}//end of run
-		
-		public void stop() {
-			requestStop = true;
-		}
-		
-	}
-	
+
+	}	
 }

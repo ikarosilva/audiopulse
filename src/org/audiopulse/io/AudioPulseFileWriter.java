@@ -83,7 +83,7 @@ public class AudioPulseFileWriter extends Thread {
 			e.printStackTrace();
 			throw new Exception(TAG);
 		} 
-		
+		Log.v(TAG,"Done writing file to disk");
 	}
 	
 	public void run(){
