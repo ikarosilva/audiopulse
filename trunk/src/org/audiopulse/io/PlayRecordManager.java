@@ -110,11 +110,10 @@ public class PlayRecordManager {
 	public synchronized void setPlaybackAndRecording(short[] stimulus) {
 		short[] safeStimulus = stimulus.clone();
 		//FIXME: switch on mono / stereo to determine playback length
-		
+		//FIXME: be safer about integer overflows for long buffers!
 		//sync recording length to playback length (assumes stereo interleaved)
-		int recordingSampleLength = stimulus.length/2 * recordingSampleRate / playbackSampleRate;
-		//but add some padding in case of small asynchronies to make sure we don't run out of data buffer space
-		recordingSampleLength += recordingPadInMillis * recordingSampleRate / 1000;
+		int playbackLengthInMillis = stimulus.length/2 *1000 / playbackSampleRate;
+		int recordingSampleLength = (playbackLengthInMillis + recordingPadInMillis) * recordingSampleRate / 1000;
 		
 		synchronized(playbackLock) {
 			synchronized (recordingLock) {
