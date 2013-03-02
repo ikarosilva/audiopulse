@@ -86,8 +86,8 @@ public class Signals {
 		//The sweepDurationinSeconds is the duration of a single epoch (trial) *including* the click's duration
 		
 		//TODO: Add proper reference to the choice of stimulus parameters
-		final double clickDurationInSeconds=getclickKempSweepDurationSeconds();
-		final double sweepDurationInSeconds=0.01;
+		final double clickDurationInSeconds=0.004;
+		final double sweepDurationInSeconds=getclickKempSweepDurationSeconds();
 		
 		final int N = (int) (totalDurationInSeconds * sampleFrequency);
 		final int clickN= (int) (clickDurationInSeconds * sampleFrequency);
