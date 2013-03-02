@@ -76,7 +76,7 @@ public class Signals {
 	public synchronized static double getclickKempSweepDurationSeconds() {
 		//Defining this method because it will be used by other classes to set the 
 		//final experiment time based on the desired number of sweeps.
-		final double sweepDurationInSeconds=0.01;
+		final double sweepDurationInSeconds=0.5;
 		return sweepDurationInSeconds;
 		
 	}
@@ -86,7 +86,7 @@ public class Signals {
 		//The sweepDurationinSeconds is the duration of a single epoch (trial) *including* the click's duration
 		
 		//TODO: Add proper reference to the choice of stimulus parameters
-		final double clickDurationInSeconds=0.004;
+		final double clickDurationInSeconds=0.001;
 		final double sweepDurationInSeconds=getclickKempSweepDurationSeconds();
 		
 		final int N = (int) (totalDurationInSeconds * sampleFrequency);

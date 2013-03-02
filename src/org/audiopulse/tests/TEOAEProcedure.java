@@ -28,14 +28,14 @@ public class TEOAEProcedure extends TestProcedure{
 		clearLog();
 
 		
-		double sampleFrequency = 16000;
+		double sampleFrequency = 44100;
 		logToUI("Running TEOAE");
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
 		Log.v(TAG,"Generating stimulus");
 		double[] probe = Signals.clickKempMethod(sampleFrequency, 
 				stimulusDuration);
 		Log.v(TAG,"setting probe old leve probe[0]=" + probe[0]);
-		probe = hardware.setOutputLevel(probe, 50);
+		probe = hardware.setOutputLevel(probe, 55);
 		Log.v(TAG," probe new level probe[0]=" + probe[0]);
 		testIO.setPlaybackAndRecording(AudioSignal.convertMonoToShort(probe));
 		double stTime= System.currentTimeMillis();
