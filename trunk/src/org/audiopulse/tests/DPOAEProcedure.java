@@ -1,23 +1,10 @@
 package org.audiopulse.tests;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
 import java.util.LinkedList;
-
-import org.apache.commons.math3.stat.Frequency;
-import org.audiopulse.activities.GeneralAudioTestActivity;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.hardware.AcousticConverter;
-import org.audiopulse.hardware.MobilePhone;
-import org.audiopulse.io.ShortFile;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.Signals;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Message;
-import android.util.Log;
 
 //TODO: put full DPOAE functionality here, fix things as needed
 public class DPOAEProcedure extends TestProcedure {
@@ -65,13 +52,22 @@ public class DPOAEProcedure extends TestProcedure {
 		saveResults();
 		sendMessage(TestActivity.Messages.PROCEDURE_COMPLETE);
 	}
+
 	
 	private void analyzeResults() {
-		//TODO
+		//TODO: define a DPOAEAnalysis call that operates on input arguments
+		//rather than a file location, call it from here
 	}
 	
 	private void saveResults() {
-		//TODO: package and save results
+		/**** Pseudocode outline for this function:
+		 *	xmlData = generateXMLData()
+		 *	zipFile = FileZipper.process(xmlData)
+		 *	savefile(zipFile,getExternalStorageDirectory())
+		 *	Sana.sendFile(zipFile)
+		 * 
+		 */
+		
 	}
 	
 	
