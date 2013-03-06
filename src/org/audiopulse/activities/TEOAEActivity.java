@@ -64,6 +64,9 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 		} else {
 			testProcedure.start();
 		}
+		
+		//Analyze 
+		
 
 	}	
 }
