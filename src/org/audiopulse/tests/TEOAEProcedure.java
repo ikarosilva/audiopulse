@@ -59,7 +59,7 @@ public class TEOAEProcedure extends TestProcedure{
 		
 		//TODO: Send data back to Activity, the final saving of result will be done when the Activity returns from plotting the processed
 		//data and the user accepts the results. So we need to delete the binary files if the user decides to reject/redo the test
-		sendDPGRAMData(DPGRAM);
+		//sendDPGRAMData(DPGRAM);
 		sendMessage(TestActivity.Messages.PROCEDURE_COMPLETE);
 	}
 	
