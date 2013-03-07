@@ -75,15 +75,15 @@ public class TEOAEKempAnalyzer implements Callable<ConcurrentMap<String,Double>>
 		double[][] XFFT= SignalProcessing.getSpectrum(data,Fs,epochTime);
 		
 		//Get responses for 2,3 and 4 kHz for now...
-		resultMap.put("Response-2kHz", getResponseLevel(XFFT, 2000));
-		resultMap.put("Response-3kHz", getResponseLevel(XFFT,3000));
-		resultMap.put("Response-4kHz", getResponseLevel(XFFT,4000));
+		resultMap.put(RESPONSE_2KHZ, getResponseLevel(XFFT, 2000));
+		resultMap.put(RESPONSE_3KHZ, getResponseLevel(XFFT,3000));
+		resultMap.put(RESPONSE_4KHZ, getResponseLevel(XFFT,4000));
 		
 		
 		//Get estimated noise floor levels
-		resultMap.put("Noise-2kHz", getResponseLevel(XFFT, 2500));
-		resultMap.put("Noise-3kHz", getResponseLevel(XFFT,3500));
-	    resultMap.put("Noise-4kHz", getResponseLevel(XFFT,4500));
+		resultMap.put(NOISE_2KHZ, getNoiseLevel(XFFT, 2500));
+		resultMap.put(NOISE_3KHZ, getNoiseLevel(XFFT,3500));
+	    resultMap.put(NOISE_4KHZ, getNoiseLevel(XFFT,4500));
 	    
 	    
 		return null;
