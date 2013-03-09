@@ -41,6 +41,8 @@
 
 package org.audiopulse.graphics;
 
+import java.util.ArrayList;
+
 import org.afree.chart.ChartFactory;
 import org.afree.chart.AFreeChart;
 import org.afree.chart.plot.PlotOrientation;
@@ -63,29 +65,19 @@ import android.util.Log;
  */
 public class PlotAudiogramView extends DemoView {
 
-	public String title;
-	public double[] DPOAEData;
-	public double[] noiseFloor;
-	public double[] f1Data;
-	public double[] f2Data;
-	public static String TAG="PlotAudiogramView";
-	/**
-	 * constructor
-	 * @param context
-	 * @param f2Data2 
-	 * @param f1Data2 
-	 * @param noiseFloor2 
-	 * @param dPOAEData2 
-	 * @param title2 
-	 */
-	public PlotAudiogramView(Context context, String title, double[] DPOAEData, 
-			double[] noiseFloor, double[] f1Data, double[] f2Data) {
+	private String title;
+	private ArrayList<Double> responseData;
+	private ArrayList<Double> noiseData;
+	private ArrayList<Double> stimData;
+	private static String TAG="PlotAudiogramView";
+
+	public PlotAudiogramView(Context context, String title, ArrayList<Double> responseData, 
+			ArrayList<Double> noiseData, ArrayList<Double> stimData) {
 		super(context);
 
-		this.DPOAEData = DPOAEData;
-		this.noiseFloor =noiseFloor;
-		this.f1Data =f1Data;
-		this.f2Data =f2Data;
+		this.responseData = responseData;
+		this.noiseData =noiseData;
+		this.stimData =stimData;
 
 		final AFreeChart chart = createChart2();
 
@@ -98,7 +90,7 @@ public class PlotAudiogramView extends DemoView {
 		//into an resource folder where they can be easily modified in the future.
 
 		//FIXME: Add this dataset to the graph, when the results are properly
-		//calibrated
+		//calibrated, for both TEOAE and DPOAE ??
 		YIntervalSeries normativeRange = new YIntervalSeries("Normative Range");
 		int[] NUB={-10, -5, -5, -5, -4};
 		int[] NLB={-15, -10, -13, -15, -13};
@@ -118,25 +110,17 @@ public class PlotAudiogramView extends DemoView {
 	private  XYSeriesCollection createDataset() {
 
 
-		XYSeries series1 = new XYSeries("DPOAE");
-		XYSeries series2 = new XYSeries("Noise Floor");
-		XYSeries series3 = new XYSeries("F1");
-		XYSeries series4 = new XYSeries("F2");
-
-		//NOTE: We assume data is being send in an interleaved array where
-		// odd samples are X-axis and even samples go in the Y-axis
-		for(int i=0;i<(DPOAEData.length/2);i++){
-			series1.add(DPOAEData[i*2], DPOAEData[i*2+1]);
-			series2.add(noiseFloor[i*2], noiseFloor[i*2+1]);
-			series3.add(f1Data[i*2], f1Data[i*2+1]);
-			series4.add(f2Data[i*2], f2Data[i*2+1]);
-		}
+		XYSeries series1 = convertData2Series("Response", responseData);
+		XYSeries series2 = convertData2Series("Noise Floor", noiseData);
+		XYSeries series3 = convertData2Series("Stimulus", stimData);
 
 		XYSeriesCollection dataset = new XYSeriesCollection();
-		dataset.addSeries(series1);
-		dataset.addSeries(series2);
-		dataset.addSeries(series3);
-		dataset.addSeries(series4);
+		if(series1 != null)
+			dataset.addSeries(series1);
+		if(series2 != null)
+			dataset.addSeries(series2);
+		if(series3 != null)
+			dataset.addSeries(series3);
 		return dataset;
 	}
 	/**
@@ -145,12 +129,28 @@ public class PlotAudiogramView extends DemoView {
 	 * @return a chart.
 	 */
 
+	private XYSeries convertData2Series(String name, ArrayList<Double> data){
+
+		XYSeries series = null;
+		//NOTE: We assume data is being send in an interleaved array where
+		// odd samples are X-axis and even samples go in the Y-axis
+		if(! data.isEmpty()){
+			series = new XYSeries(name);
+			for(int i=0;i<(data.size()/2);i++){
+				series.add(data.get(i*2), data.get(i*2+1));		
+			}
+		}else{
+			Log.v(TAG,"empty series: "+ name);
+		}
+		return series;
+	}
+
 	private AFreeChart createChart2() {
 		XYDataset data = createDataset();
 		AFreeChart chart = ChartFactory.createXYLineChart(
 				title, // chart title
 				"Frequency (kHz)", // x axis label
-				"DPOAE Level (dB SPL)", // y axis label
+				"Level (dB SPL)", // y axis label
 				data, // data
 				PlotOrientation.VERTICAL,
 				true, // include legend

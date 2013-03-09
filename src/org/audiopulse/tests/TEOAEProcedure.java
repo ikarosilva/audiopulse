@@ -2,8 +2,6 @@ package org.audiopulse.tests;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.TEOAEKempAnalyzer;
@@ -18,7 +16,7 @@ import android.util.Log;
 @UnderConstruction(owner="Ikaro Silva")
 public class TEOAEProcedure extends TestProcedure{
 
-	private final String TAG = "TEOAECalibration";
+	private final String TAG = "TEOAEProcedure";
 	private Bundle data;
 	private final double stimulusDuration=1;//stimulus duration
 	private short[] results;
@@ -64,18 +62,19 @@ public class TEOAEProcedure extends TestProcedure{
 			Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
 			e.printStackTrace();
 		}
-		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE);
 		
 		//TODO: Send data back to Activity, the final saving of result will be done when the Activity returns from plotting the processed
 		//data and the user accepts the results. So we need to delete the binary files if the user decides to reject/redo the test
 		data=new Bundle();
 		data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
-		sendMessage(data);
-		sendMessage(TestActivity.Messages.PROCEDURE_COMPLETE);
+		Log.v(TAG,"Sending analyszed data to activity");
+		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
+		Log.v(TAG,"donew with " + TAG);
 	}
 	
 	private HashMap<String, Double> analyzeResults(short[] data, double Fs) throws Exception {
-		 double epochTime=512; //Number of sample in which to break the FFT analysis
+		int epochTime=512; //Number of sample in which to break the FFT analysis
+		Log.v(TAG,"data.length= " + data.length);
 		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochTime);
 		return teoaeAnalysis.call();
 

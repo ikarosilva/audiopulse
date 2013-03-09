@@ -38,9 +38,12 @@
  */ 
 
 package org.audiopulse.activities;
-
 import org.audiopulse.tests.TEOAEProcedure;
+
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 
 
@@ -49,13 +52,13 @@ import android.view.View;
 public class TEOAEActivity extends TestActivity implements Handler.Callback
 {
 	public final String TAG="TEOAEActivity";
-	
+
 	//Begin test -- this function is called by the button in the default layout
 	public void startTest(View callingView)
 	{
 		appendText("Starting TEOAE Procedure");
 		if (testProcedure==null) {
-//			appendText("No TestProecdure set!");
+			//			appendText("No TestProecdure set!");
 			//FIXME: don't do this. Just doing it now for convenience.
 			//maybe define a DebuggingTestActivity?
 			appendText("Starting TEOAE");
@@ -63,10 +66,28 @@ public class TEOAEActivity extends TestActivity implements Handler.Callback
 			testProcedure.start();
 		} else {
 			testProcedure.start();
-		}
-		
-		//Analyze 
-		
-
+		}		
 	}	
+
+	//Overwriting from TestProcedure to deal with this specific test
+	public boolean handleMessage(Message msg) {
+		Log.v(TAG,"handling message " + msg.toString());
+		Bundle data = msg.getData();
+		switch (msg.what) {
+		case Messages.CLEAR_LOG:
+			emptyText();
+			break;
+		case Messages.LOG:
+			String pm = data.getString("log");
+			appendText(pm);
+			break;
+		case Messages.ANALYSIS_COMPLETE:
+			Bundle results=msg.getData();
+			//Start Plotting activity
+			Log.v(TAG,"calling plot activity ");
+			plotAudiogram(results);
+		}
+		return true;
+	}
+
 }

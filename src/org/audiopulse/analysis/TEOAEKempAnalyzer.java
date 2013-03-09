@@ -45,6 +45,8 @@ package org.audiopulse.analysis;
 import java.util.HashMap;
 import org.audiopulse.utilities.SignalProcessing;
 
+import android.util.Log;
+
 public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 
 	private final String TAG="TEOAEKempAnalyzer";
@@ -55,10 +57,11 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 							  //Should be power of two
 	HashMap<String, Double> resultMap;
 	
-	public TEOAEKempAnalyzer(short[] data, double Fs, double epochTime){
+	public TEOAEKempAnalyzer(short[] data, double Fs, int epochTime){
 		this.Fs=Fs;
 		this.data=data;
 		resultMap= new HashMap<String, Double>();
+		this.epochTime=epochTime;
 	}
 	
 
@@ -70,8 +73,9 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 
 		//All the analysis will be done in the fft domain for now
 		//using the AudioPulseDataAnalyzer interface to obtain the results
+		Log.v(TAG,"epochTime= " + epochTime);
 		double[][] XFFT= SignalProcessing.getSpectrum(data,Fs,epochTime);
-		
+		resultMap.put(TestType,(double) 1);//According to the interface, 1 =TEOAE
 		//Get responses for 2,3 and 4 kHz for now...
 		resultMap.put(RESPONSE_2KHZ, getResponseLevel(XFFT, 2000));
 		resultMap.put(RESPONSE_3KHZ, getResponseLevel(XFFT,3000));
