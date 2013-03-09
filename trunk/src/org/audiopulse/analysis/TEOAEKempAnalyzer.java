@@ -42,12 +42,10 @@
 //and Android Client or Desktop environment
 package org.audiopulse.analysis;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.HashMap;
 import org.audiopulse.utilities.SignalProcessing;
 
-public class TEOAEKempAnalyzer implements Callable<ConcurrentMap<String,Double>>, AudioPulseDataAnalyzer {
+public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 
 	private final String TAG="TEOAEKempAnalyzer";
 	private short[] data;
@@ -55,16 +53,16 @@ public class TEOAEKempAnalyzer implements Callable<ConcurrentMap<String,Double>>
 	private double Fs;
 	private int epochTime; //Time in samples for which to break the FFT analysis
 							  //Should be power of two
-	ConcurrentMap<String, Double> resultMap;
+	HashMap<String, Double> resultMap;
 	
 	public TEOAEKempAnalyzer(short[] data, double Fs, double epochTime){
 		this.Fs=Fs;
 		this.data=data;
-		resultMap= new ConcurrentHashMap<String, Double>();
+		resultMap= new HashMap<String, Double>();
 	}
 	
 
-	public ConcurrentMap<String, Double> call() throws Exception {
+	public HashMap<String, Double> call() throws Exception {
 		// TODO This function should calculate the "Audiogram" results that will be 
 		//plotted and save as the final analysis of the data. 
 		//For now, using generic as return type to allow for flexibility,
@@ -86,7 +84,7 @@ public class TEOAEKempAnalyzer implements Callable<ConcurrentMap<String,Double>>
 	    resultMap.put(NOISE_4KHZ, getNoiseLevel(XFFT,4500));
 	    
 	    
-		return null;
+		return resultMap;
 	}
 	
 	public static double getFreqAmplitude(double[][] XFFT, double desF, double tolerance){

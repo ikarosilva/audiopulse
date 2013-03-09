@@ -1,6 +1,9 @@
 package org.audiopulse.analysis;
 
-public interface AudioPulseDataAnalyzer {
+import java.util.HashMap;
+import java.util.concurrent.Callable;
+
+public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>> {
 
 	
 	    /// -- Define Mapping of Keys to HashMap 
@@ -17,6 +20,7 @@ public interface AudioPulseDataAnalyzer {
 		public static final String STIM_2KHZ="stim2kHz";
 		public static final String STIM_3KHZ="stim3kHz";
 		public static final String STIm_4KHZ="stim4kHz";
+		public static final String Results_MAP="AudioPulseDataAnalyzerMap";
 		
 	//Some methods have the option to do analysis in either time or spectrum
 	//domain. Return NaN for methods that wont implement
