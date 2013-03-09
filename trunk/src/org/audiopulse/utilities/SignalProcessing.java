@@ -7,8 +7,11 @@ import org.apache.commons.math3.transform.TransformType;
 import org.audiopulse.io.RecordThreadRunnable;
 
 import android.os.Bundle;
+import android.util.Log;
 
 public class SignalProcessing {
+	
+	public static final String TAG="SignalProcessing";
 	
 	@Deprecated // function name should indicate that it does not actually calculate linearly scaled rms. Perhaps name it dBfs? 
 	public static double rms(short[] x){
@@ -92,6 +95,7 @@ public class SignalProcessing {
 		//based on the maximum desired frequency for FFT analysis
 
 		//Calculate the number of sweeps given the epoch time
+		Log.v(TAG,"SPEC_N= " + SPEC_N + " x.length= " + x.length);
 		int sweeps=Math.round(x.length/SPEC_N);
 		double[] winData=new double[SPEC_N];
 		Complex[] tmpFFT=new Complex[SPEC_N];

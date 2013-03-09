@@ -76,7 +76,7 @@ public class Signals {
 	public synchronized static double getclickKempSweepDurationSeconds() {
 		//Defining this method because it will be used by other classes to set the 
 		//final experiment time based on the desired number of sweeps.
-		final double sweepDurationInSeconds=0.5;
+		final double sweepDurationInSeconds=0.02;
 		return sweepDurationInSeconds;
 		
 	}

@@ -120,7 +120,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	}
 
 	//plot audiogram
-	public void plotAudiogram(Bundle resultsBundle) {
+	public void plotAudiogram(Bundle resultsBundle ) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
 		intent.putExtras(resultsBundle);
 		startActivity(intent);
