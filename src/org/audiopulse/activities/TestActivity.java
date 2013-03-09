@@ -42,6 +42,7 @@ package org.audiopulse.activities;
 import org.audiopulse.R;
 import org.audiopulse.tests.TestProcedure;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -118,6 +119,13 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		//TODO
 	}
 
+	//plot audiogram
+	public void plotAudiogram(Bundle resultsBundle) {
+		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
+		intent.putExtras(resultsBundle);
+		startActivity(intent);
+	}
+	
 	//TODO: expand on this for other message types. Implement nested class NativeMessageHandler? 
 	//default implementation for handling messages from TestProecdure objects
 	public boolean handleMessage(Message msg) {
