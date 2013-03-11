@@ -7,8 +7,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>> {
-
-
+	
 	/// -- Define Mapping of Keys to HashMap 
 	//The purpose of these keys are to define constants that will be accessible by
 	//different packages and clients analyzing the data in the Maps returned 
@@ -26,6 +25,11 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 	public static final String STIM_4KHZ="stim4kHz";
 	public static final String Results_MAP="AudioPulseDataAnalyzerMap";
 
+	
+	//Implementations of the interface should store all the data file names  
+	//used in the analysis and that should be packaged in this Set
+	public Set<String> getRawDataFileNames();
+	
 	//This map is provided for convenience to methods wishing to iterator through
 	//all the keys
 	public static final Set<String> responseKeys = new HashSet<String>() {{  
@@ -53,6 +57,7 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 		put(NOISE_2KHZ,(double) 2); put(NOISE_3KHZ,(double) 3); put(NOISE_4KHZ,(double) 4);
 		put(STIM_2KHZ,(double) 2); put(STIM_3KHZ,(double) 3); put(STIM_4KHZ,(double) 4);
 	}};
+	
 	//Some methods have the option to do analysis in either time or spectrum
 	//domain. Return NaN for methods that wont implement
 	//The spetrum is a 2D array where the first dimension is the index of frequency

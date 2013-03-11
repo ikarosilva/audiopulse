@@ -57,7 +57,7 @@ public class TEOAEProcedure extends TestProcedure{
         sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true becauase we delegate writing of file to another thread...
 		
         try {
-			DPGRAM = analyzeResults(results,sampleFrequency);
+			DPGRAM = analyzeResults(results,sampleFrequency,file);
 		} catch (Exception e) {
 			Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
 			e.printStackTrace();
@@ -72,10 +72,14 @@ public class TEOAEProcedure extends TestProcedure{
 		Log.v(TAG,"donew with " + TAG);
 	}
 	
-	private HashMap<String, Double> analyzeResults(short[] data, double Fs) throws Exception {
+	private HashMap<String, Double> analyzeResults(short[] data, double Fs,File file) throws Exception {
 		int epochTime=512; //Number of sample in which to break the FFT analysis
 		Log.v(TAG,"data.length= " + data.length);
-		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochTime);
+		//The file passed here is not used in the analysis (ie not opened and read)!!
+		//It is used when the analysis gets accepted by the user: the app packages
+		//the file with stored the data for transmission
+		
+		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochTime,file.getAbsolutePath());
 		return teoaeAnalysis.call();
 
 	}
