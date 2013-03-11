@@ -43,6 +43,8 @@
 package org.audiopulse.analysis;
 
 import java.util.HashMap;
+import java.util.HashSet;
+
 import org.audiopulse.utilities.SignalProcessing;
 
 import android.util.Log;
@@ -56,12 +58,16 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 	private int epochTime; //Time in samples for which to break the FFT analysis
 							  //Should be power of two
 	HashMap<String, Double> resultMap;
+	private HashSet<String> files;
 	
-	public TEOAEKempAnalyzer(short[] data, double Fs, int epochTime){
+	public TEOAEKempAnalyzer(short[] data, double Fs, int epochTime, String file){
 		this.Fs=Fs;
 		this.data=data;
 		resultMap= new HashMap<String, Double>();
 		this.epochTime=epochTime;
+		files=new HashSet<String>();
+		files.add(file);
+		
 	}
 	
 
@@ -142,6 +148,14 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 
 	public double getStimulusLevel(double[][] dataFFT, double frequency) {
 		return getFreqAmplitude(dataFFT,frequency,spectralToleranceHz);
+	}
+
+	public void setRawDataFileNames(HashSet<String> files){
+		this.files=files;
+	}
+
+	public HashSet<String> getRawDataFileNames() {
+		return files;
 	}
 
 }
