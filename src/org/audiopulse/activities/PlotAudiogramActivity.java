@@ -43,9 +43,11 @@ package org.audiopulse.activities;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.graphics.PlotAudiogramView;
+import org.audiopulse.io.AudioPulseFileWriter;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -60,7 +62,8 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 	 * @param savedInstanceState
 	 */
 	private HashMap<String, Double> results;
-
+    private HashSet<String> fileNames;
+    
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -71,7 +74,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 		//this should be a HashMap with keys defined in the interface
 
 		results=(HashMap<String, Double>) data.getSerializable(AudioPulseDataAnalyzer.Results_MAP);
-
+		fileNames = (HashSet<String>) data.getSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames);
 		//Decode test name from the results and the mapping in the interface
 		Log.v(TAG,"results= "+ results.toString());
 		Log.v(TAG,"results keys= "+ results.keySet());
@@ -157,6 +160,14 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					//TODO: Implement saving file to disk (zipped) as  a thread
 					//and passing URI if called from Sana procedure
+					
+					/*
+					Log.v(TAG,"Saving files to disk");
+					AudioPulseFileWriter writer= new AudioPulseFileWriter
+							(file,results);
+					Log.v(TAG,"saving raw data" );
+					writer.start();
+					*/
 					
 				}
 			});
