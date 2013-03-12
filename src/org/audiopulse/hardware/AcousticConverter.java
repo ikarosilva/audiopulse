@@ -61,4 +61,24 @@ public class AcousticConverter {
 	public double getInputLevel(double rms) {
 		return 20*Math.log10(rms*VPerDU_input*1e6) + SPL1uV;		//SPL = dBuV + SPL1uV
 	}
+	
+	//return dB offset: dB SPL = 10*log10(A^2) + dBOffset
+	public double getDBOffset_output() {
+		return 10*Math.log10(VPerDU_output) + SPL1V;
+	}
+	//return dB offset: dB SPL = 10*log10(A^2) + dBOffset
+	public double getDBOffset_input() {
+		return 10*Math.log10(VPerDU_input*1e6) + SPL1uV;
+	}
+	
+	
+	//convert output vector to expect input vector for flat, 1 acoustic response 
+	public double[] outputToInput(double[] output) {
+		int N = output.length;
+		double[] input = new double[N];
+		for (int n=0; n<N; n++) {
+			input[n] = output[n] * VPerDU_output / VPerDU_input * Math.pow(10, (SPL1V-(SPL1uV+120))/20);
+		}
+		return input;
+	}
 }
