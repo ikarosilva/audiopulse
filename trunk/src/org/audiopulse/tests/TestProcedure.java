@@ -126,8 +126,9 @@ public abstract class TestProcedure implements Runnable{
 //	    unregisterReceiver(myNoisyAudioStreamReceiver);
 	}
 	
-	//useful calibration routines for any test
-	protected void calibrateChrip(int fHigh) {
+	//return vector of gain you need to apply at each freq
+	//TODO: add phase / delay when we care.
+	protected double[] calibrateChrip(int fHigh) {
 		//TODO
 		//calibrate left, right separately?
 		double chirpDuration = 0.1;
@@ -141,11 +142,28 @@ public abstract class TestProcedure implements Runnable{
 			System.arraycopy(chirp, 0, repeatedChrip, ii*chirp.length, chirp.length);
 			//TODO: right channel also
 		}
-		testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(
+		short[] testSignal = AudioSignal.convertStereoToShort(
 				AudioSignal.monoToStereoLeft(repeatedChrip)
-				));
+				);
+		testIO.setPlaybackAndRecording(testSignal);
 		short[] input = testIO.acquire();
-		//TODO: analyze input spectral power & phase
+		
+		//TODO: SPEC_N?
+		//TODO: make a getSpectrum that building in acoustic conversion to dB SPL, or that return linear results
+		double[][] expectedResponse = SignalProcessing.getSpectrum(testSignal,playbackSampleFrequency,8);
+		double[][] actualResponse = SignalProcessing.getSpectrum(input,playbackSampleFrequency,8);
+		
+		//TODO: this is really messy, make the code more readable
+		double dBOffsetInput = hardware.getDBOffset_input();
+		double dBOffsetOutput = hardware.getDBOffset_output();
+		
+		int N = actualResponse[1].length;
+		double[] gain = new double[N];
+		for (int n=0; n<N; n++) {
+			gain[n] = (expectedResponse[1][n] + dBOffsetOutput)
+					- (actualResponse[1][n] + dBOffsetInput);
+		}
+		return gain;
 		
 	}
 	protected void calibrateNoise() {
