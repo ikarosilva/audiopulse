@@ -23,12 +23,8 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 	public static final String STIM_2KHZ="stim2kHz";
 	public static final String STIM_3KHZ="stim3kHz";
 	public static final String STIM_4KHZ="stim4kHz";
-	public static final String Results_MAP="AudioPulseDataAnalyzerMap";
-
-	
-	//Implementations of the interface should store all the data file names  
-	//used in the analysis and that should be packaged in this Set
-	public Set<String> getRawDataFileNames();
+	public static final String Results_MAP="AudioPulseDataAnalyzerMap"; //Bundle Key
+	public static final String MetaData_RawFileNames="AudioPulseMetaDataRawFileNames";//Bundle Key
 	
 	//This map is provided for convenience to methods wishing to iterator through
 	//all the keys

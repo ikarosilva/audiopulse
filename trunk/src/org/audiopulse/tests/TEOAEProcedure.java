@@ -2,6 +2,8 @@ package org.audiopulse.tests;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
+
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.TEOAEKempAnalyzer;
@@ -22,6 +24,7 @@ public class TEOAEProcedure extends TestProcedure{
 	private short[] results;
 	private static final double  sampleFrequency = 44100;
 	private HashMap<String, Double> DPGRAM;
+	private HashSet<String> fileNames=new HashSet<String>();
 	
 	public TEOAEProcedure(TestActivity parentActivity) {
 		super(parentActivity);
@@ -48,16 +51,11 @@ public class TEOAEProcedure extends TestProcedure{
 		Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
 		
 		File file= AudioPulseFileWriter.generateFileName("TEOAE","");
-		logToUI("Saving file at:" + file.getAbsolutePath());
-		AudioPulseFileWriter writer= new AudioPulseFileWriter
-				(file,results);
-		Log.v(TAG,"saving raw data" );
-		writer.start();
-		
-        sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true becauase we delegate writing of file to another thread...
+		fileNames.add(file.getAbsolutePath());
+        sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 		
         try {
-			DPGRAM = analyzeResults(results,sampleFrequency,file);
+			DPGRAM = analyzeResults(results,sampleFrequency);
 		} catch (Exception e) {
 			Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
 			e.printStackTrace();
@@ -67,19 +65,19 @@ public class TEOAEProcedure extends TestProcedure{
 		//data and the user accepts the results. So we need to delete the binary files if the user decides to reject/redo the test
 		data=new Bundle();
 		data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
+		//The file passed here is not used in the analysis (ie not opened and read)!!
+		//It is used when the analysis gets accepted by the user: the app packages
+		//the file with stored the data for transmission
+		data.putSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames,fileNames);
 		Log.v(TAG,"Sending analyszed data to activity");
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 		Log.v(TAG,"donew with " + TAG);
 	}
 	
-	private HashMap<String, Double> analyzeResults(short[] data, double Fs,File file) throws Exception {
+	private HashMap<String, Double> analyzeResults(short[] data, double Fs) throws Exception {
 		int epochTime=512; //Number of sample in which to break the FFT analysis
-		Log.v(TAG,"data.length= " + data.length);
-		//The file passed here is not used in the analysis (ie not opened and read)!!
-		//It is used when the analysis gets accepted by the user: the app packages
-		//the file with stored the data for transmission
-		
-		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochTime,file.getAbsolutePath());
+		Log.v(TAG,"data.length= " + data.length);	
+		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochTime);
 		return teoaeAnalysis.call();
 
 	}
