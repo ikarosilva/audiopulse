@@ -33,30 +33,53 @@ public class DPOAEProcedure extends TestProcedure {
 		for (int test=0; test<numTests; test++) {
 			DPOAEParameters params = testList.poll();
 			logToUI("Running " + params.toString());
+			
+			// Function of DPOAE aprams, gives back the two-tones stimulus
 			double[][] probe = params.createStimulus(playbackSampleFrequency, hardware);
+			
+			// Play the stimulus that 
 			testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(probe));
+			
+			// Record the response to the stimulus
 			short[] data = testIO.acquire();
+			
+			// Save this result
 			recordedAudio[test] = AudioSignal.convertMonoToDouble(data);
 			sendMessage(TestActivity.Messages.PROGRESS);
 			
-			//if it doesn't eat up too many resources, we can spawn threads here
+			//Note: If it doesn't eat up too many resources, we can spawn threads here
 			//to do analysis and saving. This way, the UI can update with results
 			//as the test runs
 			//Set these threads' priority to normal
 		}
 		sendMessage(TestActivity.Messages.IO_COMPLETE);
-		
-		analyzeResults();
+
+		// Analyze the results, plot them
+		analyzeResults(recordedAudio);
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE);
-		
-		saveResults();
-		sendMessage(TestActivity.Messages.PROCEDURE_COMPLETE);
+
+		// IF this test result is verified, then save test results in the file structure
+		// TODO: Change this to only save the results once the DPGram is confirmed
+		saveResults(recordedAudio);
+		sendMessage(TestActivity.Messages.PROCEDURE_COMPLETE);			
 	}
 
 	
-	private void analyzeResults() {
+	private void analyzeResults(double [][] recordedAudio) {
 		//TODO: define a DPOAEAnalysis call that operates on input arguments
 		//rather than a file location, call it from here
+		
+		// For each test
+			// Get spectrum
+		
+			// Convert to dbSPL
+		
+			// Estimate Noise floor
+		
+			// Plot and get a confirmation of whether THIS test should be saved?
+		
+			// Delete the test information if not
+			
 	}
 	
 	private void saveResults() {
