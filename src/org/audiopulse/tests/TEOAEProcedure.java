@@ -22,7 +22,6 @@ public class TEOAEProcedure extends TestProcedure{
 	private Bundle data;
 	private final double stimulusDuration=1;//stimulus duration
 	private short[] results;
-	private static final double  sampleFrequency = 44100;
 	private HashMap<String, Double> DPGRAM;
 	private HashSet<String> fileNames=new HashSet<String>();
 	
@@ -38,8 +37,8 @@ public class TEOAEProcedure extends TestProcedure{
 		sendMessage(TestActivity.Messages.PROGRESS);
 		logToUI("Running TEOAE");
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
-		Log.v(TAG,"Generating stimulus");
-		double[] probe = Signals.clickKempMethod(sampleFrequency, 
+		Log.v(TAG,"Generating stimulus at Fs = " + super.playbackSampleFrequency);
+		double[] probe = Signals.clickKempMethod(super.playbackSampleFrequency, 
 				stimulusDuration);
 		Log.v(TAG,"setting probe old level probe[0]=" + probe[0]);
 		probe = hardware.setOutputLevel(probe, 55);
@@ -55,7 +54,7 @@ public class TEOAEProcedure extends TestProcedure{
         sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 		
         try {
-			DPGRAM = analyzeResults(results,sampleFrequency);
+			DPGRAM = analyzeResults(results,super.recordingSampleFrequency);
 		} catch (Exception e) {
 			Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
 			e.printStackTrace();

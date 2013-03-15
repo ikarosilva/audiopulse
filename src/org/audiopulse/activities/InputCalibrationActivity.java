@@ -56,8 +56,7 @@ public class InputCalibrationActivity extends TestActivity implements Handler.Ca
 {
 	public static final String TAG="InputCalibrationActivity";
 	
-	private InputProcessor recorder;
-	public final int sampleFrequency = 44100; 		//TODO: make this app-wide
+	private InputProcessor recorder;		
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -123,7 +122,7 @@ public class InputCalibrationActivity extends TestActivity implements Handler.Ca
 		public InputProcessor(InputCalibrationActivity parentActivity) {
 			Log.d(TAG,"Creating InputProcessor");
 			int minBuffer = AudioRecord.getMinBufferSize(
-					parentActivity.sampleFrequency,
+					parentActivity.recordingSamplingFrequency,
 					AudioFormat.CHANNEL_IN_MONO,
 					AudioFormat.ENCODING_PCM_16BIT
 					);
@@ -134,7 +133,7 @@ public class InputCalibrationActivity extends TestActivity implements Handler.Ca
 			
 			//create AudioRecord object
 			recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
-					parentActivity.sampleFrequency,
+					parentActivity.recordingSamplingFrequency,
 					AudioFormat.CHANNEL_IN_MONO,
 					AudioFormat.ENCODING_PCM_16BIT,
 					bufferSizeInBytes);

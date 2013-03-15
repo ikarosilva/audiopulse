@@ -98,8 +98,6 @@ public class OutputCalibrationActivity extends TestActivity
 	double[] toneFrequencies = {500, 1000, 2000, 4000, 8000};
 	double[] clickFrequencies = {5, 10, 20, 30, 40};
 	double[] amplitudes = {.2, .4, .6, .8, 1};
-	
-	public final int sampleFrequency = 44100; 		//TODO: make this app-wide
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -107,7 +105,8 @@ public class OutputCalibrationActivity extends TestActivity
 		setContentView(R.layout.device_calibration);
 		
 		//create audio streaming device with 1/4 second buffer
-		player = new AudioStreamer(sampleFrequency, sampleFrequency/4);
+		player = new AudioStreamer(super.playbackSamplingFrequency, 
+				super.playbackSamplingFrequency/4);
 		
 		Spinner sourceSpinner = (Spinner) findViewById(R.id.calibration_source);
 		sourceSpinner.setOnItemSelectedListener(this);
@@ -148,11 +147,11 @@ public class OutputCalibrationActivity extends TestActivity
 		//create new source object
 		String sourceName = getSource();
 		if (sourceName.equals(getString(R.string.calibration_tone))) {
-			source = new ThreadedToneGenerator(player.getFrameLength(), getFrequency(), sampleFrequency);			
+			source = new ThreadedToneGenerator(player.getFrameLength(), getFrequency(), super.playbackSamplingFrequency);			
 		} else if (sourceName.equals(getString(R.string.calibration_noise))) {
-			source = new ThreadedNoiseGenerator(player.getFrameLength(), sampleFrequency);
+			source = new ThreadedNoiseGenerator(player.getFrameLength(), super.playbackSamplingFrequency);
 		} else if (sourceName.equals(getString(R.string.calibration_clicks))) {
-			source = new ThreadedClickGenerator(player.getFrameLength(), getFrequency(), sampleFrequency);
+			source = new ThreadedClickGenerator(player.getFrameLength(), getFrequency(), super.playbackSamplingFrequency);
 		} else throw new MissingResourceException("Unknown source selected", sourceName, sourceName);
 
 		updateSource(); 				//update parameters from UI

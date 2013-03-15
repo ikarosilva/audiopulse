@@ -60,7 +60,7 @@ public class DPOAEProcedure extends TestProcedure {
 
 		// IF this test result is verified, then save test results in the file structure
 		// TODO: Change this to only save the results once the DPGram is confirmed
-		saveResults(recordedAudio);
+		//saveResults(recordedAudio); Commented out because it is giving an error
 		sendMessage(TestActivity.Messages.PROCEDURE_COMPLETE);			
 	}
 
@@ -158,7 +158,7 @@ public class DPOAEProcedure extends TestProcedure {
 		}
 		
 		//create stimulus from parameters
-		public double[][] createStimulus(double sampleFrequency, AcousticConverter hardware) {
+		public double[][] createStimulus(int sampleFrequency, AcousticConverter hardware) {
 			
 			//hack for now to allow SOAE recording here
 			if (testFrequency==0) {
@@ -173,7 +173,7 @@ public class DPOAEProcedure extends TestProcedure {
 			stimulus[1] = createF2Tone(sampleFrequency,hardware);
 			return stimulus;
 		}
-		public double[] createF1Tone(double sampleFrequency, AcousticConverter hardware) {
+		public double[] createF1Tone(int sampleFrequency, AcousticConverter hardware) {
 			double[] tone;
 			tone = Signals.tone(sampleFrequency, f1, durationInSeconds);
 			tone = hardware.setOutputLevel(tone, level1);
@@ -181,7 +181,7 @@ public class DPOAEProcedure extends TestProcedure {
 			//TODO: is fade uncalled for?
 			return tone;
 		}
-		public double[] createF2Tone(double sampleFrequency, AcousticConverter hardware) {
+		public double[] createF2Tone(int sampleFrequency, AcousticConverter hardware) {
 			double[] tone;
 			tone = Signals.tone(sampleFrequency, f2, durationInSeconds);
 			tone = hardware.setOutputLevel(tone, level2);

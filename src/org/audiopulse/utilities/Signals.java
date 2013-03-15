@@ -7,7 +7,7 @@ import java.util.Random;
 public class Signals {
 
 	//TODO: phase
-	public static double[] tone(double sampleFrequency, double frequency, double durationInSeconds) {
+	public static double[] tone(int sampleFrequency, double frequency, double durationInSeconds) {
 		int N = (int) (durationInSeconds * sampleFrequency);
 		double[] x = new double[N];
 		for (int n=0;n<N;n++) {
@@ -17,7 +17,7 @@ public class Signals {
 	}
 	
 	//TODO: phases
-	public static double[] toneComplex(double sampleFrequency, double[] frequencies, double durationInSeconds) {
+	public static double[] toneComplex(int sampleFrequency, double[] frequencies, double durationInSeconds) {
 		int N = (int) (durationInSeconds * sampleFrequency);
 		double[] x = new double[N];
 		for (int n=0;n<N;n++) {
@@ -29,7 +29,7 @@ public class Signals {
 		return x;
 	}
 	
-	public static double[] chirp(double sampleFrequency, double f0, double f1, double durationInSeconds) {
+	public static double[] chirp(int sampleFrequency, double f0, double f1, double durationInSeconds) {
 		int N = (int) (durationInSeconds * sampleFrequency);
 		double[] x = new double[N];
 		for (int n=0;n<N;n++) {
@@ -43,7 +43,7 @@ public class Signals {
 	
 	//TODO: Random.nextGaussian uses Box-Muller alg, which 
 	//some say is slow and innaccurate. Consider finding a invcdf lookup
-	public static double[] gaussianNoise(double sampleFrequency, double durationInSeconds) {
+	public static double[] gaussianNoise(int sampleFrequency, double durationInSeconds) {
 		Random rng = new Random();
 		int N = (int) (durationInSeconds / sampleFrequency);
 		double[] x = new double[N];
@@ -54,14 +54,14 @@ public class Signals {
 	}
 	
 
-	public static double[] fadeIn(double sampleFrequency, double fadeDuration, double[] x) {
+	public static double[] fadeIn(int sampleFrequency, double fadeDuration, double[] x) {
 		int F = (int) (fadeDuration / sampleFrequency);
 		for (int n=0;n<F;n++) {
 			x[n] *= (double)(n)/(double)(F); 
 		}
 		return x;
 	}
-	public static double[] fadeOut(double sampleFrequency, double fadeDuration, double[] x) {
+	public static double[] fadeOut(int sampleFrequency, double fadeDuration, double[] x) {
 		int N = (int) (x.length / sampleFrequency);
 		int F = (int) (fadeDuration / sampleFrequency);
 		for (int n=0;n<F;n++) {
@@ -69,7 +69,7 @@ public class Signals {
 		}
 		return x;
 	}
-	public static double[] fade(double sampleFrequency, double fadeDuration, double[] x) {
+	public static double[] fade(int sampleFrequency, double fadeDuration, double[] x) {
 		return fadeIn(sampleFrequency,fadeDuration,fadeOut(sampleFrequency,fadeDuration,x));
 	}
 	
@@ -80,7 +80,7 @@ public class Signals {
 		return sweepDurationInSeconds;
 		
 	}
-	public synchronized static double[] clickKempMethod(double sampleFrequency, double totalDurationInSeconds) {
+	public synchronized static double[] clickKempMethod(int sampleFrequency, double totalDurationInSeconds) {
 		//Constructs click stimuli for non-linear reponse extraction using 
 		//3 click at one level and a fourth click at 3x the level
 		//The sweepDurationinSeconds is the duration of a single epoch (trial) *including* the click's duration
