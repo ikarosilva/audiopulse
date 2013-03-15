@@ -39,8 +39,8 @@
 
 package org.audiopulse.tests;
 
-import java.util.LinkedList;
 
+import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.io.PlayRecordManager;
@@ -63,16 +63,26 @@ public abstract class TestProcedure implements Runnable{
 	
 	protected PlayRecordManager testIO;
 	protected AcousticConverter hardware;
-	protected int playbackSampleFrequency = 44100;
-	protected int recordingSampleFrequency = 44100;
+	protected final int playbackSampleFrequency;
+	protected final int recordingSampleFrequency;
 	//TODO: get sample freqs from app data
 	
 	public TestProcedure (TestActivity parent) {
 		TAG = "TestProcedure";
 		this.uiThreadHandler = new Handler(parent);
+		recordingSampleFrequency=parent.getRecordingSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
+		playbackSampleFrequency=parent.getPlaybackSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
 		testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
 		hardware = new AcousticConverter();
 		context = parent.getApplicationContext();
+		Log.v(TAG,"Fs= "+ playbackSampleFrequency);
+	}
+	
+	public int getRecordingSamplingFrequency(){
+		return recordingSampleFrequency;
+	}
+	public int getPlaybackSamplingFrequency(){
+		return playbackSampleFrequency;
 	}
 	
 	//call from Activity to perform test in a new thread

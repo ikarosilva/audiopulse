@@ -57,13 +57,16 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	
 	protected TextView testLog;
 	protected TestProcedure testProcedure;
-	
+	protected int recordingSamplingFrequency;
+	protected int playbackSamplingFrequency;
 	private boolean calledBySana;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.basic_test_layout);
+		recordingSamplingFrequency=this.getResources().getInteger(R.integer.samplingFrequency);
+		playbackSamplingFrequency=this.getResources().getInteger(R.integer.samplingFrequency);
 		testLog = (TextView)this.findViewById(R.id.testLog);
 
 		//TODO: can we put a TestProcedure into a bundle? E.g. by implementing Parcelable, but is that worth it?
@@ -150,5 +153,11 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		public static final int ANALYSIS_COMPLETE = 5;		//analysis block complete
 		public static final int PROCEDURE_COMPLETE = 6;		//entire test procedure is complete
 	}
-	
+
+	public int getRecordingSampleFrequency() {
+		return recordingSamplingFrequency;
+	}
+	public int getPlaybackSampleFrequency() {
+		return playbackSamplingFrequency;
+	}
 }
