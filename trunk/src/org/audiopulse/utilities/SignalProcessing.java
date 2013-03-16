@@ -89,6 +89,12 @@ public class SignalProcessing {
 	}
 	
 	public static double[][] getSpectrum(short[] x, double Fs, int SPEC_N){
+		
+		return getSpectrum(AudioSignal.convertMonoToDouble(x),Fs, SPEC_N);
+		
+	}
+	
+	public static double[][] getSpectrum(double[] x, double Fs, int SPEC_N){
 		FastFourierTransformer FFT = new 
 				FastFourierTransformer(DftNormalization.STANDARD);
 		//Calculate the size of averaged waveform
@@ -102,7 +108,7 @@ public class SignalProcessing {
 		double[][] Pxx = new double[2][SPEC_N/2];
 		double tmpPxx;
 		double SpectrumResolution = Fs/SPEC_N;
-		double REFMAX=(double) Short.MAX_VALUE; //Normalizing value
+		
 
 		//Break FFT averaging into SPEC_N segments for averaging
 		//Calculate spectrum, variation based on
@@ -115,7 +121,7 @@ public class SignalProcessing {
 			if(i*SPEC_N+SPEC_N > x.length)
 				break;
 			for (int k=0;k<SPEC_N;k++){
-				winData[k]= ((double)x[i*SPEC_N + k]/REFMAX)*SpectralWindows.hamming(k,SPEC_N);
+				winData[k]= x[i*SPEC_N + k]*SpectralWindows.hamming(k,SPEC_N);
 			}
 			tmpFFT=FFT.transform(winData,TransformType.FORWARD);
 			for(int k=0;k<(SPEC_N/2);k++){
@@ -125,10 +131,10 @@ public class SignalProcessing {
 			}
 		}
 
-		//Convert to dB
 		for(int i=0;i<Pxx[0].length;i++){
 			Pxx[0][i]=SpectrumResolution*i;
-			Pxx[1][i]=10*Math.log10(Pxx[1][i]);
+			Pxx[1][i]=10*Math.log10(Pxx[1][i]);//FIXME: Update the conversion based on calibration values
+											   //this conversion should be done through a AcousticConversion class
 		}
 
 		return Pxx;
