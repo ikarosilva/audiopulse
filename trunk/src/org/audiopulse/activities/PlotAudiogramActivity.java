@@ -50,6 +50,7 @@ import org.audiopulse.graphics.PlotAudiogramView;
 import org.audiopulse.io.AudioPulseFileWriter;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -62,8 +63,8 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 	 * @param savedInstanceState
 	 */
 	private HashMap<String, Double> results;
-    private HashSet<String> fileNames;
-    
+	private HashSet<String> fileNames;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -127,6 +128,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 		setContentView(mView);
 	}
 
+	
 	@Override 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 
@@ -144,6 +146,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					//TODO: clear state variables and pass a NULL URI
 					//if called from Sana
+					PlotAudiogramActivity.this.finish();
 				}
 			});
 
@@ -152,6 +155,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					// TODO: maybe do nothing here or clear state variables?  
 					//this should go back to the test activity by default
+					PlotAudiogramActivity.this.finish();
 				}
 			});
 
@@ -160,22 +164,25 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					//TODO: Implement saving file to disk (zipped) as  a thread
 					//and passing URI if called from Sana procedure
-					
+
 					/*
 					Log.v(TAG,"Saving files to disk");
 					AudioPulseFileWriter writer= new AudioPulseFileWriter
 							(file,results);
 					Log.v(TAG,"saving raw data" );
 					writer.start();
-					*/
-					
+					 */
+					PlotAudiogramActivity.this.finish();
 				}
 			});
 
 			dialog.show();
 			return true;
 		}
-		}
+
+		} //of switches
+		
+		//exit activity
 		return super.onKeyDown(keyCode, event);
 	}
 
