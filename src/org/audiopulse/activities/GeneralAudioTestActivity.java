@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.audiopulse.R;
+import org.audiopulse.io.AudioPulseXMLData;
 import org.audiopulse.io.PackageDataThreadRunnable;
 import org.audiopulse.io.PlayThreadRunnable;
 import org.audiopulse.io.RecordThreadRunnable;
@@ -67,13 +68,16 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 
 	private Bundle audioResultsBundle;
 	private Bundle resultsBundle;
-
 	static final int STIMULUS_DIALOG_ID = 0;
 	Bundle audioBundle = new Bundle();
 	Handler playStatusBackHandler = null;
 	Handler recordStatusBackHandler = null;
 	Thread playThread = null;
 	Thread recordThread = null;
+	Thread packageDataThread = null;
+	AudioPulseXMLData xmlData= new AudioPulseXMLData();//Initial XML Data only when being called from Sana
+	PackageDataThreadRunnable pRun=null;
+	Handler packageStatusBackHandler = null;
 	public static double playTime=0.5;
 	private static threadState recordingstate=GeneralAudioTestActivity.threadState.INITIALIZED;
 	private static threadState playbackstate=GeneralAudioTestActivity.threadState.INITIALIZED;
@@ -90,7 +94,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 			state=i;
 		}	
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -153,7 +157,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	public static void setRecordingState(GeneralAudioTestActivity.threadState state){
 		GeneralAudioTestActivity.recordingstate=state;
 	}
-	
+
 	public static GeneralAudioTestActivity.threadState getRecordingState(){
 		return GeneralAudioTestActivity.recordingstate;
 	}
@@ -163,7 +167,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	public static void setTestState(GeneralAudioTestActivity.threadState state){
 		GeneralAudioTestActivity.testState=state;
 	}
-	
+
 	public static void setPackedDataState(GeneralAudioTestActivity.threadState state){
 		GeneralAudioTestActivity.packedDataState=state;
 	}
@@ -174,7 +178,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		TextView tv = getTextView(); 
 		tv.setText(tv.getText() + str);
 	}
-	
+
 	public void emptyText(){
 		TextView tv = getTextView();
 		tv.setText("");
@@ -200,7 +204,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		Log.v(TAG,"Bundled set");
 		startActivity(intent);
 	}
-	
+
 	//plot recorded waveform
 	public void plotWaveform() {
 		//TODO: Add check for not null audioResultsBundle (notify user that to run stimulus if they press this option before running anything).
@@ -212,18 +216,29 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 	// TODO Set some common functionality here or make abstract
 	public void appendData(Bundle b) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	//Need to overwrite this method in the child class in order to used the package the data
-	//througth the ReportStatusHandler callback methods
-	 public PackageDataThreadRunnable packageThread(){
-		//TODO: make this abstract and push implementation to subclass
-		 return null;
-	 }
-	 public void addFileToPackage(String key, String fileName){
-		//TODO: make this abstract and push implementation to subclass;
-	 }
+
+	//May need to overwrite this method in the child class ...
+	//Add data through the ReportStatusHandler callback methods
+	public synchronized PackageDataThreadRunnable packageThread()
+	{
+		if(xmlData != null){
+			Context context=this.getApplicationContext();		
+			packageStatusBackHandler = new ReportStatusHandler(this);
+			pRun = new PackageDataThreadRunnable(recordStatusBackHandler,xmlData,context);
+			ExecutorService execSvc = Executors.newFixedThreadPool( 1 );
+			packageDataThread = new Thread(pRun);	
+			execSvc.execute( packageDataThread );
+			execSvc.shutdown();
+			endTest();
+		}
+		return pRun;
+	}
+
+	public void addFileToPackage(String key, String fileName){
+		this.xmlData.setSingleElement(key,fileName);
+	}
 
 	public static void setPlaybackState(GeneralAudioTestActivity.threadState state) {
 		GeneralAudioTestActivity.playbackstate=state;
@@ -232,7 +247,7 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		return GeneralAudioTestActivity.playbackstate;
 	}
 
-	
+
 	public boolean hasNextTestFrequency(){
 		//TODO: make this abstract and push implementation to subclass
 		return false;
@@ -244,8 +259,8 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 
 	public void AnalyzeData(Bundle analysisResults) {
 		//TODO: make this abstract and push implementation to subclass
-		
+
 	}
-	
-	
+
+
 }
