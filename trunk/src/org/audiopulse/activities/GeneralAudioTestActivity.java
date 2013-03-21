@@ -236,10 +236,6 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 		return pRun;
 	}
 
-	public void addFileToPackage(String key, String fileName){
-		this.xmlData.setSingleElement(key,fileName);
-	}
-
 	public static void setPlaybackState(GeneralAudioTestActivity.threadState state) {
 		GeneralAudioTestActivity.playbackstate=state;
 	}
@@ -262,5 +258,8 @@ public abstract class GeneralAudioTestActivity extends AudioPulseActivity
 
 	}
 
+	public void addFileToPackage(String key, String fileName){
+		this.xmlData.setSingleElement(key,fileName);
+	}
 
 }
