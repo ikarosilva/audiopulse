@@ -14,7 +14,32 @@ public class AcousticConverter {
 		
 	}
 	
-	// get signal as output level in dB SPL
+	//Convert energy value(s) for output (in DU) to expected SPL
+	public double convertOutputToSPL(double x) {
+		return 20*Math.log10(x * VPerDU_output) + SPL1V;
+	}
+	public double[] convertOutputToSPL(double[] x) {
+		double[] spl = new double[x.length];
+		for (int ii=0; ii<x.length;ii++) {
+			spl[ii] = convertOutputToSPL(x[ii]);
+		}
+		return spl;
+	}
+	
+	//Convert energy value(s) from input (in DU) to SPL
+	public double convertInputToSPL(double x) {
+		return 20*Math.log10(x * VPerDU_input*1e6) + SPL1uV;
+	}
+	public double[] convertInputToSPL(double[] x) {
+		double[] spl = new double[x.length];
+		for(int ii=0;ii<x.length;ii++) {
+			spl[ii] = convertInputToSPL(x[ii]);
+		}
+		return spl;
+	}
+	
+	
+	// get total signal energy output level in dB SPL
 	public double getOutputLevel(double[] x) {
 		return getOutputLevel(x,0,x.length-1);
 	}
@@ -32,7 +57,7 @@ public class AcousticConverter {
 		return 10*Math.log10(r) + SPL1V;			//convert to dB SPL
 	}
 	
-	//set signal as output level in dB SPL
+	//set output signal level in dB SPL
 	public double[] setOutputLevel(double[] x, double spl) {
 		double a = getOutputLevel(x);
 		double gain = spl - a;
