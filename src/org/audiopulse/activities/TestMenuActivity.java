@@ -81,6 +81,8 @@ public class TestMenuActivity extends AudioPulseActivity
         				Intent DPOAEIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
         				startActivity(DPOAEIntent);
         				
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.audio_calibration))) {
+        				startActivity(new Intent(TestMenuActivity.this, AudioCalibrationActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.tests_device_calibration))) {
         				startActivity(new Intent(TestMenuActivity.this, InputCalibrationActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_teoae))) {
