@@ -217,12 +217,9 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 									} 
 				                 }
 				                 dismissDialog(0);
-				                 mHandler.post(this);
+				                 PlotAudiogramActivity.this.finish();
 				             }
 				         }).start();
-				         
-					PlotAudiogramActivity.this.finish();
-
 				}
 			});
 			dialog.show();
