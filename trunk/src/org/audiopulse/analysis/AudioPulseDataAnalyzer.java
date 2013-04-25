@@ -56,7 +56,7 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 	
 	//Some methods have the option to do analysis in either time or spectrum
 	//domain. Return NaN for methods that wont implement
-	//The spetrum is a 2D array where the first dimension is the index of frequency
+	//The spectrum is a 2D array where the first dimension is the index of frequency
 	//in Hz
 
 	//Get the response for a specific frequency
