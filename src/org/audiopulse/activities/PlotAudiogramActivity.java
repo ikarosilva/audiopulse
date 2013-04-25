@@ -45,6 +45,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.graphics.PlotAudiogramView;
@@ -75,28 +76,11 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 	private String testName;
 	AudioPulseXMLData xmlData= new AudioPulseXMLData();//Initial XML Data only when being called from Sana
 
-	/*
-	 * TODO: Decide on either implementing the packaging of the data here and passing
-	 * a string with the file location, or do the packaging at the calling activity.
-	 * It maybe best to do the packaging here, and pass the file URI.
-	public static enum ActivityOutput {
-
-		EXIT(0),
-		REPEAT(1),
-		SAVE(2);
-		private int  state; //maps driving voltage (1V peak-to-peak) to SPL at transducer
-		ActivityOutput(int state) {
-			//Convert attenuation in dB relative to the maximum track level
-			this.state=state; 
-		}
-	}
-	 */
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Bundle data = getIntent().getExtras();
-		
+
 		Log.v(TAG,"extracting bundled data");
 		//Get Data generated according to the AudioPulseDataAnalyzer interface
 		//this should be a HashMap with keys defined in the interface
@@ -163,6 +147,9 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 		case KeyEvent.KEYCODE_BACK:
 		{
 
+			//TODO: Check that the thread that is saving the file is not running (this could happen if the user hits the back
+			//button after hitting the Save& Exit button, so we need to control for that
+
 			//Prompt user on how to continue based on the display of the analyzed results
 			AlertDialog dialog = new AlertDialog.Builder(this).create();
 			dialog.setMessage("Select an option");
@@ -195,31 +182,25 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 					final Handler mHandler = new Handler();
 					Log.v(TAG,"Saving files to disk");
 					showDialog(0);
-					
-					
-					//simulate work
-					/*
-					AudioPulseFileWriter writer= new AudioPulseFileWriter
-							(file,results);
-					Log.v(TAG,"saving raw data" );
-					writer.start();
-					*/
-					
-				         // Start lengthy operation in a background thread
-				         new Thread(new Runnable() {
-				             public void run() {
-				            	 
-				                 for(int i=0;i<10;i++) {
-				                	 try {
-										Thread.sleep(500);//simulate work
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									} 
-				                 }
-				                 dismissDialog(0);
-				                 PlotAudiogramActivity.this.finish();
-				             }
-				         }).start();
+
+					// Start lengthy operation in a background thread
+					new Thread(new Runnable() {
+						public void run() {
+							
+							
+							Iterator<String> it = fileNames.iterator();
+							String tmpName;
+							while(it.hasNext()){
+								tmpName=it.next();
+								Log.v(TAG,"saving raw data files as: " +tmpName );
+								AudioPulseFileWriter writer= new AudioPulseFileWriter(tmpName,results);
+								writer.start();
+								writer.join();		
+							}
+							dismissDialog(0);
+							PlotAudiogramActivity.this.finish();
+						}
+					}).start();
 				}
 			});
 			dialog.show();
