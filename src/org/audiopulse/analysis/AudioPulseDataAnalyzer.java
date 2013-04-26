@@ -14,6 +14,9 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 	// by the AudioPulseDataAnalyer interface.
 	//Not sure if this is yet the best way, expect changes...
 	public static final String TestType="TestType"; //Encodes Test Type
+	
+	//Define Anlysis parameter Names (to be used by classes that extend 
+	//AudioPulseDataAnalyzer  interface
 	public static final String RESPONSE_2KHZ="resp2kHz";
 	public static final String RESPONSE_3KHZ="resp3kHz";
 	public static final String RESPONSE_4KHZ="resp4kHz";
@@ -23,8 +26,20 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 	public static final String STIM_2KHZ="stim2kHz";
 	public static final String STIM_3KHZ="stim3kHz";
 	public static final String STIM_4KHZ="stim4kHz";
+	
+	//Define the Names of the raw recording arrays that will be
+	//saved to file after user accepts the plotted analysis
+	public static final String RAWDATA_2KHZ="raw2kHz";
+	public static final String RAWDATA_3KHZ="raw3kHz";
+	public static final String RAWDATA_4KHZ="raw4kHz";
+	public static final String RAWDATA_CLICK="rawClick";
+	
+	//Mapping Names
 	public static final String Results_MAP="AudioPulseDataAnalyzerMap"; //Bundle Key
 	public static final String MetaData_RawFileNames="AudioPulseMetaDataRawFileNames";//Bundle Key
+	
+	//Maps filenames with respective data arrays (RAWDATA_X names)
+	public static final String FileNameRawData_MAP="AudioPulseFileNameRawDataMap";//Bundle Key
 	
 	//This map is provided for convenience to methods wishing to iterator through
 	//all the keys
@@ -40,6 +55,11 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 		add(STIM_2KHZ); add(STIM_3KHZ); add(STIM_4KHZ);  
 	}};
 	
+	public static final Set<String> dataKeys = new HashSet<String>() {{  
+		add(RAWDATA_2KHZ); add(RAWDATA_3KHZ); add(RAWDATA_4KHZ);  
+		add(RAWDATA_CLICK); 
+	}};
+	
 	//Use for decoding Test Type- Test name is encoded by the sequential order
 	//(ie, TEOAE=1 , DPOAE=2, etc...because the result map is <String,Double>
 	//So to encode the test type in from a procedure in the results hashmap use:
@@ -52,6 +72,7 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 		put(RESPONSE_2KHZ,(double) 2); put(RESPONSE_3KHZ,(double) 3); put(RESPONSE_4KHZ,(double) 4); 
 		put(NOISE_2KHZ,(double) 2); put(NOISE_3KHZ,(double) 3); put(NOISE_4KHZ,(double) 4);
 		put(STIM_2KHZ,(double) 2); put(STIM_3KHZ,(double) 3); put(STIM_4KHZ,(double) 4);
+		put(RAWDATA_2KHZ,(double) 2); put(RAWDATA_3KHZ,(double) 3); put(RAWDATA_4KHZ,(double) 4);
 	}};
 	
 	//Some methods have the option to do analysis in either time or spectrum
