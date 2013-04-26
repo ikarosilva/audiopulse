@@ -15,15 +15,15 @@ import org.audiopulse.utilities.Signals;
 import android.os.Bundle;
 import android.util.Log;
 
-@UnderConstruction(owner="Ikaro Silva")
 public class TEOAEProcedure extends TestProcedure{
 
 	private final String TAG = "TEOAEProcedure";
 	private Bundle data;
-	private final double stimulusDuration=1;//stimulus duration
+	private final double stimulusDuration=0.5;//stimulus duration in seconds
 	private short[] results;
 	private HashMap<String, Double> DPGRAM;
 	private HashSet<String> fileNames=new HashSet<String>();
+	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
 	
 	public TEOAEProcedure(TestActivity parentActivity) {
 		super(parentActivity);
@@ -51,6 +51,8 @@ public class TEOAEProcedure extends TestProcedure{
 		
 		File file= AudioPulseFileWriter.generateFileName("TEOAE","");
 		fileNames.add(file.getAbsolutePath());
+		fileNamestoDataMap.put(file.getAbsolutePath(),
+				AudioPulseDataAnalyzer.RAWDATA_CLICK);
         sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 		
         try {
@@ -61,13 +63,16 @@ public class TEOAEProcedure extends TestProcedure{
 		}
 		
 		//TODO: Send data back to Activity, the final saving of result will be done when the Activity returns from plotting the processed
-		//data and the user accepts the results. So we need to delete the binary files if the user decides to reject/redo the test
+		//data and the user accepts the results. 
 		data=new Bundle();
 		data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
+		data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_CLICK,results);
+		
 		//The file passed here is not used in the analysis (ie not opened and read)!!
 		//It is used when the analysis gets accepted by the user: the app packages
-		//the file with stored the data for transmission
+		//the file with stored the data for transmission with timestamp on the file name
 		data.putSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames,fileNames);
+		data.putSerializable(AudioPulseDataAnalyzer.FileNameRawData_MAP,fileNamestoDataMap);
 		Log.v(TAG,"Sending analyszed data to activity");
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 		Log.v(TAG,"donew with " + TAG);
