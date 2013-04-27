@@ -74,12 +74,13 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 	private HashMap<String, Double> results;
 	private HashSet<String> fileNames;
 	private String testName;
+	private Bundle data;
 	AudioPulseXMLData xmlData= new AudioPulseXMLData();//Initial XML Data only when being called from Sana
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Bundle data = getIntent().getExtras();
+		data = getIntent().getExtras();
 
 		Log.v(TAG,"extracting bundled data");
 		//Get Data generated according to the AudioPulseDataAnalyzer interface
@@ -87,6 +88,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 
 		results=(HashMap<String, Double>) data.getSerializable(AudioPulseDataAnalyzer.Results_MAP);
 		fileNames = (HashSet<String>) data.getSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames);
+	
 		//Decode test name from the results and the mapping in the interface
 		Log.v(TAG,"results= "+ results.toString());
 		Log.v(TAG,"results keys= "+ results.keySet());
@@ -177,7 +179,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					//TODO: Implement saving file to disk (zipped) as  a thread
 					//and passing URI if called from Sana procedure
-					//TODO: We need to implement a timer
+					//TODO: We need to implement a timer?
 
 					final Handler mHandler = new Handler();
 					Log.v(TAG,"Saving files to disk");
@@ -187,16 +189,32 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 					new Thread(new Runnable() {
 						public void run() {
 							
-							
 							Iterator<String> it = fileNames.iterator();
+							@SuppressWarnings("unchecked")
+							HashMap<String,String> fileNamestoDataMap = (HashMap<String,String>) data.getSerializable(
+									AudioPulseDataAnalyzer.FileNameRawData_MAP);
 							String tmpName;
+							String dataName;
+							short [] results;
 							while(it.hasNext()){
 								tmpName=it.next();
-								Log.v(TAG,"saving raw data files as: " +tmpName );
-								AudioPulseFileWriter writer= new AudioPulseFileWriter(tmpName,results);
+								dataName=fileNamestoDataMap.get(tmpName.toString());
+								Log.v(TAG,"saving raw data: " + dataName+  " files as: " +tmpName );
+								results=(short []) data.getSerializable(dataName);
+								Log.v(TAG,"creating writer");
+								AudioPulseFileWriter writer= new AudioPulseFileWriter(new File(tmpName),results);
+								Log.v(TAG,"starting writer thread");
 								writer.start();
-								writer.join();		
+								try {
+									Log.v(TAG,"waiting for thread to finish");
+									writer.join();
+									Log.v(TAG,"thread donew!");
+								} catch (InterruptedException e) {
+									Log.v(TAG,"Exception caught: " + e.getMessage() );
+									e.printStackTrace();
+								}		
 							}
+							Log.v(TAG,"done saving all files, exiting activity");
 							dismissDialog(0);
 							PlotAudiogramActivity.this.finish();
 						}
