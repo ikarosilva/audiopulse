@@ -29,8 +29,8 @@
  * -----------------
  * (C) Copyright 2012, by SanaAudioPulse
  *
- * Original Author:  Ikaro Silva
- * Contributor(s):   -;
+ * Original Author:  Andrew Schwartz
+ * Contributor(s):   Ikaro Silva
  *
  * Changes
  * -------
@@ -38,42 +38,56 @@
  */ 
 
 package org.audiopulse.activities;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
-import org.audiopulse.R;
-import org.audiopulse.io.DPOAEStimulus;
 import org.audiopulse.tests.DPOAEProcedure;
-import org.sana.android.Constants;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 
-public class DPOAEActivity extends TestActivity 
+
+//GeneralAudioTestActivity is a template for all tests; all test activities should extend GeneralAudioTestActivity.
+//FIXME: for now implementing my debugging procedures here. FIgure out our structure, and make the appropriate structural changes.
+public class DPOAEActivity extends TestActivity implements Handler.Callback
 {
-	public static final String TAG="DPOAEActivity";
-	
-	static final int STIMULUS_DIALOG_ID = 0;
-	Bundle audioBundle = new Bundle();
-	String testNameKey="testName";
-	String testNameValue;
-	Bundle DPOAERequest;
-	
-		@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.dpoae);
-		
-		testProcedure = new DPOAEProcedure(this);
-	}
-    
-	public void startTest(View callingView){
-		testProcedure.start();
+	public final String TAG="DPOAEActivity";
+
+	//Begin test -- this function is called by the button in the default layout
+	public void startTest(View callingView)
+	{
+		appendText("Starting DPOAE Procedure");
+		if (testProcedure==null) {
+			//			appendText("No TestProecdure set!");
+			//FIXME: don't do this. Just doing it now for convenience.
+			//maybe define a DebuggingTestActivity?
+			appendText("Starting DPOAE");
+			testProcedure = new DPOAEProcedure(this);
+			testProcedure.start();
+		} else {
+			testProcedure.start();
+		}		
+	}	
+
+	//Overwriting from TestProcedure to deal with this specific test
+	public boolean handleMessage(Message msg) {
+		Log.v(TAG,"handling message " + msg.toString());
+		Bundle data = msg.getData();
+		switch (msg.what) {
+		case Messages.CLEAR_LOG:
+			emptyText();
+			break;
+		case Messages.LOG:
+			String pm = data.getString("log");
+			appendText(pm);
+			break;
+		case Messages.ANALYSIS_COMPLETE:
+			Bundle results=msg.getData();
+			//Start Plotting activity
+			Log.v(TAG,"calling plot activity ");
+			plotAudiogram(results);
+		}
+		return true;
 	}
 
 }
