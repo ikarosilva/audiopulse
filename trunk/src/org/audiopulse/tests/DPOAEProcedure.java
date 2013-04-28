@@ -1,199 +1,103 @@
 package org.audiopulse.tests;
 
-import java.util.LinkedList;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
 import org.audiopulse.activities.TestActivity;
-import org.audiopulse.hardware.AcousticConverter;
+import org.audiopulse.analysis.AudioPulseDataAnalyzer;
+import org.audiopulse.analysis.TEOAEKempAnalyzer;
+import org.audiopulse.io.AudioPulseFileWriter;
+import org.audiopulse.utilities.APAnnotations.UnderConstruction;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.Signals;
 
-//TODO: put full DPOAE functionality here, fix things as needed
-public class DPOAEProcedure extends TestProcedure {
-	private LinkedList<DPOAEParameters> testList = new LinkedList<DPOAEProcedure.DPOAEParameters>();
-	
-	public DPOAEProcedure(TestActivity parent) {
-		super(parent);
-		TAG = "DPOAEProcedure";
-		testList.add(SOAEParameters.spont);
-		testList.add(BiologicParameters.F2k);
-		testList.add(BiologicParameters.F3k);
-		testList.add(BiologicParameters.F4k);
+import android.os.Bundle;
+import android.util.Log;
+
+public class DPOAEProcedure extends TestProcedure{
+
+	private final String TAG = "DPOAEProcedure";
+	private Bundle data;
+	private final double stimulusDuration=0.5;//stimulus duration in seconds
+	private short[] results;
+	private HashMap<String, Double> DPGRAM;
+	private HashSet<String> fileNames=new HashSet<String>();
+	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
+
+	public DPOAEProcedure(TestActivity parentActivity) {
+		super(parentActivity);
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void run() {
+		
+		//Loop through all the test frequencies, generating stimulus and collecting the results
+		ArrayList<Double> testFrequencies=new ArrayList<Double>();
+		ArrayList<Short []> RESULTS = new ArrayList<Short []>();
+		testFrequencies.add((double) 2000);
+		testFrequencies.add((double) 3000);
+		testFrequencies.add((double) 4000);
 		clearLog();
 		
-		//test:
-		calibrateChrip(4000);
+		//create {f1, f2} tones in {left, right} channel of stereo stimulus
+		Log.v(TAG,"Starting DPOAE Recording- generating stimuli at Fs = " + super.playbackSampleFrequency);
 		
-		
-		int numTests = testList.size();
-
-		double[][] recordedAudio = new double[numTests][];
-		for (int test=0; test<numTests; test++) {
-			DPOAEParameters params = testList.poll();
-			logToUI("Running " + params.toString());
-			
-			// Function of DPOAE aprams, gives back the two-tones stimulus
-			double[][] probe = params.createStimulus(playbackSampleFrequency, hardware);
-			
-			// Play the stimulus that 
-			testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(probe));
-			
-			// Record the response to the stimulus
-			short[] data = testIO.acquire();
-			
-			// Save this result
-			recordedAudio[test] = AudioSignal.convertMonoToDouble(data);
+		for (Double thisFrequency : testFrequencies){
 			sendMessage(TestActivity.Messages.PROGRESS);
+			logToUI("Running DPOAE frequency: " + thisFrequency + " kHz");
 			
-			//Note: If it doesn't eat up too many resources, we can spawn threads here
-			//to do analysis and saving. This way, the UI can update with results
-			//as the test runs
-			//Set these threads' priority to normal
-		}
-		sendMessage(TestActivity.Messages.IO_COMPLETE);
+			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
+					stimulusDuration);
+			Log.v(TAG,"setting probe old level probe[0]=" + probe[0]);
+			probe[0] = hardware.setOutputLevel(probe[0], Signals.dpoaeGorgaAmplitude());
+			probe[1] = hardware.setOutputLevel(probe[1], Signals.dpoaeGorgaAmplitude());
+			Log.v(TAG," probe new level probe[0]=" + probe[0]);
+			testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(probe));
+			double stTime= System.currentTimeMillis();
+			results = testIO.acquire();
+			double ndTime= System.currentTimeMillis();
+			Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
 
-		// Analyze the results, plot them
-		analyzeResults(recordedAudio);
-		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE);
+			File file= AudioPulseFileWriter.generateFileName("DPOAE","");
+			fileNames.add(file.getAbsolutePath());
+			fileNamestoDataMap.put(file.getAbsolutePath(),
+					AudioPulseDataAnalyzer.RAWDATA_CLICK);
+			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 
-		// IF this test result is verified, then save test results in the file structure
-		// TODO: Change this to only save the results once the DPGram is confirmed
-		//saveResults(recordedAudio); Commented out because it is giving an error
-		sendMessage(TestActivity.Messages.PROCEDURE_COMPLETE);			
-	}
-
-	
-	private void analyzeResults(double [][] recordedAudio) {
-		//TODO: define a DPOAEAnalysis call that operates on input arguments
-		//rather than a file location, call it from here
-		
-		// For each test
-			// Get spectrum
-		
-			// Convert to dbSPL
-		
-			// Estimate Noise floor
-		
-			// Plot and get a confirmation of whether THIS test should be saved?
-		
-			// Delete the test information if not
-			
-	}
-	
-	private void saveResults() {
-		/**** Pseudocode outline for this function:
-		 *	xmlData = generateXMLData()
-		 *	zipFile = FileZipper.process(xmlData)
-		 *	savefile(zipFile,getExternalStorageDirectory())
-		 *	Sana.sendFile(zipFile)
-		 * 
-		 */
-		
-	}
-	
-	
-	//DPOAE parameters from the Bio-Logic OAE Report (2012)
-	public static final class BiologicParameters {
-		private static final String protocol = "Biologic";
-		private static final double duration = 0.5;
-		
-		public static final DPOAEParameters F2k =
-			new DPOAEParameters(protocol,2000,duration,1641,2016,64.4,53.4);
-		public static final DPOAEParameters F3k =
-			new DPOAEParameters(protocol,3000,duration,2297,2813,64.6,55.1);
-		public static final DPOAEParameters F4k =
-			new DPOAEParameters(protocol,4000,duration,3281,3984,64.8,55.6);
-		public static final DPOAEParameters F6k =
-			new DPOAEParameters(protocol,6000,duration,4594,5625,64.8,56.6);
-		public static final DPOAEParameters F8k =
-			new DPOAEParameters(protocol,8000,duration,6516,7969,64.8,54.9);
-	}
-	
-	//Hack the SOAE parameters in here
-	public static final class SOAEParameters {
-		private static final String protocol = "Spontaneous";
-		private static final double duration = 4.3;
-		public static final DPOAEParameters spont = new DPOAEParameters(protocol,0,duration,0,0,0,0);
-	}
-	
-	//"Handbook of Otocoustic Emissions" J. Hall, Singular Publishing Group Copyright 2000
-	public static final class HOAEParmaeters {
-		private static final String protocol = "HOAE";
-		private static final double duration = 0.5;
-		private static final DPOAEParameters createHOAEParams(int freq) {
-			return new DPOAEParameters(protocol,freq,duration,freq/1.2,freq,65,50);
-		}
-		
-		public static final DPOAEParameters F2k = createHOAEParams(2000);
-		public static final DPOAEParameters F3k = createHOAEParams(3000);
-		public static final DPOAEParameters F4k = createHOAEParams(4000);
-		public static final DPOAEParameters F6k = createHOAEParams(6000);
-		public static final DPOAEParameters F8k = createHOAEParams(8000);
-	}
-	
-	//one object to contain all necessary info to analyze, calibrate, graph
-	//e.g. DPOAEParameters p = DPOAEParameters.BiologicParameters.F2k
-	public static class DPOAEParameters {
-		public final double testFrequency;		//Frequency label (e.g. 2000) (Hz)
-		public final double durationInSeconds;	//DP tones duration (s)
-		public final double f1, f2;				//test tone frequencies (Hz)
-		public final double level1, level2;		//test tone levels (dB SPL)
-		public final double dpFreq;				//expected DP frequency (Hz)
-		public final String protocol;
-		
-		//private to force client to use factory methods
-		//e.g. DPOAEParameters params = DPOAEParameters.getBiologicParameters(DPOAEParameters.Tests.F2k)
-		public DPOAEParameters(String protocol, int testFrequency, double duration,
-				double f1, double f2, double level1, double level2) {
-			this.protocol = protocol;
-			this.durationInSeconds = duration;
-			this.testFrequency = testFrequency;
-			this.f1 = f1;
-			this.f2 = f2;
-			this.level1 = level1;
-			this.level2 = level2;
-			this.dpFreq = 2*f1-f2;;
-		}
-		
-		//create stimulus from parameters
-		public double[][] createStimulus(int sampleFrequency, AcousticConverter hardware) {
-			
-			//hack for now to allow SOAE recording here
-			if (testFrequency==0) {
-				int N = (int) (durationInSeconds * sampleFrequency);
-				double[][] stimulus = new double[2][N];
-				return stimulus;
+			try {
+				DPGRAM = analyzeResults(results,super.recordingSampleFrequency);
+			} catch (Exception e) {
+				Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
+				e.printStackTrace();
 			}
-			
-			//create {f1, f2} tones in {left, right} channel of stereo stimulus
-			double[][] stimulus = new double[2][];
-			stimulus[0] = createF1Tone(sampleFrequency,hardware);
-			stimulus[1] = createF2Tone(sampleFrequency,hardware);
-			return stimulus;
-		}
-		public double[] createF1Tone(int sampleFrequency, AcousticConverter hardware) {
-			double[] tone;
-			tone = Signals.tone(sampleFrequency, f1, durationInSeconds);
-			tone = hardware.setOutputLevel(tone, level1);
-			tone = Signals.fade(sampleFrequency, 0.01, tone);
-			//TODO: is fade uncalled for?
-			return tone;
-		}
-		public double[] createF2Tone(int sampleFrequency, AcousticConverter hardware) {
-			double[] tone;
-			tone = Signals.tone(sampleFrequency, f2, durationInSeconds);
-			tone = hardware.setOutputLevel(tone, level2);
-			tone = Signals.fade(sampleFrequency, 0.01, tone);
-			return tone;
-		}		
-		
-		@Override
-		public String toString() {
-			return protocol + ", " + testFrequency + " Hz";
+
+			//TODO: Send data back to Activity, the final saving of result will be done when the Activity returns from plotting the processed
+			//data and the user accepts the results. 
+			data=new Bundle();
+			data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
+			data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_CLICK,results);
+
+			//The file passed here is not used in the analysis (ie not opened and read)!!
+			//It is used when the analysis gets accepted by the user: the app packages
+			//the file with stored the data for transmission with timestamp on the file name
+			data.putSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames,fileNames);
+			data.putSerializable(AudioPulseDataAnalyzer.FileNameRawData_MAP,fileNamestoDataMap);
 		}
 		
+		Log.v(TAG,"Sending analyzed data to activity");
+		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
+		Log.v(TAG,"donew with " + TAG);
+	}
+
+	private HashMap<String, Double> analyzeResults(short[] data, double Fs) throws Exception {
+		int epochTime=512; //Number of sample in which to break the FFT analysis
+		Log.v(TAG,"data.length= " + data.length);	
+		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochTime);
+		return teoaeAnalysis.call();
+
 	}
 
 }
