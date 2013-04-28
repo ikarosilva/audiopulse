@@ -16,14 +16,23 @@ public class Signals {
 		return x;
 	}
 	
-	//TODO: phases
 	public static double[] toneComplex(int sampleFrequency, double[] frequencies, double durationInSeconds) {
+		//Use amplitudes == 1 if method is called without amplitude array
+		double[] amplitudes= new double[frequencies.length];
+		for (int ff=0;ff<frequencies.length;ff++) {
+			amplitudes[ff]=(double)1;
+		}
+		return toneComplex(sampleFrequency,frequencies, amplitudes, durationInSeconds);
+	}
+	
+	//TODO: phases
+	public static double[] toneComplex(int sampleFrequency, double[] frequencies, double[] amplitudes, double durationInSeconds) {
 		int N = (int) (durationInSeconds * sampleFrequency);
 		double[] x = new double[N];
 		for (int n=0;n<N;n++) {
 			x[n] = 0;
 			for (int ff=0;ff<frequencies.length;ff++) {
-				x[n] += Math.sin(2*Math.PI*frequencies[ff]*n/sampleFrequency);
+				x[n] += amplitudes[ff]*Math.sin(2*Math.PI*frequencies[ff]*n/sampleFrequency);
 			}
 		}
 		return x;
@@ -80,6 +89,27 @@ public class Signals {
 		return sweepDurationInSeconds;
 		
 	}
+	
+	public synchronized static double dpoaeGorgaAmplitude(){
+		return 65;
+	}
+
+	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F1) {
+		//Generate a specific set of DPOAE stimuli based on the same parameters from 
+		//"Handbook of Otocoustic Emissions" J. Hall, Singular Publishing Group Copyright 2000
+		// Screening parameters in page 136 (based on Gorga 
+		//Otoacoustic emissions from normal‐hearing and hearing‐impaired subjects: Distortion product responses
+		//J. Acoust. Soc. Am. Volume 93, Issue 4, pp. 2050-2060 (1993)
+		
+		double sweeps=200;
+		double epocTime=0.02048; //epoch time in seconds 
+		double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
+		double[][] x= new double[2][];
+		x[0]=Signals.tone(sampleFrequency,F1,playTime);	
+		x[1]=Signals.tone(sampleFrequency,1.2 *F1,playTime);
+		return x;
+	}
+	
 	public synchronized static double[] clickKempMethod(int sampleFrequency, double totalDurationInSeconds) {
 		//Constructs click stimuli for non-linear reponse extraction using 
 		//3 click at one level and a fourth click at 3x the level
