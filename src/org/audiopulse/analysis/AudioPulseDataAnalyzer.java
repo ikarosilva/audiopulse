@@ -27,6 +27,11 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 	public static final String STIM_3KHZ="stim3kHz";
 	public static final String STIM_4KHZ="stim4kHz";
 	
+	//Used by DPOAEs 
+	public static final String STIM2_2KHZ="stim2kHz";
+	public static final String STIM2_3KHZ="stim3kHz";
+	public static final String STIM2_4KHZ="stim4kHz";
+	
 	//Define the Names of the raw recording arrays that will be
 	//saved to file after user accepts the plotted analysis
 	public static final String RAWDATA_2KHZ="raw2kHz";
@@ -53,6 +58,11 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 
 	public static final Set<String> stimKeys = new HashSet<String>() {{  
 		add(STIM_2KHZ); add(STIM_3KHZ); add(STIM_4KHZ);  
+	}};
+	
+	//Used by DPOAEs
+	public static final Set<String> stim2Keys = new HashSet<String>() {{  
+		add(STIM2_2KHZ); add(STIM2_3KHZ); add(STIM2_4KHZ);  
 	}};
 	
 	public static final Set<String> dataKeys = new HashSet<String>() {{  

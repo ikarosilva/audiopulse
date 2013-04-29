@@ -58,9 +58,6 @@ public class DPOAEActivity extends TestActivity implements Handler.Callback
 	{
 		appendText("Starting DPOAE Procedure");
 		if (testProcedure==null) {
-			//			appendText("No TestProecdure set!");
-			//FIXME: don't do this. Just doing it now for convenience.
-			//maybe define a DebuggingTestActivity?
 			appendText("Starting DPOAE");
 			testProcedure = new DPOAEProcedure(this);
 			testProcedure.start();

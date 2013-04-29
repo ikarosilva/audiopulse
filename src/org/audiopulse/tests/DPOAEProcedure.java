@@ -7,9 +7,8 @@ import java.util.HashSet;
 
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
-import org.audiopulse.analysis.TEOAEKempAnalyzer;
+import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
 import org.audiopulse.io.AudioPulseFileWriter;
-import org.audiopulse.utilities.APAnnotations.UnderConstruction;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.Signals;
 
@@ -20,7 +19,6 @@ public class DPOAEProcedure extends TestProcedure{
 
 	private final String TAG = "DPOAEProcedure";
 	private Bundle data;
-	private final double stimulusDuration=0.5;//stimulus duration in seconds
 	private short[] results;
 	private HashMap<String, Double> DPGRAM;
 	private HashSet<String> fileNames=new HashSet<String>();
@@ -49,8 +47,9 @@ public class DPOAEProcedure extends TestProcedure{
 			sendMessage(TestActivity.Messages.PROGRESS);
 			logToUI("Running DPOAE frequency: " + thisFrequency + " kHz");
 			
+			//Stimulus is presented at F2
 			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
-					stimulusDuration);
+					thisFrequency);
 			Log.v(TAG,"setting probe old level probe[0]=" + probe[0]);
 			probe[0] = hardware.setOutputLevel(probe[0], Signals.dpoaeGorgaAmplitude());
 			probe[1] = hardware.setOutputLevel(probe[1], Signals.dpoaeGorgaAmplitude());
@@ -63,12 +62,19 @@ public class DPOAEProcedure extends TestProcedure{
 
 			File file= AudioPulseFileWriter.generateFileName("DPOAE","");
 			fileNames.add(file.getAbsolutePath());
-			fileNamestoDataMap.put(file.getAbsolutePath(),
-					AudioPulseDataAnalyzer.RAWDATA_CLICK);
+			if(thisFrequency == 2000)
+				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_2KHZ);
+			else if(thisFrequency == 3000)
+				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_3KHZ);
+			else if(thisFrequency == 4000)
+				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_4KHZ);	
+			
 			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 
 			try {
-				DPGRAM = analyzeResults(results,super.recordingSampleFrequency);
+				DPGRAM = analyzeResults(results,
+						super.recordingSampleFrequency,
+						thisFrequency,DPGRAM);
 			} catch (Exception e) {
 				Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
 				e.printStackTrace();
@@ -92,10 +98,12 @@ public class DPOAEProcedure extends TestProcedure{
 		Log.v(TAG,"donew with " + TAG);
 	}
 
-	private HashMap<String, Double> analyzeResults(short[] data, double Fs) throws Exception {
-		int epochTime=512; //Number of sample in which to break the FFT analysis
+	private HashMap<String, Double> analyzeResults(short[] data, 
+			double Fs, double F1, 
+			HashMap<String, Double> DPGRAM) throws Exception {
 		Log.v(TAG,"data.length= " + data.length);	
-		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochTime);
+		AudioPulseDataAnalyzer teoaeAnalysis=
+				new DPOAEGorgaAnalyzer(data,Fs,F1,DPGRAM);
 		return teoaeAnalysis.call();
 
 	}
