@@ -91,10 +91,13 @@ public class Signals {
 	}
 	
 	public synchronized static double dpoaeGorgaAmplitude(){
-		return 65;
+		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
+		//but this seems to result in clipping for most phones.
+		//we need to find an optimal maximum level that does not clip the sound
+		return 35;
 	}
 
-	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F1) {
+	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F2) {
 		//Generate a specific set of DPOAE stimuli based on the same parameters from 
 		//"Handbook of Otocoustic Emissions" J. Hall, Singular Publishing Group Copyright 2000
 		// Screening parameters in page 136 (based on Gorga 
@@ -105,8 +108,8 @@ public class Signals {
 		double epocTime=0.02048; //epoch time in seconds 
 		double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
 		double[][] x= new double[2][];
-		x[0]=Signals.tone(sampleFrequency,F1,playTime);	
-		x[1]=Signals.tone(sampleFrequency,1.2 *F1,playTime);
+		x[0]=Signals.tone(sampleFrequency,F2,playTime);	
+		x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
 		return x;
 	}
 	
