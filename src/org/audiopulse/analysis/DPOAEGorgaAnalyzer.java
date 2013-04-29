@@ -43,7 +43,6 @@
 package org.audiopulse.analysis;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 import org.audiopulse.utilities.SignalProcessing;
 
@@ -85,7 +84,7 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 
 		//All the analysis will be done in the fft domain 
 		//using the AudioPulseDataAnalyzer interface to obtain the results
-		Log.v(TAG,"epochTime= " + epochTime);
+		Log.v(TAG,"Analyzing frequency: " + F2);
 		double[][] XFFT= SignalProcessing.getSpectrum(data,Fs,epochTime);
 		resultMap.put(TestType,(double) 2);//According to the interface, 2 =DPOAE
 		String strSTIM = null, strSTIM2 = null,strResponse = null,strNoise = null;
@@ -99,8 +98,8 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 		}else{
 			Log.v(TAG,"Unexpected F2=" + F2);
 		}
-		resultMap.put(strSTIM, getResponseLevel(XFFT,F1));
-		resultMap.put(strSTIM2, getResponseLevel(XFFT,F2));
+		resultMap.put(strSTIM, getStimulusLevel(XFFT,F1));
+		resultMap.put(strSTIM2, getStimulusLevel(XFFT,F2));
 		resultMap.put(strResponse, getResponseLevel(XFFT,F12));
 		resultMap.put(strNoise, getNoiseLevel(XFFT,F12));
 		return resultMap;
