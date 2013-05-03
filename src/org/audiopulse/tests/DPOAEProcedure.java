@@ -20,10 +20,10 @@ public class DPOAEProcedure extends TestProcedure{
 	private final String TAG = "DPOAEProcedure";
 	private Bundle data;
 	private short[] results;
-	private HashMap<String, Double> DPGRAM;
 	private HashSet<String> fileNames=new HashSet<String>();
 	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
-
+	private HashMap<String, Double> DPGRAM= new HashMap<String, Double>();
+	
 	public DPOAEProcedure(TestActivity parentActivity) {
 		super(parentActivity);
 		// TODO Auto-generated constructor stub
@@ -39,6 +39,8 @@ public class DPOAEProcedure extends TestProcedure{
 		testFrequencies.add((double) 3000);
 		testFrequencies.add((double) 4000);
 		clearLog();
+		
+		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
 		
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
 		Log.v(TAG,"Starting DPOAE Recording- generating stimuli at Fs = " + super.playbackSampleFrequency);
@@ -62,28 +64,33 @@ public class DPOAEProcedure extends TestProcedure{
 
 			File file= AudioPulseFileWriter.generateFileName("DPOAE","");
 			fileNames.add(file.getAbsolutePath());
-			if(thisFrequency == 2000)
-				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_2KHZ);
-			else if(thisFrequency == 3000)
-				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_3KHZ);
-			else if(thisFrequency == 4000)
-				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_4KHZ);	
-			
+			if(thisFrequency == 2000){
+				Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_2KHZ);
+				fileNamestoDataMap.put(AudioPulseDataAnalyzer.RAWDATA_2KHZ,file.getAbsolutePath());
+			} else if(thisFrequency == 3000){
+				Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_3KHZ);
+				fileNamestoDataMap.put(AudioPulseDataAnalyzer.RAWDATA_3KHZ,file.getAbsolutePath());
+			}else if(thisFrequency == 4000){
+				Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_4KHZ);
+				fileNamestoDataMap.put(AudioPulseDataAnalyzer.RAWDATA_4KHZ,file.getAbsolutePath());	
+			}
 			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 
 			try {
-				DPGRAM = analyzeResults(results,
+				localDPGRAM = analyzeResults(results,
 						super.recordingSampleFrequency,
-						thisFrequency,DPGRAM);
+						thisFrequency,localDPGRAM);
 			} catch (Exception e) {
 				Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
 				e.printStackTrace();
 			}
-
+			
 			//TODO: Send data back to Activity, the final saving of result will be done when the Activity returns from plotting the processed
 			//data and the user accepts the results. 
 			data=new Bundle();
+			Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.Results_MAP);
 			data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
+			Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_CLICK);
 			data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_CLICK,results);
 
 			//The file passed here is not used in the analysis (ie not opened and read)!!
@@ -91,9 +98,16 @@ public class DPOAEProcedure extends TestProcedure{
 			//the file with stored the data for transmission with timestamp on the file name
 			data.putSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames,fileNames);
 			data.putSerializable(AudioPulseDataAnalyzer.FileNameRawData_MAP,fileNamestoDataMap);
+			for (String tmpkey: localDPGRAM.keySet()){
+				Log.v(TAG,"local " + tmpkey + " = " + localDPGRAM.get(tmpkey));
+				DPGRAM.put(tmpkey,localDPGRAM.get(tmpkey));
+			}
 		}
 		
-		Log.v(TAG,"Sending analyzed data to activity");
+		Log.v(TAG,"Sending analyzed data to activity, keys in bundle are:");
+		for (String tmpkey: DPGRAM.keySet()){
+			Log.v(TAG,"global= " + tmpkey + " = " + DPGRAM.get(tmpkey));
+		}
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 		Log.v(TAG,"donew with " + TAG);
 	}
@@ -102,9 +116,9 @@ public class DPOAEProcedure extends TestProcedure{
 			double Fs, double F1, 
 			HashMap<String, Double> DPGRAM) throws Exception {
 		Log.v(TAG,"data.length= " + data.length);	
-		AudioPulseDataAnalyzer teoaeAnalysis=
+		AudioPulseDataAnalyzer dpoaeAnalysis=
 				new DPOAEGorgaAnalyzer(data,Fs,F1,DPGRAM);
-		return teoaeAnalysis.call();
+		return dpoaeAnalysis.call();
 
 	}
 
