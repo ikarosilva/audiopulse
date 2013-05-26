@@ -8,7 +8,6 @@ import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.TEOAEKempAnalyzer;
 import org.audiopulse.io.AudioPulseFileWriter;
-import org.audiopulse.utilities.APAnnotations.UnderConstruction;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.Signals;
 
@@ -19,6 +18,7 @@ public class TEOAEProcedure extends TestProcedure{
 
 	private final String TAG = "TEOAEProcedure";
 	private Bundle data;
+	//TODO: Select appropiate stimulus duration
 	private final double stimulusDuration=0.5;//stimulus duration in seconds
 	private short[] results;
 	private HashMap<String, Double> DPGRAM;
@@ -43,6 +43,7 @@ public class TEOAEProcedure extends TestProcedure{
 		Log.v(TAG,"setting probe old level probe[0]=" + probe[0]);
 		probe = hardware.setOutputLevel(probe, 55);
 		Log.v(TAG," probe new level probe[0]=" + probe[0]);
+		//TODO: Fix issues with the signal being clipped/buffer overuns ?
 		testIO.setPlaybackAndRecording(AudioSignal.convertMonoToShort(probe));
 		double stTime= System.currentTimeMillis();
 		results = testIO.acquire();

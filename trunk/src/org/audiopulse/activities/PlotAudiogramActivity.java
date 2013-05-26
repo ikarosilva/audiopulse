@@ -50,7 +50,6 @@ import java.util.Iterator;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.graphics.PlotAudiogramView;
 import org.audiopulse.io.AudioPulseFileWriter;
-import org.audiopulse.io.AudioPulseXMLData;
 import org.audiopulse.utilities.AudioSignal;
 
 import android.app.AlertDialog;
@@ -75,8 +74,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 	private HashSet<String> fileNames;
 	private String testName;
 	private Bundle data;
-	AudioPulseXMLData xmlData= new AudioPulseXMLData();//Initial XML Data only when being called from Sana
-
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

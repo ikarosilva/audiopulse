@@ -4,9 +4,6 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
-import org.audiopulse.io.RecordThreadRunnable;
-
-import android.os.Bundle;
 import android.util.Log;
 
 public class SignalProcessing {

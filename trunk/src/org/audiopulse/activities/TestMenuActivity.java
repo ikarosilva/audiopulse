@@ -74,10 +74,7 @@ public class TestMenuActivity extends AudioPulseActivity
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
         				//TODO: change this to launch a plot activity
         				//plotWaveform();
-        			} else if (itemText.equalsIgnoreCase(getResources().getString(R.string.old_menu))) {
-        				startActivity(new Intent(TestMenuActivity.this, ThreadedPlayRecActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE))) {
-        				
         				Intent DPOAEIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
         				startActivity(DPOAEIntent);
         				
