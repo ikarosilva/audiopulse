@@ -23,27 +23,9 @@
         <activity android:name=".activities.DPOAEActivity"
             android:configChanges="orientation|keyboardHidden">
         </activity>
-        <activity android:name=".activities.ThreadedPlayRecActivity"
-                  android:label="Specific Tests">
+        <activity android:name=".activities.CalibrationMenuActivity" >
             <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="org.audiopulse.DPGRAM_RIGHT"/>
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="org.audiopulse.DPGRAM_LEFT"/>
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="org.audiopulse.DPOAE_4KHZ"/>
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="org.audiopulse.DPOAE_3KHZ"/>
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="org.audiopulse.DPOAE_2KHZ"/>
+                <action android:name="org.audiopulse.CAPTURE_MENU"/>
             </intent-filter>
         </activity>
         <activity android:name=".activities.TestMenuActivity"
