@@ -71,18 +71,32 @@ public class TestMenuActivity extends AudioPulseActivity
         			
         			//TODO: Tests should return a Bundle containing the data they are suppose to provide,
         			//and URLs to any file location they create
-        			if (itemText.equalsIgnoreCase(getResources().getString(R.string.menu_plot))) {
-        				//TODO: change this to launch a plot activity
-        				//plotWaveform();
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE))) {
+        			if (itemText.equalsIgnoreCase(getResources().getString(R.string.calibration_title))) {
+        				//Start menu with calibration related activities
+        				startActivity(new Intent(TestMenuActivity.this, CalibrationMenuActivity.class));
+
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
+        				//TODO: Pass Ear information to file
         				Intent DPOAEIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
         				startActivity(DPOAEIntent);
         				
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.audio_calibration))) {
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_LEFT))) {
+        				//TODO: Pass Ear information to file
+        				Intent DPOAEIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
+        				startActivity(DPOAEIntent);	
+        			}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.audio_calibration))) {
         				startActivity(new Intent(TestMenuActivity.this, AudioCalibrationActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.tests_device_calibration))) {
         				startActivity(new Intent(TestMenuActivity.this, InputCalibrationActivity.class));
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_teoae))) {
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.TEOAE_RIGHT))) {
+        				//TODO: Pass Ear information to file
+        				Bundle tests = new Bundle();
+        				tests.putString("testName",itemText);
+        				Intent testIntent = new Intent(TestMenuActivity.this, TEOAEActivity.class);
+        				testIntent.putExtras(tests);
+        				startActivity(testIntent);
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.TEOAE_LEFT))) {
+        				//TODO: Pass Ear information to file
         				Bundle tests = new Bundle();
         				tests.putString("testName",itemText);
         				Intent testIntent = new Intent(TestMenuActivity.this, TEOAEActivity.class);
