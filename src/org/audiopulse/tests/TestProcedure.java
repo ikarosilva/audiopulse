@@ -65,6 +65,7 @@ public abstract class TestProcedure implements Runnable{
 	protected AcousticConverter hardware;
 	protected final int playbackSampleFrequency;
 	protected final int recordingSampleFrequency;
+	protected final String testEar;
 	//TODO: get sample freqs from app data
 	
 	public TestProcedure (TestActivity parent) {
@@ -74,6 +75,7 @@ public abstract class TestProcedure implements Runnable{
 		playbackSampleFrequency=parent.getPlaybackSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
 		testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
 		hardware = new AcousticConverter();
+		testEar= parent.getTestEar();
 		context = parent.getApplicationContext();
 		Log.v(TAG,"Fs= "+ playbackSampleFrequency);
 	}

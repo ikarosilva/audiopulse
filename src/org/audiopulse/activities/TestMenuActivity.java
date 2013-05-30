@@ -53,6 +53,10 @@ import android.widget.TextView;
 public class TestMenuActivity extends AudioPulseActivity 
 {
 	public static final String TAG="TestMenuActivity";
+	public static final String BUNDLE_TESTNAME_KEY="testName";
+	public static final String BUNDLE_TESTEAR_KEY="testEar";
+	public static final String BUNDLE_TESTEAR_RIGHT="RE";
+	public static final String BUNDLE_TESTEAR_LEFT="LE";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -68,37 +72,39 @@ public class TestMenuActivity extends AudioPulseActivity
         			TextView item = (TextView) itemClicked;
         			String itemText = item.getText().toString();
         			        			//item.getId(), R.id.??
-        			
+    				//Use this Bundle to pass information to the secondary activiies
+    				Bundle tests = new Bundle();
+    				
         			//TODO: Tests should return a Bundle containing the data they are suppose to provide,
         			//and URLs to any file location they create
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.calibration_title))) {
         				//Start menu with calibration related activities
         				startActivity(new Intent(TestMenuActivity.this, CalibrationMenuActivity.class));
-
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
-        				//TODO: Pass Ear information to file
-        				Intent DPOAEIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
-        				startActivity(DPOAEIntent);
-        				
+        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
+        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
+        				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
+        				testIntent.putExtras(tests);
+        				startActivity(testIntent);
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_LEFT))) {
-        				//TODO: Pass Ear information to file
-        				Intent DPOAEIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
-        				startActivity(DPOAEIntent);	
+        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
+        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_LEFT);	
+        				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
+        				testIntent.putExtras(tests);
+        				startActivity(testIntent);
         			}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.audio_calibration))) {
         				startActivity(new Intent(TestMenuActivity.this, AudioCalibrationActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.tests_device_calibration))) {
         				startActivity(new Intent(TestMenuActivity.this, InputCalibrationActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.TEOAE_RIGHT))) {
-        				//TODO: Pass Ear information to file
-        				Bundle tests = new Bundle();
-        				tests.putString("testName",itemText);
         				Intent testIntent = new Intent(TestMenuActivity.this, TEOAEActivity.class);
+        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
+        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
         				testIntent.putExtras(tests);
         				startActivity(testIntent);
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.TEOAE_LEFT))) {
-        				//TODO: Pass Ear information to file
-        				Bundle tests = new Bundle();
-        				tests.putString("testName",itemText);
+        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
+        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_LEFT);
         				Intent testIntent = new Intent(TestMenuActivity.this, TEOAEActivity.class);
         				testIntent.putExtras(tests);
         				startActivity(testIntent);

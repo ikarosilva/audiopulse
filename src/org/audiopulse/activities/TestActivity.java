@@ -60,6 +60,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	protected int recordingSamplingFrequency;
 	protected int playbackSamplingFrequency;
 	private boolean calledBySana;
+	protected String testEar;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,10 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		playbackSamplingFrequency=this.getResources().getInteger(R.integer.samplingFrequency);
 		testLog = (TextView)this.findViewById(R.id.testLog);
 
+		//TODO: Get ear being tested from Bundle
+		Bundle request = getIntent().getExtras();
+		testEar = (String) request.get(TestMenuActivity.BUNDLE_TESTEAR_KEY);
+		
 		//TODO: can we put a TestProcedure into a bundle? E.g. by implementing Parcelable, but is that worth it?
 //		Bundle request = getIntent().getExtras();
 //		testProcedure = (TestProcedure) request.get("test");
@@ -159,5 +164,9 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	}
 	public int getPlaybackSampleFrequency() {
 		return playbackSamplingFrequency;
+	}
+
+	public String getTestEar() {
+		return testEar;
 	}
 }

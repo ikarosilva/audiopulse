@@ -50,7 +50,7 @@ public class TEOAEProcedure extends TestProcedure{
 		double ndTime= System.currentTimeMillis();
 		Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
 		
-		File file= AudioPulseFileWriter.generateFileName("TEOAE","");
+		File file= AudioPulseFileWriter.generateFileName("TEOAE","",super.testEar);
 		fileNames.add(file.getAbsolutePath());
 		fileNamestoDataMap.put(file.getAbsolutePath(),
 				AudioPulseDataAnalyzer.RAWDATA_CLICK);

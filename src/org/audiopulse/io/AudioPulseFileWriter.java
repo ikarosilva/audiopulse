@@ -62,9 +62,17 @@ public class AudioPulseFileWriter extends Thread {
 		return fileExtension;
 	}
 	
+	@Deprecated //Used the one that requires the ear being tested (below)
 	public synchronized static File generateFileName(String testType,
 			String testFrequency){
 		String fileName="AP_" + testType + "-" + testFrequency + "kHz-" +new Date().toString()+fileExtension;
+		File outFile = new File(root, fileName.replace(" ","-").replace(":", "-") );
+		return outFile;
+	}
+	
+	public synchronized static File generateFileName(String testType,
+			String testFrequency, String testEar){
+		String fileName="AP_" + testType + "-" + testEar + '-'+ testFrequency + "kHz-" +new Date().toString()+fileExtension;
 		File outFile = new File(root, fileName.replace(" ","-").replace(":", "-") );
 		return outFile;
 	}
