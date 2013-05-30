@@ -62,7 +62,7 @@ public class DPOAEProcedure extends TestProcedure{
 			double ndTime= System.currentTimeMillis();
 			Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
 
-			File file= AudioPulseFileWriter.generateFileName("DPOAE","");
+			File file= AudioPulseFileWriter.generateFileName("DPOAE","",super.testEar);
 			fileNames.add(file.getAbsolutePath());
 			if(thisFrequency == 2000){
 				Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_2KHZ);
