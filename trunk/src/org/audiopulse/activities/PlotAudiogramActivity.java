@@ -46,24 +46,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.graphics.PlotAudiogramView;
+import org.audiopulse.io.AudioPulseFilePackager;
 import org.audiopulse.io.AudioPulseFileWriter;
-import org.audiopulse.utilities.AudioSignal;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.Window;
-import android.widget.ProgressBar;
 
 public class PlotAudiogramActivity extends AudioPulseActivity {
 	/**
@@ -179,7 +176,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 					//and passing URI if called from Sana procedure
 					//TODO: We need to implement a timer?
 
-					final Handler mHandler = new Handler();
+					//final Handler mHandler = new Handler();
 					Log.v(TAG,"Saving files to disk");
 					showDialog(0);
 
@@ -193,6 +190,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 									AudioPulseDataAnalyzer.FileNameRawData_MAP);
 							String tmpName;
 							String dataName;
+							List<String> fileList = new ArrayList<String>();
 							short [] results;
 							while(it.hasNext()){
 								tmpName=it.next();
@@ -206,13 +204,27 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 								try {
 									Log.v(TAG,"waiting for thread to finish");
 									writer.join();
-									Log.v(TAG,"thread donew!");
+									Log.v(TAG,"thread done!");
+									//Add file to list of files to be zipped
+									fileList.add(tmpName);
 								} catch (InterruptedException e) {
 									Log.v(TAG,"Exception caught: " + e.getMessage() );
 									e.printStackTrace();
-								}		
+								}	
+								
 							}
-							Log.v(TAG,"done saving all files, exiting activity");
+							Log.v(TAG,"done saving data files.");
+							//Zip files
+							AudioPulseFilePackager packager= new AudioPulseFilePackager(fileList);
+							packager.start();
+							try {
+								packager.join();
+								Log.v(TAG,"done packaging data files.");
+							} catch (InterruptedException e) {
+								Log.v(TAG,"Error while packaging data: " + e.getMessage());
+								e.printStackTrace();
+							}
+							
 							dismissDialog(0);
 							PlotAudiogramActivity.this.finish();
 						}
