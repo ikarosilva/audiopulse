@@ -44,7 +44,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -53,7 +52,7 @@ import java.util.zip.ZipOutputStream;
 import android.os.Environment;
 import android.util.Log;
 
-public class AudioPulseFilePackager implements Runnable 
+public class AudioPulseFilePackager extends Thread
 {
 	private static final String TAG="PackageDataThreadRunnable";
 	List<String> fileList;
@@ -100,6 +99,14 @@ public class AudioPulseFilePackager implements Runnable
 			zos.close();
 		}
 		outFile=new File(zipFileName);
+		
+		//Remove the files added to the zip
+			for (String fileName : fileList) {
+				Log.v(TAG,"Removing redundant data file : " + fileName);
+				File tmpFile=new File(fileName);
+				tmpFile.delete();	
+			}
+		
 		return outFile ;
 
 	}
