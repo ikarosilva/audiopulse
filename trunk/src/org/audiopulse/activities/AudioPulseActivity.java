@@ -62,8 +62,6 @@ public class AudioPulseActivity extends ObservationActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-    // Sana observation meta data - from Sana API ObservationActivity
-    initMetaData();
 	}
 	
 	//disable some hardware key functionality that would interfere with a test
