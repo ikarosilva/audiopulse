@@ -71,6 +71,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 	private HashSet<String> fileNames;
 	private String testName;
 	private Bundle data;
+	private File PackagedFile;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -217,6 +218,9 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 							//Zip files
 							AudioPulseFilePackager packager= new AudioPulseFilePackager(fileList);
 							packager.start();
+							
+							//To be returned to the activity that requested the plotting
+							PackagedFile=packager.getOutFile();
 							try {
 								packager.join();
 								Log.v(TAG,"done packaging data files.");
