@@ -55,6 +55,8 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 {
 	public final String TAG="BasicTestActivity";
 	
+  public static final int CONFIRM_PLOT_CODE = 1;
+   
 	protected TextView testLog;
 	protected TestProcedure testProcedure;
 	protected int recordingSamplingFrequency;
@@ -83,6 +85,20 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 			// Sana observation meta data - from Sana API ObservationActivity
 			initMetaData();
 			calledBySana = true;
+      /*
+      // can use concept or intent action
+      String test = getIntent().getAction();
+      if(test.equals("org.audiopulse.TEOAE_2KHZ"){
+          //TODO fill in setting up the test procedure
+          // testProcedure = something;
+      } else if(test.equals("org.audiopulse.TEOAE_3KHZ"){
+         //TODO fill in setting up the test procedure
+         // testProcedure = something;
+      } else if(test.equals("org.audiopulse.TEOAE_4KHZ"){
+         //TODO fill in setting up the test procedure
+         // testProcedure = something;
+      }
+      */
 		} else {
 			Log.v(TAG,"Running AudioPulse in standalone mode");
 			calledBySana = false;
@@ -131,8 +147,28 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	public void plotAudiogram(Bundle resultsBundle ) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
 		intent.putExtras(resultsBundle);
-		startActivity(intent);
+    // Added conditional to see if we want confirmation that plot is accepted
+    // such as when running headless - EW
+    if(calledBySana)
+		    startActivityForResult(intent, CONFIRM_PLOT_CODE);
+    else
+        startActivity(intent);
 	}
+   
+  @Override
+  protected void onActivityResult (int requestCode, int resultCode, Intent data){
+     if(resultCode == RESULT_OK){
+     switch(requestCode){
+     case CONFIRM_PLOT_CODE:
+        // TODO what doe we use for the result data here? -EW
+        if(calledBySana){
+           // should call setResultOkAndData(Uri)
+        }
+        break;
+     default:
+        // DO nothing
+     }
+  }  
 	
 	//TODO: expand on this for other message types. Implement nested class NativeMessageHandler? 
 	//default implementation for handling messages from TestProecdure objects
