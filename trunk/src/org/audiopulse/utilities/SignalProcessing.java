@@ -104,6 +104,7 @@ public class SignalProcessing {
 		Complex[] tmpFFT=new Complex[SPEC_N];
 		double[][] Pxx = new double[2][SPEC_N/2];
 		double tmpPxx;
+		double scale=SPEC_N*Math.PI*2;
 		double SpectrumResolution = Fs/SPEC_N;
 		
 
@@ -122,8 +123,8 @@ public class SignalProcessing {
 			}
 			tmpFFT=FFT.transform(winData,TransformType.FORWARD);
 			for(int k=0;k<(SPEC_N/2);k++){
-				tmpPxx = tmpFFT[k].abs()/(double)SPEC_N;
-				tmpPxx*=tmpPxx; //Not accurate for the DC & Nyquist, but we are not using it!
+				tmpPxx = tmpFFT[k].abs();
+				tmpPxx=(tmpPxx*tmpPxx)/scale; //Not accurate for the DC & Nyquist, but we are not using it!
 				Pxx[1][k]=( (i*Pxx[1][k]) + tmpPxx )/((double) i+1); //averaging
 			}
 		}

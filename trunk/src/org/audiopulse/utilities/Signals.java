@@ -100,9 +100,9 @@ public class Signals {
 	}
 	
 	public static double[] copyOfRange(double[] data,int start, int end){
-		double[] y=new double[end-1-start];
+		double[] y=new double[end-start];
 		for(int i=start;i<end;i++)
-			y[i]=data[i];
+			y[i-start]=data[i];
 		return y;
 	}
 	
@@ -110,7 +110,7 @@ public class Signals {
 		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
 		//but this seems to result in clipping for most phones.
 		//we need to find an optimal maximum level that does not clip the sound
-		return 35;
+		return 50;
 	}
 
 	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F2) {
