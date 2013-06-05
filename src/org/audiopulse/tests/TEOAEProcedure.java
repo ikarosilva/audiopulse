@@ -19,7 +19,7 @@ public class TEOAEProcedure extends TestProcedure{
 	private final String TAG = "TEOAEProcedure";
 	private Bundle data;
 	//TODO: Select appropiate stimulus duration
-	private final double stimulusDuration=0.5;//stimulus duration in seconds
+	private final double stimulusDuration=4;//stimulus duration in seconds
 	private short[] results;
 	private HashMap<String, Double> DPGRAM;
 	private HashSet<String> fileNames=new HashSet<String>();
