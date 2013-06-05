@@ -64,9 +64,12 @@ public class TEOAEKempClientAnalysis {
 
 		//Find initial peak indix based on matched filtering
 		int endIndex=epochSize*4*20;
-		endIndex=(endIndex>audioData.length-onsetDelay) ? 
-				(audioData.length-onsetDelay):endIndex;
+		endIndex=(endIndex>(audioData.length-1-onsetDelay)) ? 
+				(audioData.length-1-onsetDelay):endIndex;
+		System.out.println("Searching for onset time "+ onsetDelay + "\t" 
+				+ endIndex +"\t" + audioData.length);
 		int start=find4EpochOnset(Signals.copyOfRange(audioData, onsetDelay,endIndex));
+		System.out.println("finding individual peaks");
 		for (j = onsetDelay+ start; j < (audioData.length -  epochSize); j = j + winSlide)
 		{
 			//Get maximum peak value and location within epoch
