@@ -92,6 +92,20 @@ public class Signals {
 		
 	}
 	
+	public static short[] copyOfRange(short[] data,int start, int end){
+		short[] y=new short[end-1-start];
+		for(int i=start;i<end;i++)
+			y[i]=data[i];
+		return y;
+	}
+	
+	public static double[] copyOfRange(double[] data,int start, int end){
+		double[] y=new double[end-1-start];
+		for(int i=start;i<end;i++)
+			y[i]=data[i];
+		return y;
+	}
+	
 	public synchronized static double dpoaeGorgaAmplitude(){
 		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
 		//but this seems to result in clipping for most phones.

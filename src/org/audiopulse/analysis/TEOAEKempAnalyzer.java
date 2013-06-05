@@ -43,10 +43,6 @@
 package org.audiopulse.analysis;
 
 import java.util.HashMap;
-import java.util.HashSet;
-
-import org.audiopulse.utilities.SignalProcessing;
-
 import android.util.Log;
 
 public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
@@ -76,20 +72,18 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 		//All the analysis will be done in the fft domain for now
 		//using the AudioPulseDataAnalyzer interface to obtain the results
 		Log.v(TAG,"epochTime= " + epochTime);
-		double[][] XFFT= SignalProcessing.getSpectrum(data,Fs,epochTime);
+		double[] results=TEOAEKempClientAnalysis.mainAnalysis(data,Fs,epochTime);
 		resultMap.put(TestType,(double) 1);//According to the interface, 1 =TEOAE
 		//Get responses for 2,3 and 4 kHz for now...
-		resultMap.put(RESPONSE_2KHZ, getResponseLevel(XFFT, 2000));
-		resultMap.put(RESPONSE_3KHZ, getResponseLevel(XFFT,3000));
-		resultMap.put(RESPONSE_4KHZ, getResponseLevel(XFFT,4000));
+		resultMap.put(RESPONSE_2KHZ, results[0]);
+		resultMap.put(RESPONSE_3KHZ, results[1]);
+		resultMap.put(RESPONSE_4KHZ, results[2]);
 		
 		
-		//Get estimated noise floor levels
-		resultMap.put(NOISE_2KHZ, getNoiseLevel(XFFT, 2500));
-		resultMap.put(NOISE_3KHZ, getNoiseLevel(XFFT,3500));
-	    resultMap.put(NOISE_4KHZ, getNoiseLevel(XFFT,4500));
-	    
-	    
+		//Get estimated noise floor levels, which is constant for this method
+		resultMap.put(NOISE_2KHZ, results[3]);
+		resultMap.put(NOISE_3KHZ, results[3]);
+	    resultMap.put(NOISE_4KHZ, results[3]);   
 		return resultMap;
 	}
 	
