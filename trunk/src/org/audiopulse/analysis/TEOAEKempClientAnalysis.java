@@ -32,7 +32,7 @@ public class TEOAEKempClientAnalysis {
 	public static double getThreshold(double[] audioData){
 		double peakThreshold = 0;
 		int numberOfEpochs =20;
-		int percThreshold=99;
+		int percThreshold=85;
 
 		int midPoint = Math.round(audioData.length/2), leftPoint, rightPoint;
 		leftPoint = midPoint - (epochSize*numberOfEpochs);
@@ -70,7 +70,8 @@ public class TEOAEKempClientAnalysis {
 				+ endIndex +"\t" + audioData.length);
 		int start=find4EpochOnset(Signals.copyOfRange(audioData, onsetDelay,endIndex));
 		System.out.println("finding individual peaks");
-		for (j = onsetDelay+ start; j < (audioData.length -  epochSize); j = j + winSlide)
+		onsetDelay=onsetDelay+ start;
+		for (j = onsetDelay; j < (audioData.length -  epochSize); j = j + winSlide)
 		{
 			//Get maximum peak value and location within epoch
 			peakCandVal=0;
@@ -97,9 +98,9 @@ public class TEOAEKempClientAnalysis {
 				//Peak found, take the max as the new peak
 				//For tag negative peaks with negative sign
 				if(lookForNegative ==false){
-					peakInd.add(peakCandInd);
+					peakInd.add(peakCandInd+onsetDelay);
 				}else{
-					peakInd.add(-1*peakCandInd);
+					peakInd.add(-1*(peakCandInd+onsetDelay));
 				}
 
 				//if 3 positive peaks where found, Look for a negative peak next
