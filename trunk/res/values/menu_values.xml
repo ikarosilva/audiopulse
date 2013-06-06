@@ -4,7 +4,7 @@
         <item>@string/calibration_title</item>
         <item>@string/DPOAE_RIGHT</item>
         <item>@string/DPOAE_LEFT</item>
-        <item>@string/TEOAE_LEFT</item>
+        <item>@string/TEOAE_RIGHT</item>
         <item>@string/TEOAE_LEFT</item>
     </array>   
     <array name="calibration_menu">
