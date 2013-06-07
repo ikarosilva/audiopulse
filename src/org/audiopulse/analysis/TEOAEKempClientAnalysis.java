@@ -81,7 +81,6 @@ public class TEOAEKempClientAnalysis {
 					//Get maximum peak value and location within epoch
 					peakCandVal=-1;
 					peakCandInd=-1;
-					Log.v(TAG,"Searching: "  + j + " - " + (j+epochSize));
 					for(k=j;k<(j+epochSize);k++){
 						tmpVal=Math.abs(audioData[k]);
 						if (tmpVal > peakThreshold && (tmpVal > peakCandVal)){
@@ -103,9 +102,9 @@ public class TEOAEKempClientAnalysis {
 						//Peak found, take the max as the new peak
 						//For tag negative peaks with negative sign
 						if( ( Math.abs(peakCandInd)+onsetDelay ) > audioData.length){
-							Log.e(TAG,"Incorrect peak location: " + Math.abs(peakCandInd) + "  + delay " + onsetDelay);
+							Log.w(TAG,"Incorrect peak location: " + Math.abs(peakCandInd) + "  + delay " + onsetDelay);
 						}else if(( Math.abs(peakCandInd)+onsetDelay + epochSize ) > audioData.length) {
-							Log.v(TAG,"Last peak index is too short for processing: " + Math.abs(peakCandInd) + onsetDelay);
+							Log.w(TAG,"Last peak index is too short for processing: " + Math.abs(peakCandInd) + onsetDelay);
 						}else{
 							peakInd.add(Math.abs(peakCandInd)+onsetDelay);
 						}
@@ -144,7 +143,6 @@ public class TEOAEKempClientAnalysis {
 			//NOTE: ASSUMPTION: Negative peaks are 3x bigger than the positive peaks!!!
 			//Check polarity of the peak, only start after the first negative peak due to
 			//possible transients
-			Log.v(TAG,"Processing:"+ n + " peak of value: " + audioData[Math.abs(peakInd.get(n))]);
 			isNegative=(audioData[Math.abs(peakInd.get(n))]<0);
 			if(isNegative){
 				if(start){
@@ -168,7 +166,6 @@ public class TEOAEKempClientAnalysis {
 			}
 
 		}
-		Log.v(TAG,"averaging over "+ countNegative + " epochs.");
 		//Get final 4average (note we assume countNegative is the most accurate statistic regarding the number
 		//of epochs collected
 		for(int k=0;k<sum.length;k++)

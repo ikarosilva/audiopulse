@@ -76,6 +76,8 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 		double[] results=TEOAEKempClientAnalysis.mainAnalysis(data,Fs,epochSize);
 		resultMap.put(TestType,(double) 1);//According to the interface, 1 =TEOAE
 		//Get responses for 2,3 and 4 kHz for now...
+		Log.v(TAG,"Estimated responses: " + results[0] + " , " + results[1] +
+				" , " + results[2]+ " noise= " + results[3]);
 		resultMap.put(RESPONSE_2KHZ, results[0]);
 		resultMap.put(RESPONSE_3KHZ, results[1]);
 		resultMap.put(RESPONSE_4KHZ, results[2]);
