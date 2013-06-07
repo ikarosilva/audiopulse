@@ -54,16 +54,16 @@ import android.widget.TextView;
 public class TestActivity extends AudioPulseActivity implements Handler.Callback
 {
 	public final String TAG="BasicTestActivity";
-	
-  public static final int CONFIRM_PLOT_CODE = 1;
-   
+
+	public static final int CONFIRM_PLOT_CODE = 1;
+
 	protected TextView testLog;
 	protected TestProcedure testProcedure;
 	protected int recordingSamplingFrequency;
 	protected int playbackSamplingFrequency;
 	private boolean calledBySana;
 	protected String testEar;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -75,17 +75,17 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		//TODO: Get ear being tested from Bundle
 		Bundle request = getIntent().getExtras();
 		testEar = (String) request.get(TestMenuActivity.BUNDLE_TESTEAR_KEY);
-		
+
 		//TODO: can we put a TestProcedure into a bundle? E.g. by implementing Parcelable, but is that worth it?
-//		Bundle request = getIntent().getExtras();
-//		testProcedure = (TestProcedure) request.get("test");
-		
+		//		Bundle request = getIntent().getExtras();
+		//		testProcedure = (TestProcedure) request.get("test");
+
 		String caller = this.getCallingPackage();
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			// Sana observation meta data - from Sana API ObservationActivity
 			initMetaData();
 			calledBySana = true;
-      /*
+			/*
       // can use concept or intent action
       String test = getIntent().getAction();
       if(test.equals("org.audiopulse.TEOAE_2KHZ"){
@@ -98,7 +98,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
          //TODO fill in setting up the test procedure
          // testProcedure = something;
       }
-      */
+			 */
 		} else {
 			Log.v(TAG,"Running AudioPulse in standalone mode");
 			calledBySana = false;
@@ -147,29 +147,30 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	public void plotAudiogram(Bundle resultsBundle ) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
 		intent.putExtras(resultsBundle);
-    // Added conditional to see if we want confirmation that plot is accepted
-    // such as when running headless - EW
-    if(calledBySana)
-		    startActivityForResult(intent, CONFIRM_PLOT_CODE);
-    else
-        startActivity(intent);
+		// Added conditional to see if we want confirmation that plot is accepted
+		// such as when running headless - EW
+		if(calledBySana)
+			startActivityForResult(intent, CONFIRM_PLOT_CODE);
+		else
+			startActivity(intent);
 	}
-   
-  @Override
-  protected void onActivityResult (int requestCode, int resultCode, Intent data){
-     if(resultCode == RESULT_OK){
-     switch(requestCode){
-     case CONFIRM_PLOT_CODE:
-        // TODO what doe we use for the result data here? -EW
-        if(calledBySana){
-           // should call setResultOkAndData(Uri)
-        }
-        break;
-     default:
-        // DO nothing
-     }
-  }  
-	
+
+	@Override
+	protected void onActivityResult (int requestCode, int resultCode, Intent data){
+		if(resultCode == RESULT_OK){
+			switch(requestCode){
+			case CONFIRM_PLOT_CODE:
+				// TODO what doe we use for the result data here? -EW
+				if(calledBySana){
+					// should call setResultOkAndData(Uri)
+				}
+				break;
+			default:
+				// DO nothing
+			}
+		}
+	}  
+
 	//TODO: expand on this for other message types. Implement nested class NativeMessageHandler? 
 	//default implementation for handling messages from TestProecdure objects
 	public boolean handleMessage(Message msg) {
