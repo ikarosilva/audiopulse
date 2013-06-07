@@ -63,20 +63,20 @@ public class AudioPulseFilePackager extends Thread
 	public AudioPulseFilePackager(List<String> fileList){
 		this.fileList=fileList;
 	}
-	
+
 	public synchronized void run()
 	{
 		try {
 			outFile=packageData();
-			Log.v(TAG,"Packaged data save at " +
-			outFile.getAbsolutePath());
+			Log.v(TAG,"Packaged data saved at " +
+					outFile.getAbsolutePath());
 		} catch (IOException e) {
 			Log.v(TAG,"Could not package data: " + e.getMessage());
 			outFile=null;
 		}
 	}
 
-	
+
 	private synchronized File packageData() throws IOException {
 
 		//Zip all the files
@@ -86,27 +86,38 @@ public class AudioPulseFilePackager extends Thread
 		ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os));
 		//create byte buffer
 		byte[] buffer = new byte[1024];
+		int len, fileSepIndex;
+		String tmpFileName;
 		try {
 			for (String fileName : fileList) {
 				Log.v(TAG,"Adding file to zip: " + fileName);
-				//File file=new File(fileName);
-				ZipEntry entry = new ZipEntry(fileName);
+				fileSepIndex=fileName.lastIndexOf("/");
+				if(fileSepIndex > -1){
+					tmpFileName=fileName.substring(fileSepIndex+1);
+				}else{
+					tmpFileName=fileName;
+				}
+				ZipEntry entry = new ZipEntry(tmpFileName);		
 				zos.putNextEntry(entry);
-				zos.write(buffer);
+				FileInputStream in = new FileInputStream(fileName);
+				while ((len = in.read(buffer)) > 0) {
+					zos.write(buffer, 0, len);
+				}
+				in.close();
 				zos.closeEntry();
 			}
 		} finally {
 			zos.close();
 		}
 		outFile=new File(zipFileName);
-		
+
 		//Remove the files added to the zip
-			for (String fileName : fileList) {
-				Log.v(TAG,"Removing redundant data file : " + fileName);
-				File tmpFile=new File(fileName);
-				tmpFile.delete();	
-			}
-		
+		for (String fileName : fileList) {
+			Log.v(TAG,"Removing redundant data file (already in zip): " + fileName);
+			File tmpFile=new File(fileName);
+			tmpFile.delete();	
+		}
+
 		return outFile ;
 
 	}

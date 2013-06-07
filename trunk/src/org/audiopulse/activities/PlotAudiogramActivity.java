@@ -137,6 +137,9 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 		setContentView(mView);
 	}
 
+	public String getPackageFileName(){
+		return this.PackagedFile.getAbsolutePath();
+	}
 
 	@Override 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -198,23 +201,17 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 								dataName=fileNamestoDataMap.get(tmpName.toString());
 								Log.v(TAG,"saving raw data: " + dataName+  " files as: " +tmpName );
 								results=(short []) data.getSerializable(dataName);
-								Log.v(TAG,"creating writer");
 								AudioPulseFileWriter writer= new AudioPulseFileWriter(new File(tmpName),results);
-								Log.v(TAG,"starting writer thread");
 								writer.start();
 								try {
-									Log.v(TAG,"waiting for thread to finish");
 									writer.join();
-									Log.v(TAG,"thread done!");
+									Log.v(TAG,"Adding file to zip: " + tmpName);
 									//Add file to list of files to be zipped
 									fileList.add(tmpName);
 								} catch (InterruptedException e) {
-									Log.v(TAG,"Exception caught: " + e.getMessage() );
-									e.printStackTrace();
+									Log.e(TAG,"InterruptedException caught: " + e.getMessage() );
 								}	
-								
 							}
-							Log.v(TAG,"done saving data files.");
 							//Zip files
 							AudioPulseFilePackager packager= new AudioPulseFilePackager(fileList);
 							packager.start();
@@ -223,9 +220,8 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 							PackagedFile=packager.getOutFile();
 							try {
 								packager.join();
-								Log.v(TAG,"done packaging data files.");
 							} catch (InterruptedException e) {
-								Log.v(TAG,"Error while packaging data: " + e.getMessage());
+								Log.e(TAG,"Error while packaging data: " + e.getMessage());
 								e.printStackTrace();
 							}
 							
