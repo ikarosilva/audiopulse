@@ -42,7 +42,7 @@ public class TEOAEProcedure extends TestProcedure{
 				stimulusDuration);
 		Log.v(TAG,"setting probe old level probe[0]=" + probe[0]);
 		probe = hardware.setOutputLevel(probe, 55);
-		Log.v(TAG," probe new level probe[0]=" + probe[0]);
+		Log.v(TAG," probe new level probe[0]=" + probe[0] + "  and length= " + probe.length);
 		//TODO: Fix issues with the signal being clipped/buffer overuns ?
 		testIO.setPlaybackAndRecording(AudioSignal.convertMonoToShort(probe));
 		double stTime= System.currentTimeMillis();
@@ -59,7 +59,7 @@ public class TEOAEProcedure extends TestProcedure{
         try {
 			DPGRAM = analyzeResults(results,super.recordingSampleFrequency);
 		} catch (Exception e) {
-			Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
+			Log.e(TAG,"Could not generate analysis for results!!" + e.getMessage());
 			e.printStackTrace();
 		}
 		
@@ -74,15 +74,15 @@ public class TEOAEProcedure extends TestProcedure{
 		//the file with stored the data for transmission with timestamp on the file name
 		data.putSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames,fileNames);
 		data.putSerializable(AudioPulseDataAnalyzer.FileNameRawData_MAP,fileNamestoDataMap);
-		Log.v(TAG,"Sending analyszed data to activity");
+		Log.v(TAG,"Sending analyzed data to activity");
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 		Log.v(TAG,"donew with " + TAG);
 	}
 	
-	private HashMap<String, Double> analyzeResults(short[] data, double Fs) throws Exception {
-		int epochTime=512; //Number of sample in which to break the FFT analysis
-		Log.v(TAG,"data.length= " + data.length);	
-		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochTime);
+	private HashMap<String, Double> analyzeResults(short[] data, int Fs) throws Exception {
+		int epochSize=(int) Math.round(Signals.getclickKempSweepDurationSeconds()*Fs); //Size in samples of the trial
+		Log.v(TAG,"data.length= " + data.length + " Fs=" + Fs + " epochSize= " + epochSize);	
+		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochSize);
 		return teoaeAnalysis.call();
 
 	}
