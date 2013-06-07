@@ -87,7 +87,7 @@ public class Signals {
 		//final experiment time based on the desired number of sweeps.
 		//NOTE: If you change this value you will also have to the corresponding value in that does
 		// the analysis on the client side!!
-		final double sweepDurationInSeconds=0.02;
+		double sweepDurationInSeconds=0.02;
 		return sweepDurationInSeconds;
 		
 	}
@@ -142,8 +142,8 @@ public class Signals {
 		final int clickN= (int) (clickDurationInSeconds * sampleFrequency);
 		final int sweepN= (int) (sweepDurationInSeconds * sampleFrequency);
 		final int sweeps= (int) Math.floor(N/sweepN);	
-		final double maxAmp=1;
-		final double minAmp=Math.abs(maxAmp)*-3;  //Biggest peak amp is -3x the smaller peaks
+		final double minAmp=-1;  //Biggest peak amp is -3x the smaller peaks
+		final double maxAmp=Math.abs(minAmp)/3.0;
 		double[] x = new double[N];
 		int index0, index1, n, m;
 		for (n=0;n<sweeps;n++) {

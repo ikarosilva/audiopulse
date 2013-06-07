@@ -43,23 +43,24 @@
 package org.audiopulse.analysis;
 
 import java.util.HashMap;
+
 import android.util.Log;
 
 public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 
 	private final String TAG="TEOAEKempAnalyzer";
 	private short[] data;
-	private final static double spectralToleranceHz=50;
-	private double Fs;
-	private int epochTime; //Time in samples for which to break the FFT analysis
-							  //Should be power of two
+	private int Fs;
+	private static final int spectralToleranceHz=50;
+	private int epochSize; //Size in samples of a single trial
+							  
 	HashMap<String, Double> resultMap;
 	
-	public TEOAEKempAnalyzer(short[] data, double Fs, int epochTime){
+	public TEOAEKempAnalyzer(short[] data, int Fs, int epochSize){
 		this.Fs=Fs;
 		this.data=data;
 		resultMap= new HashMap<String, Double>();
-		this.epochTime=epochTime;	
+		this.epochSize=epochSize;	
 	}
 	
 
@@ -71,8 +72,8 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 
 		//All the analysis will be done in the fft domain for now
 		//using the AudioPulseDataAnalyzer interface to obtain the results
-		Log.v(TAG,"epochTime= " + epochTime);
-		double[] results=TEOAEKempClientAnalysis.mainAnalysis(data,Fs,epochTime);
+		Log.v(TAG,"Calling analysis thread with: data.size= " + data.length +" Fs= " + Fs +" epochSize= " + epochSize);
+		double[] results=TEOAEKempClientAnalysis.mainAnalysis(data,Fs,epochSize);
 		resultMap.put(TestType,(double) 1);//According to the interface, 1 =TEOAE
 		//Get responses for 2,3 and 4 kHz for now...
 		resultMap.put(RESPONSE_2KHZ, results[0]);
@@ -108,7 +109,7 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 	}
 
 
-	public double getResponseLevel(short[] rawdata, double frequency, double Fs) {
+	public double getResponseLevel(short[] rawdata, double frequency, int Fs) {
 		// not implemented
 		return Double.NaN;
 	}
@@ -119,7 +120,7 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 	}
 
 
-	public double getNoiseLevel(short[] rawdata, double frequency, double Fs) {
+	public double getNoiseLevel(short[] rawdata, double frequency, int Fs) {
 		// not implemented
 		return Double.NaN;
 	}
@@ -130,7 +131,7 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 	}
 
 
-	public double getStimulusLevel(short[] rawdata, double frequency, double Fs) {
+	public double getStimulusLevel(short[] rawdata, double frequency, int Fs) {
 		// not implemented
 		return Double.NaN;
 	}
@@ -139,4 +140,5 @@ public class TEOAEKempAnalyzer implements AudioPulseDataAnalyzer {
 	public double getStimulusLevel(double[][] dataFFT, double frequency) {
 		return getFreqAmplitude(dataFFT,frequency,spectralToleranceHz);
 	}
+
 }

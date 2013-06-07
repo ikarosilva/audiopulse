@@ -143,7 +143,7 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 	}
 
 
-	public double getResponseLevel(short[] rawdata, double frequency, double Fs) {
+	public double getResponseLevel(short[] rawdata, double frequency, int Fs) {
 		// not implemented
 		return Double.NaN;
 	}
@@ -156,7 +156,7 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 	}
 
 
-	public double getNoiseLevel(short[] rawdata, double frequency, double Fs) {
+	public double getNoiseLevel(short[] rawdata, double frequency, int Fs) {
 		// not implemented
 		return Double.NaN;
 	}
@@ -168,7 +168,7 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 	}
 
 
-	public double getStimulusLevel(short[] rawdata, double frequency, double Fs) {
+	public double getStimulusLevel(short[] rawdata, double frequency, int Fs) {
 		// not implemented
 		return Double.NaN;
 	}

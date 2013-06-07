@@ -91,15 +91,15 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 	//in Hz
 
 	//Get the response for a specific frequency
-	double getResponseLevel(short rawdata[],double frequency, double Fs);
+	double getResponseLevel(short rawdata[],double frequency, int Fs);
 	double getResponseLevel(double dataFFT[][],double frequency);
 
 	//Get the noise floor for a specific frequency
-	double getNoiseLevel(short rawdata[],double frequency, double Fs);
+	double getNoiseLevel(short rawdata[],double frequency, int Fs);
 	double getNoiseLevel(double dataFFT[][],double frequency);
 
 	//Get estimated stimulus level for a specific frequency
-	double getStimulusLevel(short rawdata[],double frequency, double Fs);
+	double getStimulusLevel(short rawdata[],double frequency, int Fs);
 	double getStimulusLevel(double dataFFT[][],double frequency);
 
 }
