@@ -19,7 +19,7 @@ public class TEOAEProcedure extends TestProcedure{
 	private final String TAG = "TEOAEProcedure";
 	private Bundle data;
 	//TODO: Select appropiate stimulus duration
-	private final double stimulusDuration=4;//stimulus duration in seconds
+	private final double stimulusDuration=5;//stimulus duration in seconds
 	private short[] results;
 	private HashMap<String, Double> DPGRAM;
 	private HashSet<String> fileNames=new HashSet<String>();
@@ -37,19 +37,21 @@ public class TEOAEProcedure extends TestProcedure{
 		sendMessage(TestActivity.Messages.PROGRESS);
 		logToUI("Running TEOAE");
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
-		Log.v(TAG,"Generating stimulus at Fs = " + super.playbackSampleFrequency);
 		double[] probe = Signals.clickKempMethod(super.playbackSampleFrequency, 
 				stimulusDuration);
-		Log.v(TAG,"setting probe old level probe[0]=" + probe[0]);
-		probe = hardware.setOutputLevel(probe, 55);
-		Log.v(TAG," probe new level probe[0]=" + probe[0] + "  and length= " + probe.length);
+		probe = hardware.setOutputLevel(probe, 30);
+		short[] interLeavedProbe=
+				Signals.interleave(AudioSignal.convertMonoToShort(probe));
 		//TODO: Fix issues with the signal being clipped/buffer overuns ?
-		testIO.setPlaybackAndRecording(AudioSignal.convertMonoToShort(probe));
+		//setPlaybackAndRecording ASSUMES STEREO INTERLEAVED!
+		testIO.setPlaybackAndRecording(interLeavedProbe);
 		double stTime= System.currentTimeMillis();
 		results = testIO.acquire();
 		double ndTime= System.currentTimeMillis();
-		Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
-		
+		Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000
+				+ " secs at playFs= " + super.playbackSampleFrequency
+				+ " and recFs= " +super.recordingSampleFrequency);
+		Log.v(TAG,"Expected duration of at least = "+ stimulusDuration + " secs" );
 		File file= AudioPulseFileWriter.generateFileName("TEOAE","",super.testEar);
 		fileNames.add(file.getAbsolutePath());
 		fileNamestoDataMap.put(file.getAbsolutePath(),
@@ -81,7 +83,12 @@ public class TEOAEProcedure extends TestProcedure{
 	
 	private HashMap<String, Double> analyzeResults(short[] data, int Fs) throws Exception {
 		int epochSize=(int) Math.round(Signals.getclickKempSweepDurationSeconds()*Fs); //Size in samples of the trial
-		Log.v(TAG,"data.length= " + data.length + " Fs=" + Fs + " epochSize= " + epochSize);	
+		Log.v(TAG,"N= " + data.length + " data time= " + (data.length/Fs) + 
+				" Fs=" + Fs + " epochSize= " + epochSize);	
+		if((data.length/Fs)< stimulusDuration){
+			Log.e(TAG,"Data is too short, size is: " + (data.length/Fs) +
+					" but we expected: " + stimulusDuration);
+		}
 		AudioPulseDataAnalyzer teoaeAnalysis=new TEOAEKempAnalyzer(data,Fs,epochSize);
 		return teoaeAnalysis.call();
 

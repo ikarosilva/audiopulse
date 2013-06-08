@@ -15,7 +15,7 @@ public class Signals {
 		}
 		return x;
 	}
-	
+
 	public static double[] toneComplex(int sampleFrequency, double[] frequencies, double durationInSeconds) {
 		//Use amplitudes == 1 if method is called without amplitude array
 		double[] amplitudes= new double[frequencies.length];
@@ -24,7 +24,7 @@ public class Signals {
 		}
 		return toneComplex(sampleFrequency,frequencies, amplitudes, durationInSeconds);
 	}
-	
+
 	//TODO: phases
 	public static double[] toneComplex(int sampleFrequency, double[] frequencies, double[] amplitudes, double durationInSeconds) {
 		int N = (int) (durationInSeconds * sampleFrequency);
@@ -37,7 +37,7 @@ public class Signals {
 		}
 		return x;
 	}
-	
+
 	public static double[] chirp(int sampleFrequency, double f0, double f1, double durationInSeconds) {
 		int N = (int) (durationInSeconds * sampleFrequency);
 		double[] x = new double[N];
@@ -49,7 +49,7 @@ public class Signals {
 		}
 		return x;
 	}
-	
+
 	//TODO: Random.nextGaussian uses Box-Muller alg, which 
 	//some say is slow and innaccurate. Consider finding a invcdf lookup
 	public static double[] gaussianNoise(int sampleFrequency, double durationInSeconds) {
@@ -61,7 +61,7 @@ public class Signals {
 		}
 		return x;
 	}
-	
+
 
 	public static double[] fadeIn(int sampleFrequency, double fadeDuration, double[] x) {
 		int F = (int) (fadeDuration / sampleFrequency);
@@ -81,31 +81,31 @@ public class Signals {
 	public static double[] fade(int sampleFrequency, double fadeDuration, double[] x) {
 		return fadeIn(sampleFrequency,fadeDuration,fadeOut(sampleFrequency,fadeDuration,x));
 	}
-	
+
 	public synchronized static double getclickKempSweepDurationSeconds() {
 		//Defining this method because it will be used by other classes to set the 
 		//final experiment time based on the desired number of sweeps.
 		//NOTE: If you change this value you will also have to the corresponding value in that does
 		// the analysis on the client side!!
-		double sweepDurationInSeconds=0.02;
+		double sweepDurationInSeconds=0.04;
 		return sweepDurationInSeconds;
-		
+
 	}
-	
+
 	public static short[] copyOfRange(short[] data,int start, int end){
 		short[] y=new short[end-1-start];
 		for(int i=start;i<end;i++)
 			y[i]=data[i];
 		return y;
 	}
-	
+
 	public static double[] copyOfRange(double[] data,int start, int end){
 		double[] y=new double[end-start];
 		for(int i=start;i<end;i++)
 			y[i-start]=data[i];
 		return y;
 	}
-	
+
 	public synchronized static double dpoaeGorgaAmplitude(){
 		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
 		//but this seems to result in clipping for most phones.
@@ -119,7 +119,7 @@ public class Signals {
 		// Screening parameters in page 136 (based on Gorga 
 		//Otoacoustic emissions from normal‐hearing and hearing‐impaired subjects: Distortion product responses
 		//J. Acoust. Soc. Am. Volume 93, Issue 4, pp. 2050-2060 (1993)
-		
+
 		double sweeps=200;
 		double epocTime=0.02048; //epoch time in seconds 
 		double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
@@ -128,21 +128,21 @@ public class Signals {
 		x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
 		return x;
 	}
-	
+
 	public synchronized static double[] clickKempMethod(int sampleFrequency, double totalDurationInSeconds) {
 		//Constructs click stimuli for non-linear reponse extraction using 
 		//3 click at one level and a fourth click at 3x the level
 		//The sweepDurationinSeconds is the duration of a single epoch (trial) *including* the click's duration
-		
+
 		//TODO: Add proper reference to the choice of stimulus parameters
 		final double clickDurationInSeconds=0.001;
 		final double sweepDurationInSeconds=getclickKempSweepDurationSeconds();
-		
+
 		final int N = (int) (totalDurationInSeconds * sampleFrequency);
 		final int clickN= (int) (clickDurationInSeconds * sampleFrequency);
 		final int sweepN= (int) (sweepDurationInSeconds * sampleFrequency);
 		final int sweeps= (int) Math.floor(N/sweepN);	
-		final double minAmp=-1;  //Biggest peak amp is -3x the smaller peaks
+		final double minAmp=-0.75;  //Biggest peak amp is -3x the smaller peaks
 		final double maxAmp=Math.abs(minAmp)/3.0;
 		double[] x = new double[N];
 		int index0, index1, n, m;
@@ -158,6 +158,16 @@ public class Signals {
 					x[m] = maxAmp;
 				}	
 			}
+		}
+		return x;
+	}
+
+	public static short[] interleave(short[] data) {
+		// TODO Auto-generated method stub
+		short[] x=new short[data.length*2];
+		for(int i=0;i<data.length;i=i+2){
+			x[i*2]=data[i];
+			x[i*2+1]=data[i];
 		}
 		return x;
 	}
