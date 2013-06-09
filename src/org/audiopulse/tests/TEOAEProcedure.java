@@ -39,7 +39,7 @@ public class TEOAEProcedure extends TestProcedure{
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
 		double[] probe = Signals.clickKempMethod(super.playbackSampleFrequency, 
 				stimulusDuration);
-		probe = hardware.setOutputLevel(probe, 30);
+		probe = hardware.setOutputLevel(probe, 25);
 		short[] interLeavedProbe=
 				Signals.interleave(AudioSignal.convertMonoToShort(probe));
 		//TODO: Fix issues with the signal being clipped/buffer overuns ?
