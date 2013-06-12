@@ -196,7 +196,6 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 							while(it.hasNext()){
 								tmpName=it.next();
 								dataName=fileNamestoDataMap.get(tmpName.toString());
-								//FIXME: Giving errors with DPOAE procedure
 								Log.v(TAG,"saving raw data : " + dataName+ " to files as: " +tmpName );
 								results=(short []) data.getSerializable(dataName);
 								Log.v(TAG,"results size= "  + results.length );

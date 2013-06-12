@@ -43,8 +43,6 @@ public class DPOAEProcedure extends TestProcedure{
 		
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
 		Log.v(TAG,"Starting DPOAE Recording- generating stimuli at Fs = " + super.playbackSampleFrequency);
-		//TODO: Send data back to Activity, the final saving of result will be done when the Activity returns from plotting the processed
-		//data and the user accepts the results. 
 		data=new Bundle();
 		
 		for (Double thisFrequency : testFrequencies){
