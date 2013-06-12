@@ -1,19 +1,10 @@
 package org.audiopulse.analysis;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.math3.stat.*;
 import org.audiopulse.utilities.*;
-
 import android.util.Log;
 
-class TEOAEAnalysisException extends Exception {
-	private static final long serialVersionUID = 1L;
-	public TEOAEAnalysisException() {
-	}
-	public TEOAEAnalysisException(String msg) {
-		super(msg);
-	}
-}
+
 
 public class TEOAEKempClientAnalysis {
 
@@ -27,32 +18,56 @@ public class TEOAEKempClientAnalysis {
 	public static double getThreshold(double[] audioData, int epochSize){
 		double peakThreshold = 0;
 		int numberOfEpochs =20;
-		int percThreshold=85;
+		double percThreshold=1; //In terms of sigma (std) from normal distribution
 
 		int midPoint = Math.round(audioData.length/2), leftPoint, rightPoint;
 		leftPoint = midPoint - (epochSize*numberOfEpochs);
 		rightPoint = midPoint + ( epochSize*numberOfEpochs);
 
-		// Get an idea of the signal max to determine the threshold			
-		double[] absData= new double[rightPoint-leftPoint];
-		for (int j = 0; j < absData.length; j++) 
-			absData[j] = Math.abs(audioData[leftPoint+j]);
+		// Get an idea of the signal max  positive and negative values to determine the threshold			
+		// The threshold is the percentile of the mid range data
+		double[] tmpData=Signals.copyOfRange(audioData,leftPoint,rightPoint);
+		double mx=0, pxx=0, sigma=0, max=0;
+		int count=0;
+		for(int n=0;n<tmpData.length;n++){
+			mx=(count*mx+tmpData[n])/(count+1);
+			pxx=(count*pxx+tmpData[n]*tmpData[n])/(count+1);
+			count=count+1;
+			max=(Math.abs(tmpData[n]) > max) ? 
+					Math.abs(tmpData[n]) :max;
+		}
+		sigma=Math.sqrt(pxx-(mx*mx));
+		peakThreshold=mx+(percThreshold*sigma);
+		peakThreshold=(peakThreshold > max) ? max:peakThreshold;
 
-		// The threshold is the 75th percentile of the mid range data
-		peakThreshold = StatUtils.percentile(absData,percThreshold);
+		Log.v(TAG,"Using peakThreshold of= " + peakThreshold + " and " + peakThreshold);
 		return peakThreshold;
 
 	}
 
+	public static int getAbsMaxInd(double[] x, int start, int end){
+		double max=Double.MIN_VALUE;
+		int ind=-1;
+		if(x.length<end){
+			end=x.length;
+			Log.w(TAG,"Setting maximum index search to same size as data");
+		}
+		for(int i=start;i<end;i++){
+			if(Math.abs(x[i])>max){
+				max=Math.abs(x[i]);
+				ind=i;
+			}
+		}
+		return ind;
+	}
+
 	public static List<Integer>  getPeakIndices(double[] audioData, double peakThreshold,int epochSize, int Fs){
 		int winSlide = (int) Math.round(epochSize/2);
-		int k, j;
+		int  j;
 		List<Integer> peakInd = new ArrayList<Integer>();	
-		double peakCandVal, tmpVal; //peak value, and is its index
+		double peakCandVal; //peak value, and is its index
 		int peakCandInd;
-		int countNegative=0, countPositive=0;
-		boolean lookForNegative=true;
-		int onsetDelay= (int) Math.round(Fs*0.1);//Peak processing delay in order to avoid transient artifacts
+		int onsetDelay= (int) Math.round(Fs*0.01);//Peak processing delay in order to avoid transient artifacts
 		//NOTE: To help with synchronization/timing issues, the procedures looks first for the biggest negative
 		//peak in the first epoch. From then on the next 3 epochs are expected to have positive peaks. After 3 positive
 		//peak epochs are found it then proceeds to find the biggest negative peak again and re-start the cycle. 
@@ -76,55 +91,30 @@ public class TEOAEKempClientAnalysis {
 				}
 				//Negative peaks are tagged with a negative index to help identify them later on (so that only a single array need to be returned)
 				//all peakCandVal amplitudes are positive non-negative if found
-				for (j = onsetDelay; j < (audioData.length -  epochSize - winSlide); j = j + winSlide)
-				{
+				for (j = onsetDelay; j < (audioData.length -  epochSize - winSlide); j = j + winSlide){
 					//Get maximum peak value and location within epoch
-					peakCandVal=-1;
-					peakCandInd=-1;
-					for(k=j;k<(j+epochSize);k++){
-						tmpVal=Math.abs(audioData[k]);
-						if (tmpVal > peakThreshold && (tmpVal > peakCandVal)){
-							if(lookForNegative && (audioData[k] <0)){
-								//Looking for negative peaks only
-								peakCandInd = -1*k;
-								peakCandVal = tmpVal;
-								countNegative++;
-							}else if(!lookForNegative && (audioData[k] >0) ){
-								//Looking for positive peaks only
-								peakCandInd = k;
-								peakCandVal = tmpVal;
-								countPositive++;
-							}
-						}			
-					}		
+					peakCandInd=getAbsMaxInd(audioData,j,j+epochSize);
+					peakCandVal=audioData[peakCandInd];
+					if ( (peakCandVal > peakThreshold) ){
+						//Keep peakCandInd as it is
+					}else if((peakCandVal < peakThreshold) ){
+						//Looking for negative peaks only
+						peakCandInd=peakCandInd*-1; //Tag negative peaks with negative indices for later analysis
+					}else{
+						peakCandVal=0;
+					}
 
-					if(peakCandVal > -1){
+					if(peakCandVal != 0){
 						//Peak found, take the max as the new peak
 						//For tag negative peaks with negative sign
-						if( ( Math.abs(peakCandInd)+onsetDelay ) > audioData.length){
+						if( ( Math.abs(peakCandInd) ) > audioData.length){
 							Log.w(TAG,"Incorrect peak location: " + Math.abs(peakCandInd) + "  + delay " + onsetDelay);
-						}else if(( Math.abs(peakCandInd)+onsetDelay + epochSize ) > audioData.length) {
-							Log.w(TAG,"Last peak index is too short for processing: " + Math.abs(peakCandInd) + onsetDelay);
+						}else if(( Math.abs(peakCandInd)+ epochSize ) > audioData.length) {
+							Log.w(TAG,"Last peak index is too short for processing: " + Math.abs(peakCandInd) );
 						}else{
-							peakInd.add(Math.abs(peakCandInd)+onsetDelay);
+							peakInd.add(Math.abs(peakCandInd));
 						}
-
-						//if 3 positive peaks where found, Look for a negative peak next
-						if(countPositive == 3){
-							countPositive=0;
-							countNegative=0;
-							lookForNegative=true;
-						}
-
-						//if 1 negative peak was found, Look for 3 positive peaks next
-						if(countNegative >0){
-							countPositive=0;
-							countNegative=0;
-							lookForNegative=false;
-						}
-
-						// Move j to peak location + 1, so the next search will be from peak + 20 msec
-						j = Math.abs(peakCandInd) + 1;
+						j=Math.abs(peakCandInd)+1;
 					}
 				}	
 				Log.v(TAG,"Done finding epochs, found: " + peakInd.size());
@@ -133,57 +123,30 @@ public class TEOAEKempClientAnalysis {
 
 	private static double[] get4AverageWaveform(double[] audioData,	List<Integer> peakInd, int epochSize) {
 		double[] sum=new double[epochSize];
-		int countPositive=0, countNegative=0;
-		int countMismatched=0;
-		boolean start=false, isNegative;
 		int expectedNegativePeaks= Math.round ((audioData.length)/(4*epochSize));
-		//TODO: Set tolerance for number of mismatches
+		int negativePeaks=(int) Math.floor((double)peakInd.size()/4.0);
+		//TODO: Find a way to estimate missed peaks and jitter
 		Log.v(TAG,"Attempting to average over roughly "+ expectedNegativePeaks + " epochs.");
 		for(int n=0; n<peakInd.size();n++){
-			//NOTE: ASSUMPTION: Negative peaks are 3x bigger than the positive peaks!!!
-			//Check polarity of the peak, only start after the first negative peak due to
-			//possible transients
-			isNegative=(audioData[Math.abs(peakInd.get(n))]<0);
-			if(isNegative){
-				if(start){
-					//After find the first negative peak, there should always be 3 positive peaks
-					//before the next negative peak. If not, this should be considered a mismatch
-					if((countPositive%3) !=0){
-						countMismatched++;
-					}
-				}
-				start=true;
-				countNegative++;
-			}else if(start){
-				//Add counts of positive
-				countPositive++;
-			}
-			if(start){
-				//Passed the first negative peak. Keep running sum
-				//Sum to the running average
-				for(int k=0;k<sum.length;k++)
-					sum[k]+=audioData[Math.abs(peakInd.get(n))+k];
-			}
-
+			//Sum to the running average
+			for(int k=0;k<sum.length;k++)
+				sum[k]+=audioData[Math.abs(peakInd.get(n))+k];
 		}
 		//Get final 4average (note we assume countNegative is the most accurate statistic regarding the number
 		//of epochs collected
 		for(int k=0;k<sum.length;k++)
-			sum[k]=sum[k]/((double) countNegative);
-
-		Log.v(TAG,"Averaged : " + countNegative + " negative peaks, " + countPositive
-				+ " positive peaks. With " + countMismatched + " mismatches");
+			sum[k]=(double) sum[k]/negativePeaks;
+		Log.v(TAG,"Averaged : " + negativePeaks + " negative peaks");
 		Log.v(TAG,"Expected about : " + expectedNegativePeaks + " negative peaks.");
 		return sum;
 	}
 
 	public static double[] getTemporalAverage(double[] audioData, int epochSize,int Fs){
 		double[] epochAverage; 	
-		double peakThreshold = 0;
+		double peakThreshold =0;//Values for positive and negative peaks respectively
 
 		//Estimate peak threshold
 		peakThreshold=getThreshold(audioData,epochSize);
-		Log.v(TAG,"Peak threshold= "+ peakThreshold);
 
 		//Get peak indices
 		List<Integer> peakInd = getPeakIndices(audioData,peakThreshold,epochSize,Fs);
@@ -224,12 +187,12 @@ public class TEOAEKempClientAnalysis {
 		return maxInd;
 	}
 
-	public static double[] getEvokedResponse(double[] average,int cutPoint,int epochSize, int Fs){
+	public static double[] getEvokedResponse(double[] average,int Fs){
 
-		double[] trimAverage=Signals.copyOfRange(average,
-				epochSize-cutPoint-1,epochSize-1);
-		double[][] responseFFT= SignalProcessing.getSpectrum(trimAverage,
-				Fs,trimAverage.length);
+		double[][] responseFFT= SignalProcessing.getSpectrum(average,
+				Fs,average.length);
+
+		System.out.println("trimmed length=" + average.length);
 		double[] results= new double[fResp.length];
 
 		for(int n=0;n<fResp.length;n++)
@@ -298,33 +261,49 @@ public class TEOAEKempClientAnalysis {
 		return residueNoiseVar;
 	}
 
+	private static int[] getCutPoints(int epochSize, 
+			int epochOnsetDelay) {
+		//Trims response so that if a power of two, avoid the delay and
+		//end state due to transients 
+		int trimLength=epochSize-epochOnsetDelay;
+		int fftSize=(int) Math.pow(2,
+				(int) Math.floor(Math.log(trimLength)/Math.log(2)));
+		int leftOver=trimLength-fftSize;
+		//If there are any left over samples from the fft, take it from the end
+		//because the alignment procedure leaves stimulus transients on the end
+		//of the waveform
+		int[] cutPoints={epochOnsetDelay,epochSize-leftOver};
+		return cutPoints;
+	}
 
 	public static double[] mainAnalysis(short[] rawData, int Fs, int epochSize) throws Exception 
 	{
 		double epochTime=(int) Math.round(epochSize*Fs);
 		//Set the start time from which to start analzying the averaged
 		//epoch response in order to avoid transients (in seconds)
-		int epochOnsetDelay= (int) Math.round(Fs*0.014);
+		int epochOnsetDelay= (int) Math.round(Fs*0.004);
 
 		Log.v(TAG,rawData.length + "  / epoch size= " 
-				+ ((double) rawData.length/epochSize + " epochTime= " + epochTime));
+				+ ((double) rawData.length/epochSize + " epochTime= " + epochTime)
+				+ "epochOnsetDelay= " + epochOnsetDelay);
 
 		// Convert the raw data from short to double
 		Log.v(TAG,"Converting data to short");
 		double[] audioData = AudioSignal.convertMonoToDouble(rawData);
 		Log.v(TAG,"estimating average");
 		double[] epochAverage=getTemporalAverage(audioData,epochSize,Fs);
-		Log.v(TAG,"estimating noise");
 		double residueNoiseVar=getNoiseEstimate(audioData,epochSize);
-		int fftSize=(int) Math.pow(2,
-				(int) Math.floor(Math.log(epochSize-epochOnsetDelay)/Math.log(2)));
-		Log.v(TAG,"estimating evoked response");
-		double[] results=getEvokedResponse(epochAverage,fftSize,epochSize,Fs);
+		int[] cutPoints = getCutPoints(epochSize,epochOnsetDelay);
+		Log.v(TAG,"cutpoints are: " + cutPoints[0] +" " + cutPoints[1]
+				+ " length is=" + epochSize);
+		epochAverage=Signals.copyOfRange(epochAverage,cutPoints[0],cutPoints[1]);
+		//TODO:Find midpoint and use that as anchor for fftsize buffer
+		double[] results=getEvokedResponse(epochAverage,Fs);
 
 		//Normalize and convert to dB wrt Short.MAX
 		//as is done in the getResponse method
 		residueNoiseVar=residueNoiseVar/(Short.MAX_VALUE*Short.MAX_VALUE);
-		residueNoiseVar=10*Math.log10(residueNoiseVar/(fftSize*2*Math.PI));
+		residueNoiseVar=10*Math.log10(residueNoiseVar/(epochAverage.length*2*Math.PI));
 		Log.v(TAG,"TEOAE analysis complete!");
 		double[] output={results[0],results[1],results[2],residueNoiseVar};
 
@@ -332,4 +311,3 @@ public class TEOAEKempClientAnalysis {
 	}
 
 }
-
