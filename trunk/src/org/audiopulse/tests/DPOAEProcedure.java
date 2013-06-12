@@ -34,16 +34,18 @@ public class DPOAEProcedure extends TestProcedure{
 		
 		//Loop through all the test frequencies, generating stimulus and collecting the results
 		ArrayList<Double> testFrequencies=new ArrayList<Double>();
-		ArrayList<Short []> RESULTS = new ArrayList<Short []>();
 		testFrequencies.add((double) 2000);
 		testFrequencies.add((double) 3000);
 		testFrequencies.add((double) 4000);
 		clearLog();
-		
+		int testCount=0;
 		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
 		
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
 		Log.v(TAG,"Starting DPOAE Recording- generating stimuli at Fs = " + super.playbackSampleFrequency);
+		//TODO: Send data back to Activity, the final saving of result will be done when the Activity returns from plotting the processed
+		//data and the user accepts the results. 
+		data=new Bundle();
 		
 		for (Double thisFrequency : testFrequencies){
 			sendMessage(TestActivity.Messages.PROGRESS);
@@ -61,19 +63,33 @@ public class DPOAEProcedure extends TestProcedure{
 			results = testIO.acquire();
 			double ndTime= System.currentTimeMillis();
 			Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
-
-			File file= AudioPulseFileWriter.generateFileName("DPOAE","",super.testEar);
-			fileNames.add(file.getAbsolutePath());
+			File file=null;
+			
 			if(thisFrequency == 2000){
-				Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_2KHZ);
-				fileNamestoDataMap.put(AudioPulseDataAnalyzer.RAWDATA_2KHZ,file.getAbsolutePath());
+				file= AudioPulseFileWriter.generateFileName("DPOAE","2",super.testEar);
+				fileNames.add(file.getAbsolutePath());
+				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_2KHZ);
+				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_2KHZ);
+				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_2KHZ);
+				data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_2KHZ,results);
 			} else if(thisFrequency == 3000){
-				Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_3KHZ);
-				fileNamestoDataMap.put(AudioPulseDataAnalyzer.RAWDATA_3KHZ,file.getAbsolutePath());
+				file= AudioPulseFileWriter.generateFileName("DPOAE","3",super.testEar);
+				fileNames.add(file.getAbsolutePath());
+				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_3KHZ);
+				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_3KHZ);
+				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_3KHZ);
+				data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_3KHZ,results);
 			}else if(thisFrequency == 4000){
-				Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_4KHZ);
-				fileNamestoDataMap.put(AudioPulseDataAnalyzer.RAWDATA_4KHZ,file.getAbsolutePath());	
+				file= AudioPulseFileWriter.generateFileName("DPOAE","4",super.testEar);
+				fileNames.add(file.getAbsolutePath());
+				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_4KHZ);
+				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_4KHZ);
+				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_4KHZ);
+				data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_4KHZ,results);
 			}
+			
+			Log.v(TAG,"Holding data of size: " + results.length + " in class memory until return of PlotAudioGramActivity.");
+			Log.v(TAG,"If data gets accepted by user, will be stored at: " + file.getAbsolutePath());
 			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 
 			try {
@@ -85,14 +101,9 @@ public class DPOAEProcedure extends TestProcedure{
 				e.printStackTrace();
 			}
 			
-			//TODO: Send data back to Activity, the final saving of result will be done when the Activity returns from plotting the processed
-			//data and the user accepts the results. 
-			data=new Bundle();
-			Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.Results_MAP);
+			Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.Results_MAP);
 			data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
-			Log.v(TAG,"addin key: " + AudioPulseDataAnalyzer.RAWDATA_CLICK);
-			data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_CLICK,results);
-
+			
 			//The file passed here is not used in the analysis (ie not opened and read)!!
 			//It is used when the analysis gets accepted by the user: the app packages
 			//the file with stored the data for transmission with timestamp on the file name
@@ -112,6 +123,7 @@ public class DPOAEProcedure extends TestProcedure{
 		Log.v(TAG,"donew with " + TAG);
 	}
 
+	//Analysis of the results on the raw data
 	private HashMap<String, Double> analyzeResults(short[] data, 
 			double Fs, double F1, 
 			HashMap<String, Double> DPGRAM) throws Exception {

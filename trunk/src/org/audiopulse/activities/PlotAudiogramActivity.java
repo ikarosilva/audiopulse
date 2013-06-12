@@ -176,11 +176,8 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 			dialog.setButton(DialogInterface.BUTTON_NEUTRAL,"Save & Exit",
 					new DialogInterface.OnClickListener(){
 				public void onClick(DialogInterface dialog, int which) {
-					//TODO: Implement saving file to disk (zipped) as  a thread
-					//and passing URI if called from Sana procedure
-					//TODO: We need to implement a timer?
-
-					//final Handler mHandler = new Handler();
+					//TODO: passs URI if called from Sana procedure
+					
 					Log.v(TAG,"Saving files to disk");
 					showDialog(0);
 
@@ -199,8 +196,10 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 							while(it.hasNext()){
 								tmpName=it.next();
 								dataName=fileNamestoDataMap.get(tmpName.toString());
-								Log.v(TAG,"saving raw data: " + dataName+  " files as: " +tmpName );
+								//FIXME: Giving errors with DPOAE procedure
+								Log.v(TAG,"saving raw data : " + dataName+ " to files as: " +tmpName );
 								results=(short []) data.getSerializable(dataName);
+								Log.v(TAG,"results size= "  + results.length );
 								AudioPulseFileWriter writer= new AudioPulseFileWriter(new File(tmpName),results);
 								writer.start();
 								try {

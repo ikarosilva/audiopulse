@@ -15,7 +15,7 @@ public interface AudioPulseDataAnalyzer extends Callable<HashMap<String,Double>>
 	//Not sure if this is yet the best way, expect changes...
 	public static final String TestType="TestType"; //Encodes Test Type
 	
-	//Define Anlysis parameter Names (to be used by classes that extend 
+	//Define Analysis parameter Names (to be used by classes that extend 
 	//AudioPulseDataAnalyzer  interface
 	public static final String RESPONSE_2KHZ="resp2kHz";
 	public static final String RESPONSE_3KHZ="resp3kHz";
