@@ -6,9 +6,15 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 import android.util.Log;
 
+//Noinstantiable utility class
 public class SignalProcessing {
 	
 	public static final String TAG="SignalProcessing";
+	
+	private SignalProcessing(){
+		//Suppress default constructor for noninstantiability
+		throw new AssertionError();
+	}
 	
 	@Deprecated // function name should indicate that it does not actually calculate linearly scaled rms. Perhaps name it dBfs? 
 	public static double rms(short[] x){
