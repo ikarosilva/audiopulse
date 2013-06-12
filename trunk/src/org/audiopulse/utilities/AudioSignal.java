@@ -41,9 +41,14 @@ package org.audiopulse.utilities;
 import android.util.Log;
 
 // Useful functions for converting audio signals between double (for math) and short (for playback)
-
+//Noinstantiable utility class
 public class AudioSignal {
 	public static final String TAG="AudioSignal";
+	
+	private AudioSignal(){
+		//Suppress default constructor for noninstantiability
+		throw new AssertionError();
+	}
 	
 	//convert a mono double vector to shorts
 	public static short[] convertMonoToShort(double[] signal) {

@@ -19,7 +19,7 @@ public class TEOAEProcedure extends TestProcedure{
 	private final String TAG = "TEOAEProcedure";
 	private Bundle data;
 	//TODO: Select appropiate stimulus duration
-	private final double stimulusDuration=5;//stimulus duration in seconds
+	private final double stimulusDuration=20;//stimulus duration in seconds
 	private short[] results;
 	private HashMap<String, Double> DPGRAM;
 	private HashSet<String> fileNames=new HashSet<String>();
@@ -39,7 +39,7 @@ public class TEOAEProcedure extends TestProcedure{
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
 		double[] probe = Signals.clickKempMethod(super.playbackSampleFrequency, 
 				stimulusDuration);
-		probe = hardware.setOutputLevel(probe, 25);
+		probe = hardware.setOutputLevel(probe, 35);
 		short[] interLeavedProbe=
 				Signals.interleave(AudioSignal.convertMonoToShort(probe));
 		//TODO: Fix issues with the signal being clipped/buffer overuns ?

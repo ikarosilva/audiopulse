@@ -4,8 +4,14 @@ import java.util.Random;
 
 
 //class containing static methods to generate useful signals
+//Noinstantiable utility class
 public class Signals {
 
+	private Signals(){
+		//Suppress default constructor for noninstantiability
+		throw new AssertionError();
+	}
+	
 	//TODO: phase
 	public static double[] tone(int sampleFrequency, double frequency, double durationInSeconds) {
 		int N = (int) (durationInSeconds * sampleFrequency);

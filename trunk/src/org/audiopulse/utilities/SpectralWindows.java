@@ -39,8 +39,14 @@
 
 package org.audiopulse.utilities;
 
+//Noinstantiable utility class
 public class SpectralWindows {
 
+	private SpectralWindows(){
+		//Suppress default constructor for noninstantiability
+		throw new AssertionError();
+	}
+	
 	public static double hamming(int n, int N){
 		// assert that the absolute value is >= 0
 		assert ( n <= N ) : "Window sample: " + n + " is beyond expected window range: "+ N;
