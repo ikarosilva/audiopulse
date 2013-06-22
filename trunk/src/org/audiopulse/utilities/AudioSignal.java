@@ -51,6 +51,9 @@ public class AudioSignal {
 	}
 	
 	//convert a mono double vector to shorts
+	//TODO: We need to document this, it seems like this method
+	//expects the mono signal to be stereo interleaved with the same samples
+	//if not called from the convertStereoToShort method
 	public static short[] convertMonoToShort(double[] signal) {
 		short[] shortVector = new short [signal.length];
 		for (int n=0;n<signal.length;n++) {

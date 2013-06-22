@@ -23,6 +23,9 @@
         <activity android:name=".activities.DPOAEActivity"
             android:configChanges="orientation|keyboardHidden">
         </activity>
+        <activity android:name=".activities.TestDPOAEActivity"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
         <activity android:name=".activities.CalibrationMenuActivity" >
             <intent-filter>
                 <action android:name="org.audiopulse.CAPTURE_MENU"/>

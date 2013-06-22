@@ -2,6 +2,7 @@
 <resources>
     <array name="main_menu">
         <item>@string/calibration_title</item>
+        <item>@string/TEST_DPOAE</item>
         <item>@string/DPOAE_RIGHT</item>
         <item>@string/DPOAE_LEFT</item>
         <item>@string/TEOAE_RIGHT</item>
@@ -13,6 +14,7 @@
         <item>@string/menu_debug</item>
     </array>   
     <string name="calibration_title">Calibration Menu</string>
+    <string name="TEST_DPOAE">TEST DPOAE</string>
     <string name="DPOAE_RIGHT">DPOAE Right Ear</string>
     <string name="DPOAE_LEFT">DPOAE Left Ear</string>
     <string name="TEOAE_RIGHT">TEOAE Right Ear</string>

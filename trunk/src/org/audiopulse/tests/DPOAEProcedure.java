@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
@@ -23,7 +24,7 @@ public class DPOAEProcedure extends TestProcedure{
 	private HashSet<String> fileNames=new HashSet<String>();
 	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
 	private HashMap<String, Double> DPGRAM= new HashMap<String, Double>();
-	
+
 	public DPOAEProcedure(TestActivity parentActivity) {
 		super(parentActivity);
 		// TODO Auto-generated constructor stub
@@ -31,38 +32,38 @@ public class DPOAEProcedure extends TestProcedure{
 
 	@Override
 	public void run() {
-		
+
 		//Loop through all the test frequencies, generating stimulus and collecting the results
 		ArrayList<Double> testFrequencies=new ArrayList<Double>();
 		testFrequencies.add((double) 2000);
-		testFrequencies.add((double) 3000);
-		testFrequencies.add((double) 4000);
+		//testFrequencies.add((double) 3000);
+		//testFrequencies.add((double) 4000);
 		clearLog();
-		int testCount=0;
 		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
-		
+
 		//create {f1, f2} tones in {left, right} channel of stereo stimulus
 		Log.v(TAG,"Starting DPOAE Recording- generating stimuli at Fs = " + super.playbackSampleFrequency);
 		data=new Bundle();
-		
+
 		for (Double thisFrequency : testFrequencies){
 			sendMessage(TestActivity.Messages.PROGRESS);
 			logToUI("Running DPOAE frequency: " + thisFrequency + " kHz");
-			
+
 			//Stimulus is presented at F2
 			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
 					thisFrequency);
 			Log.v(TAG,"setting probe old level probe[0]=" + probe[0]);
-			probe[0] = hardware.setOutputLevel(probe[0], Signals.dpoaeGorgaAmplitude());
-			probe[1] = hardware.setOutputLevel(probe[1], Signals.dpoaeGorgaAmplitude());
+			probe[0] = hardware.setOutputLevel(probe[0], 50);//Signals.dpoaeGorgaAmplitude());
+			probe[1] = hardware.setOutputLevel(probe[1], 40);//Signals.dpoaeGorgaAmplitude());
 			Log.v(TAG," probe new level probe[0]=" + probe[0]);
 			testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(probe));
+
 			double stTime= System.currentTimeMillis();
 			results = testIO.acquire();
 			double ndTime= System.currentTimeMillis();
 			Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
 			File file=null;
-			
+
 			if(thisFrequency == 2000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","2",super.testEar);
 				fileNames.add(file.getAbsolutePath());
@@ -85,7 +86,16 @@ public class DPOAEProcedure extends TestProcedure{
 				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_4KHZ);
 				data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_4KHZ,results);
 			}
-			
+
+			//TODO: For now hard-code value instead of dynamically get from Resources...
+			if(super.testName.contentEquals("TEST DPOAE")){
+				//Extra parameters added for TestDPOAEActivity Only!
+				data.putLong("N",results.length);
+				data.putShortArray("samples",results);
+				data.putFloat("recSampleRate",super.recordingSampleFrequency);
+				data.putDouble("expectedFrequency", (thisFrequency-thisFrequency/1.2));
+			}
+
 			Log.v(TAG,"Holding data of size: " + results.length + " in class memory until return of PlotAudioGramActivity.");
 			Log.v(TAG,"If data gets accepted by user, will be stored at: " + file.getAbsolutePath());
 			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
@@ -98,10 +108,10 @@ public class DPOAEProcedure extends TestProcedure{
 				Log.v(TAG,"Could not generate analysis for results!!" + e.getMessage());
 				e.printStackTrace();
 			}
-			
+
 			Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.Results_MAP);
 			data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
-			
+
 			//The file passed here is not used in the analysis (ie not opened and read)!!
 			//It is used when the analysis gets accepted by the user: the app packages
 			//the file with stored the data for transmission with timestamp on the file name
@@ -112,7 +122,7 @@ public class DPOAEProcedure extends TestProcedure{
 				DPGRAM.put(tmpkey,localDPGRAM.get(tmpkey));
 			}
 		}
-		
+
 		Log.v(TAG,"Sending analyzed data to activity, keys in bundle are:");
 		for (String tmpkey: DPGRAM.keySet()){
 			Log.v(TAG,"global= " + tmpkey + " = " + DPGRAM.get(tmpkey));

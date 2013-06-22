@@ -63,6 +63,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	protected int playbackSamplingFrequency;
 	private boolean calledBySana;
 	protected String testEar;
+	protected String testName;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -75,7 +76,8 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		//TODO: Get ear being tested from Bundle
 		Bundle request = getIntent().getExtras();
 		testEar = (String) request.get(TestMenuActivity.BUNDLE_TESTEAR_KEY);
-
+		testName= (String) request.get(TestMenuActivity.BUNDLE_TESTNAME_KEY);
+		
 		//TODO: can we put a TestProcedure into a bundle? E.g. by implementing Parcelable, but is that worth it?
 		//		Bundle request = getIntent().getExtras();
 		//		testProcedure = (TestProcedure) request.get("test");
@@ -135,7 +137,14 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 
 	//plot recorded signal spectrum
 	public void plotSpectrum(Bundle audioResultsBundle) {
-		//TODO
+		Intent intent = new Intent(this.getApplicationContext(), PlotSpectralActivity.class);
+		intent.putExtras(audioResultsBundle);
+		// Added conditional to see if we want confirmation that plot is accepted
+		// such as when running headless - EW
+		if(calledBySana)
+			startActivityForResult(intent, CONFIRM_PLOT_CODE);
+		else
+			startActivity(intent);
 	}
 
 	//plot recorded waveform
@@ -205,5 +214,8 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 
 	public String getTestEar() {
 		return testEar;
+	}
+	public String getTestName() {
+		return testName;
 	}
 }

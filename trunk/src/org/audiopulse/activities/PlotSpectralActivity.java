@@ -63,15 +63,13 @@ public class PlotSpectralActivity extends AudioPulseActivity {
         super.onCreate(savedInstanceState);
         Bundle audio_bundle = getIntent().getExtras();
         long N=audio_bundle.getLong("N");
-        Double recordRMS=audio_bundle.getDouble("recordRMS");
         short[] audioBuffer;
 		audioBuffer=audio_bundle.getShortArray("samples");
 		float sampleRate=audio_bundle.getFloat("recSampleRate");
 		double expectedFrequency=audio_bundle.getDouble("expectedFrequency");
-		
-		Log.v(TAG,"Sample rate is " + sampleRate);
-        PlotSpectralView mView = new PlotSpectralView(this,N,audioBuffer,
-        		sampleRate,recordRMS,expectedFrequency);
+		Log.v(TAG,"plotting spectrum");
+        PlotSpectralView mView = new PlotSpectralView(this,audioBuffer,
+        		sampleRate,expectedFrequency);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(mView);
     }

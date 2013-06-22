@@ -74,6 +74,7 @@ public class SignalProcessing {
 		//http://www.mathworks.com/support/tech-notes/1700/1702.html
 
 		//Perform windowing and averaging on the power spectrum
+		Log.v(TAG,"Calculating FFT");
 		for (int i=0; i < N; i++){
 			if(i*SPEC_N+SPEC_N > N)
 				break;

@@ -22,9 +22,9 @@ public class PlayRecordManager {
 	
 	private int playbackSampleRate;
 	private int recordingSampleRate;
-	private int playerBufferLengthInMillis = 100;		//length of playback buffer (not stimulus)
-	private int recorderBufferLengthInMillis = 100;		//length of recording buffer (not read size)
-	private int recorderReadLengthInMillis = 25;		//recording buffer read length per operation
+	private int playerBufferLengthInMillis = 200;		//length of playback buffer (not stimulus)
+	private int recorderBufferLengthInMillis = 200;		//length of recording buffer (not read size)
+	private int recorderReadLengthInMillis = 50;		//recording buffer read length per operation
 	private int playerBufferLength;
 	private int recorderBufferLength;
 	private int recorderReadLength;
@@ -61,11 +61,18 @@ public class PlayRecordManager {
 	public PlayRecordManager(int playbackSampleFrequency, int recordingSampleFrequency) {
 		this.playbackSampleRate = playbackSampleFrequency;
 		this.recordingSampleRate = recordingSampleFrequency;
-		
+		Log.v(TAG,"playbackSampleRate= " + playbackSampleRate 
+				+ " recordingSampleRate= " + recordingSampleRate);
 		playerBufferLength = playerBufferLengthInMillis * playbackSampleFrequency / 1000;
-		recorderBufferLength = recorderBufferLengthInMillis * playbackSampleFrequency / 1000;;
-		recorderReadLength = recorderReadLengthInMillis * playbackSampleFrequency / 1000;;
+		recorderBufferLength = recorderBufferLengthInMillis * playbackSampleFrequency / 1000;
+		recorderReadLength = recorderReadLengthInMillis * playbackSampleFrequency / 1000;
 
+		Log.v(TAG,"playerBufferLength= " + playerBufferLength 
+				+ " recordingSampleRate= " + recordingSampleRate);
+		Log.v(TAG,"playbackSampleRate= " + playbackSampleRate 
+				+ " recorderBufferLength= " + recorderBufferLength);
+		Log.v(TAG,"recorderReadLength= " + recorderReadLength);
+		
 		//TODO: create AudioTrack and AudioRecord objects here?
 	}
 	
@@ -364,6 +371,27 @@ public class PlayRecordManager {
 						  playerMode);
 				player.play();
 				Log.i(TAG,"Player initialized with " + bufferSizeInBytes + "-byte ( " + bufferSizeInBytes*1000/2/playbackSampleRate + "ms) buffer");
+				
+				if(player.getChannelConfiguration() != AudioFormat.CHANNEL_OUT_STEREO) {
+					Log.e(TAG,"Channel channel not stereo (" + 
+				AudioFormat.CHANNEL_OUT_STEREO + " ) value is= " + player.getChannelConfiguration());
+					throw new AssertionError("Invalid Audio  Channel Configuration");
+				}
+				
+				if(player.getPlaybackRate() != playbackSampleRate) {
+					Log.e(TAG,"Channel rate not configure properly (" + 
+				playbackSampleRate + " ) playback value is= " + player.getPlaybackRate());
+					throw new AssertionError("Invalid Plabyback Rate Configuration");
+				}
+				if(player.getSampleRate() != playbackSampleRate) {
+					Log.e(TAG,"Channel rate not configure properly (" + 
+				playbackSampleRate + " ) value is= " + player.getSampleRate());
+					throw new AssertionError("Invalid Sample Rate Configuration");
+				}
+				
+				Log.i(TAG,"Audio Track configuration: sampleRate= " + player.getSampleRate()
+						+ " ChannelConfiguration= " + player.getChannelConfiguration() 
+						+ " PlaybackRate" + player.getPlaybackRate());
 				
 				//set up Thread that will run playback loop
 				playbackThread = new Thread( new Runnable() {
