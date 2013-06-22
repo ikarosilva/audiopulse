@@ -58,6 +58,7 @@ import org.audiopulse.utilities.SignalProcessing;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 
 /**
  * DeviationRendererDemo02View
@@ -72,27 +73,23 @@ public class PlotSpectralView extends DemoView {
 	 * @param N 
 	 */
 	private static final String TAG="PlotSpectralView";
-	private static long N;
 	private static short[] audioBuffer;
 	private static float sampleRate;
-	private static Double recordRMS;
 	private static double frange=100; //Range for highlighting where the expected response should 
 	//occur (in Hz)
 	private static double expectedFrequency;
 	static double fRangeStart;
 	static double fRangeEnd;
 
-	public PlotSpectralView(Context context, long M, short[] aBuffer, float Fs, 
-			Double recRMS, double eFrequency) {
+	public PlotSpectralView(Context context,short[] aBuffer, float Fs, 
+			 double eFrequency) {
 		super(context);
-		N=M;
 		audioBuffer=aBuffer;
-		sampleRate=Fs;
-		recordRMS=recRMS;	
+		sampleRate=Fs;	
 		expectedFrequency=eFrequency;
 		fRangeStart=expectedFrequency-frange;
 		fRangeEnd=expectedFrequency+frange;
-
+		Log.v(TAG,"Fs=" + sampleRate + " ,N= " + aBuffer.length);
 		final AFreeChart chart = createChart2();
 		setChart(chart);
 	}
@@ -101,7 +98,9 @@ public class PlotSpectralView extends DemoView {
 		XYSeriesCollection result = new XYSeriesCollection();
 		XYSeries series = new XYSeries(1);
 
+		Log.v(TAG,"estimating spectrum");
 		double[] Pxx=SignalProcessing.getSpectrum(audioBuffer);
+		
 		double fres= (double) sampleRate/Pxx.length;
 		
 		//Insert data and apply FIR smoothing to the spectral display
@@ -110,6 +109,7 @@ public class PlotSpectralView extends DemoView {
 		//int firLength=20 is a good choice;
 		int firLength=20;
 		double ave =0, flt_ind;
+		Log.v(TAG,"creating dataset");
 		for(int k=0;k<(Pxx.length/2);k++){
 			flt_ind=(k>=firLength)?firLength:(k+1);
 			ave = ave + 10*Math.log10(Pxx[k]) -((k>=firLength)?10*Math.log10(Pxx[k-firLength]):0);
@@ -126,7 +126,7 @@ public class PlotSpectralView extends DemoView {
 		XYDataset dataset = createDataset2();
 		// create the chart...
 		AFreeChart chart = ChartFactory.createXYLineChart(
-				"RMS = " + recordRMS.toString() + " dB", // chart title
+				"Spectrum", // chart title
 				"Frequency (Hz)", // x axis label
 				"Amplitude (dB)", // y axis label
 				dataset, // data

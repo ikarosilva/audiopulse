@@ -2,19 +2,23 @@ package org.audiopulse.utilities;
 
 import java.util.Random;
 
+import android.util.Log;
+
 
 //class containing static methods to generate useful signals
 //Noinstantiable utility class
 public class Signals {
 
+	private static final String TAG="Signals";
 	private Signals(){
 		//Suppress default constructor for noninstantiability
 		throw new AssertionError();
 	}
-	
+
 	//TODO: phase
 	public static double[] tone(int sampleFrequency, double frequency, double durationInSeconds) {
 		int N = (int) (durationInSeconds * sampleFrequency);
+		Log.v(TAG,"N= " + N + " dur= " +durationInSeconds + " fs= " +sampleFrequency);
 		double[] x = new double[N];
 		for (int n=0;n<N;n++) {
 			x[n] = Math.sin(2*Math.PI*frequency*n/sampleFrequency);
@@ -130,9 +134,34 @@ public class Signals {
 		double epocTime=0.02048; //epoch time in seconds 
 		double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
 		double[][] x= new double[2][];
-		x[0]=Signals.tone(sampleFrequency,F2,playTime);	
-		x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
+		Log.v(TAG,"Generating tones at: " + F2 +" and " + (F2/1.2));
+		x[0]=Signals.tone(sampleFrequency,F2,playTime);
+		//x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
+		x[1]=Signals.tone(sampleFrequency,1,playTime);
 		return x;
+	}
+
+	public synchronized static double[] dpoaeMonoGorgaMethod(int sampleFrequency, double F2) {
+		//Generate a specific set of DPOAE stimuli based on the same parameters from 
+		//"Handbook of Otocoustic Emissions" J. Hall, Singular Publishing Group Copyright 2000
+		// Screening parameters in page 136 (based on Gorga 
+		//Otoacoustic emissions from normal‐hearing and hearing‐impaired subjects: Distortion product responses
+		//J. Acoust. Soc. Am. Volume 93, Issue 4, pp. 2050-2060 (1993)
+
+		double sweeps=200;
+		double epocTime=0.02048; //epoch time in seconds 
+		double playTime=epocTime*sweeps*2;//From Gorga, this should be 4.096 seconds
+		Log.v(TAG,"Generating tones at: " + F2 +" and " + (F2/1.2));
+		double[] x1=Signals.tone(sampleFrequency,F2,playTime);
+		double[] x2=Signals.tone(sampleFrequency,F2/1.2,playTime);
+		Log.v(TAG,"signals of of length: " + Math.round((double) x1.length/(double) sampleFrequency));
+		Log.v(TAG,"playtime: " + playTime);
+		double[] y= new double[2*x1.length];
+		for(int n=0;n<x1.length;n++){
+			y[2*n]=x2[n]+x1[n];
+			y[2*n+1]=y[2*n];
+		}
+		return y;
 	}
 
 	public synchronized static double[] clickKempMethod(int sampleFrequency, double totalDurationInSeconds) {

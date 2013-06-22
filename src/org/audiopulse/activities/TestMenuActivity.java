@@ -40,7 +40,6 @@
 package org.audiopulse.activities;
 
 import org.audiopulse.R;
-import org.audiopulse.tests.DPOAEProcedure;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -80,7 +79,13 @@ public class TestMenuActivity extends AudioPulseActivity
         			if (itemText.equalsIgnoreCase(getResources().getString(R.string.calibration_title))) {
         				//Start menu with calibration related activities
         				startActivity(new Intent(TestMenuActivity.this, CalibrationMenuActivity.class));
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.TEST_DPOAE))) {
+        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
+        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
+        				Intent testIntent = new Intent(TestMenuActivity.this, TestDPOAEActivity.class);
+        				testIntent.putExtras(tests);
+        				startActivity(testIntent);
+        			}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
         				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
         				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
         				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);

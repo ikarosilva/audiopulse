@@ -94,9 +94,28 @@ public class AudioStreamer
 		track = new AudioTrack(audioMode, sampleRate, channelConfig, audioFormat, bytesPerFrame, trackMode); 
 		if(track.getState() != AudioTrack.STATE_INITIALIZED) {
 			Log.e(TAG,"Error: Audio record was not properly initialized!!");
-			return;
+			throw new AssertionError("Invalid Audio State Configuration");
+		}
+		if(track.getChannelConfiguration() != AudioFormat.CHANNEL_OUT_STEREO) {
+			Log.e(TAG,"Channel channel not stereo (" + 
+		AudioFormat.CHANNEL_OUT_STEREO + " ) value is= " + track.getChannelConfiguration());
+			throw new AssertionError("Invalid Audio  Channel Configuration");
 		}
 		
+		if(track.getPlaybackRate() != sampleRate) {
+			Log.e(TAG,"Channel rate not configure properly (" + 
+		sampleRate + " ) playback value is= " + track.getPlaybackRate());
+			throw new AssertionError("Invalid Plabyback Rate Configuration");
+		}
+		if(track.getSampleRate() != sampleRate) {
+			Log.e(TAG,"Channel rate not configure properly (" + 
+		sampleRate + " ) value is= " + track.getSampleRate());
+			throw new AssertionError("Invalid Sample Rate Configuration");
+		}
+		
+		Log.v(TAG,"Audio Track configuration: sampleRate= " + track.getSampleRate()
+				+ " ChannelConfiguration= " + track.getChannelConfiguration() 
+				+ " PlaybackRate" + track.getPlaybackRate());
 	}
 	
 	//connect AudioStreamer object with a ThreadedSignalGenerator object that will give it a signal
