@@ -125,11 +125,11 @@ public class Signals {
 		//and synringe coupler set to normal adult ear canal length
 		double level=0;
 		if(Frequency == 2000){
-			level=47;
+			level=37;
 		}else if(Frequency == 3000){
-			level=55;
+			level=40;
 		}else if(Frequency == 4000){
-			level =53;
+			level =47;
 		}else{
 			throw new IllegalArgumentException("Invalid DPOAE frquency= " + Frequency);
 		}

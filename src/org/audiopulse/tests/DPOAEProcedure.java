@@ -37,7 +37,7 @@ public class DPOAEProcedure extends TestProcedure{
 		ArrayList<Double> testFrequencies=new ArrayList<Double>();
 
 		if(super.testName.contentEquals("TEST DPOAE")){
-			testFrequencies.add((double) 3000);
+			testFrequencies.add((double) 2000);
 		}else{
 			testFrequencies.add((double) 2000);
 			testFrequencies.add((double) 3000);
