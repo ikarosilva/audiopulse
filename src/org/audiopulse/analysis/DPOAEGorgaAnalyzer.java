@@ -45,6 +45,7 @@ package org.audiopulse.analysis;
 import java.util.HashMap;
 
 import org.audiopulse.utilities.SignalProcessing;
+import org.audiopulse.utilities.Signals;
 
 import android.util.Log;
 
@@ -57,8 +58,7 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 	private double F1;
 	private double F2;
 	private double F12;
-	final int epochTime=512; //Size of each epoch from which to do spectral the averaging, this is a trade off between
-	//being close the Gorga's value (20.48 ms) and being a power of 2 for FFT analysis given our Fs (16 kHz).
+	private static int epochSamples; //Size of each epoch from which to do spectral the averaging.
 	HashMap<String, Double> resultMap;
 
 	public DPOAEGorgaAnalyzer(short[] data, double Fs, double F2,
@@ -69,6 +69,8 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 		F1=F2/1.2;
 		this.F12=(2*F1)-F2;//Frequency of the expected response
 		resultMap= new HashMap<String, Double>();
+		epochSamples=(int) Math.round(Signals.dpoeaGorgaEpochTime()*Fs);
+		epochSamples=(int) Math.pow(2,Math.floor(Math.log((int) epochSamples)/Math.log(2)));
 		this.resultMap=resultMap;
 		if(Fs != 16000){
 			Log.v(TAG,"Unexpected sampling frequency:" + Fs);
@@ -85,7 +87,8 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 		//All the analysis will be done in the fft domain 
 		//using the AudioPulseDataAnalyzer interface to obtain the results
 		Log.v(TAG,"Analyzing frequency: " + F2);
-		double[][] XFFT= SignalProcessing.getSpectrum(data,Fs,epochTime);
+		double[][] XFFT= SignalProcessing.getSpectrum(data,Fs,epochSamples);
+		
 		resultMap.put(TestType,(double) 2);//According to the interface, 2 =DPOAE
 		String strSTIM = null, strSTIM2 = null,strResponse = null,strNoise = null;
 

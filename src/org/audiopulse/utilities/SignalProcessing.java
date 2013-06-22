@@ -105,15 +105,14 @@ public class SignalProcessing {
 		//based on the maximum desired frequency for FFT analysis
 
 		//Calculate the number of sweeps given the epoch time
-		Log.v(TAG,"SPEC_N= " + SPEC_N + " x.length= " + x.length);
 		int sweeps=Math.round(x.length/SPEC_N);
 		double[] winData=new double[SPEC_N];
 		Complex[] tmpFFT=new Complex[SPEC_N];
 		double[][] Pxx = new double[2][SPEC_N/2];
 		double tmpPxx;
 		double SpectrumResolution = Fs/SPEC_N;
-		
-
+		double REFMAX=Short.MAX_VALUE; //Normalizing value
+		double scaleFactor=SPEC_N*2*Math.PI;
 		//Break FFT averaging into SPEC_N segments for averaging
 		//Calculate spectrum, variation based on
 		//http://www.mathworks.com/support/tech-notes/1700/1702.html
@@ -125,25 +124,24 @@ public class SignalProcessing {
 			if(i*SPEC_N+SPEC_N > x.length)
 				break;
 			for (int k=0;k<SPEC_N;k++){
-				winData[k]= x[i*SPEC_N + k]*SpectralWindows.hamming(k,SPEC_N);
+				winData[k]= ((double)x[i*SPEC_N + k]/REFMAX)*SpectralWindows.hamming(k,SPEC_N);
 			}
 			tmpFFT=FFT.transform(winData,TransformType.FORWARD);
 			for(int k=0;k<(SPEC_N/2);k++){
 				tmpPxx = tmpFFT[k].abs();
-				tmpPxx=2*(tmpPxx*tmpPxx)/(double)SPEC_N; //Not accurate for the DC & Nyquist, but we are not using it!
+				tmpPxx=(tmpPxx*tmpPxx)/scaleFactor; //Not accurate for the DC & Nyquist, but we are not using it!
 				Pxx[1][k]=( (i*Pxx[1][k]) + tmpPxx )/((double) i+1); //averaging
 			}
 		}
 
+		//Convert to dB
 		for(int i=0;i<Pxx[0].length;i++){
 			Pxx[0][i]=SpectrumResolution*i;
-			Pxx[1][i]=10*Math.log10(Pxx[1][i]);//FIXME: Update the conversion based on calibration values
-											   //this conversion should be done through a AcousticConversion class
+			Pxx[1][i]=10*Math.log10(Pxx[1][i]);
 		}
-
 		return Pxx;
 	}
-
+	
 	public static boolean isclipped(short[] rawData, double Fs) {
 		// TODO: Crude method to detect clipping of the waveform by 
 		//using a moving window and checking if all samples in that window
