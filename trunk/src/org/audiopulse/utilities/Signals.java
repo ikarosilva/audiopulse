@@ -116,11 +116,24 @@ public class Signals {
 		return y;
 	}
 
-	public synchronized static double dpoaeGorgaAmplitude(){
+	public synchronized static double dpoaeGorgaAmplitude(double Frequency){
 		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
 		//but this seems to result in clipping for most phones.
 		//we need to find an optimal maximum level that does not clip the sound
-		return 50;
+
+		//Optimized levels for HTC phone and frequency based on manual validation of spectrum
+		//and synringe coupler set to normal adult ear canal length
+		double level=0;
+		if(Frequency == 2000){
+			level=47;
+		}else if(Frequency == 3000){
+			level=55;
+		}else if(Frequency == 4000){
+			level =53;
+		}else{
+			throw new IllegalArgumentException("Invalid DPOAE frquency= " + Frequency);
+		}
+		return level;
 	}
 
 	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F2) {
@@ -136,8 +149,7 @@ public class Signals {
 		double[][] x= new double[2][];
 		Log.v(TAG,"Generating tones at: " + F2 +" and " + (F2/1.2));
 		x[0]=Signals.tone(sampleFrequency,F2,playTime);
-		//x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
-		x[1]=Signals.tone(sampleFrequency,1,playTime);
+		x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
 		return x;
 	}
 

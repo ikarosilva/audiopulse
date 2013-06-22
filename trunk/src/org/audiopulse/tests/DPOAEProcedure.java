@@ -35,9 +35,14 @@ public class DPOAEProcedure extends TestProcedure{
 
 		//Loop through all the test frequencies, generating stimulus and collecting the results
 		ArrayList<Double> testFrequencies=new ArrayList<Double>();
-		testFrequencies.add((double) 2000);
-		//testFrequencies.add((double) 3000);
-		//testFrequencies.add((double) 4000);
+
+		if(super.testName.contentEquals("TEST DPOAE")){
+			testFrequencies.add((double) 3000);
+		}else{
+			testFrequencies.add((double) 2000);
+			testFrequencies.add((double) 3000);
+			testFrequencies.add((double) 4000);
+		}
 		clearLog();
 		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
 
@@ -53,8 +58,8 @@ public class DPOAEProcedure extends TestProcedure{
 			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
 					thisFrequency);
 			Log.v(TAG,"setting probe old level probe[0]=" + probe[0]);
-			probe[0] = hardware.setOutputLevel(probe[0], 50);//Signals.dpoaeGorgaAmplitude());
-			probe[1] = hardware.setOutputLevel(probe[1], 40);//Signals.dpoaeGorgaAmplitude());
+			probe[0] = hardware.setOutputLevel(probe[0],Signals.dpoaeGorgaAmplitude(thisFrequency));
+			probe[1] = hardware.setOutputLevel(probe[1],Signals.dpoaeGorgaAmplitude(thisFrequency));
 			Log.v(TAG," probe new level probe[0]=" + probe[0]);
 			testIO.setPlaybackAndRecording(AudioSignal.convertStereoToShort(probe));
 
@@ -90,10 +95,12 @@ public class DPOAEProcedure extends TestProcedure{
 			//TODO: For now hard-code value instead of dynamically get from Resources...
 			if(super.testName.contentEquals("TEST DPOAE")){
 				//Extra parameters added for TestDPOAEActivity Only!
+				double F1= thisFrequency/1.2;
+				double expected=2*F1 - thisFrequency;
 				data.putLong("N",results.length);
 				data.putShortArray("samples",results);
 				data.putFloat("recSampleRate",super.recordingSampleFrequency);
-				data.putDouble("expectedFrequency", (thisFrequency-thisFrequency/1.2));
+				data.putDouble("expectedFrequency",expected);
 			}
 
 			Log.v(TAG,"Holding data of size: " + results.length + " in class memory until return of PlotAudioGramActivity.");
