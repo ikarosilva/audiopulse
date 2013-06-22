@@ -144,7 +144,7 @@ public class Signals {
 		//J. Acoust. Soc. Am. Volume 93, Issue 4, pp. 2050-2060 (1993)
 
 		double sweeps=200;
-		double epocTime=0.02048; //epoch time in seconds 
+		double epocTime=dpoeaGorgaEpochTime(); //epoch time in seconds 
 		double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
 		double[][] x= new double[2][];
 		Log.v(TAG,"Generating tones at: " + F2 +" and " + (F2/1.2));
@@ -153,6 +153,10 @@ public class Signals {
 		return x;
 	}
 
+	public static double dpoeaGorgaEpochTime(){
+		//return epoch time in seconds
+		return 0.02048;
+	}
 	public synchronized static double[] dpoaeMonoGorgaMethod(int sampleFrequency, double F2) {
 		//Generate a specific set of DPOAE stimuli based on the same parameters from 
 		//"Handbook of Otocoustic Emissions" J. Hall, Singular Publishing Group Copyright 2000

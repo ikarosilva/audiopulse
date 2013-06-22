@@ -80,12 +80,14 @@ public class PlotSpectralView extends DemoView {
 	private static double expectedFrequency;
 	static double fRangeStart;
 	static double fRangeEnd;
+	static int fftSize;
 
 	public PlotSpectralView(Context context,short[] aBuffer, float Fs, 
-			 double eFrequency) {
+			 double eFrequency, int fftN) {
 		super(context);
 		audioBuffer=aBuffer;
 		sampleRate=Fs;	
+		fftSize=fftN;
 		expectedFrequency=eFrequency;
 		fRangeStart=expectedFrequency-frange;
 		fRangeEnd=expectedFrequency+frange;
@@ -99,24 +101,11 @@ public class PlotSpectralView extends DemoView {
 		XYSeries series = new XYSeries(1);
 
 		Log.v(TAG,"estimating spectrum");
-		double[] Pxx=SignalProcessing.getSpectrum(audioBuffer);
-		
-		double fres= (double) sampleRate/Pxx.length;
-		
-		//Insert data and apply FIR smoothing to the spectral display
-		//Parameters for the frequency-domain smoothing of the periodogram
-		//set firLength =1  for no smoothing at all.
-		//int firLength=20 is a good choice;
-		int firLength=20;
-		double ave =0, flt_ind;
+		double[][]XFFT=SignalProcessing.getSpectrum(audioBuffer,sampleRate,fftSize);
 		Log.v(TAG,"creating dataset");
-		for(int k=0;k<(Pxx.length/2);k++){
-			flt_ind=(k>=firLength)?firLength:(k+1);
-			ave = ave + 10*Math.log10(Pxx[k]) -((k>=firLength)?10*Math.log10(Pxx[k-firLength]):0);
-
-			series.add(((double) 0) + k*fres,
-					ave/flt_ind);
-		}
+		for(int k=0;k<(XFFT[0].length/2);k++)
+			series.add(XFFT[0][k], XFFT[1][k]);
+		
 		result.addSeries(series);
 		return result;
 	}

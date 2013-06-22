@@ -97,10 +97,14 @@ public class DPOAEProcedure extends TestProcedure{
 				//Extra parameters added for TestDPOAEActivity Only!
 				double F1= thisFrequency/1.2;
 				double expected=2*F1 - thisFrequency;
+				int fftSize=(int) Math.round(
+						Signals.dpoeaGorgaEpochTime()*super.recordingSampleFrequency);
+				fftSize=(int) Math.pow(2,Math.floor(Math.log((int) fftSize)/Math.log(2)));
 				data.putLong("N",results.length);
 				data.putShortArray("samples",results);
 				data.putFloat("recSampleRate",super.recordingSampleFrequency);
 				data.putDouble("expectedFrequency",expected);
+				data.putInt("fftSize",fftSize);
 			}
 
 			Log.v(TAG,"Holding data of size: " + results.length + " in class memory until return of PlotAudioGramActivity.");
