@@ -55,7 +55,7 @@ public class SignalProcessing {
 		return dB2lin((double)a);
 	}
 	public static double dB2lin(double a) {
-		return Math.pow(10, a/20);
+		return Math.pow(10, a/20.0);
 	}
 	
 	@Deprecated //use double[][] getSpectrum(short[] x) instead (the first column is frequency indices
@@ -174,14 +174,5 @@ public class SignalProcessing {
 		}
 		return clipped;
 	}
-
-	/*
-	public static double[] getDPOAEResults(Bundle audioBundle, RecordThreadRunnable rRun){
-		short[] audioBuffer = audioBundle.getShortArray("samples");
-		double[] Pxx=SignalProcessing.getSpectrum(audioBuffer);
-		//TODO: set noise estimation to mid-frequency between desired stimulus and F1 for now
-		//double Fnoise=rRun
-		}
-		*/
 	
 }
