@@ -1,13 +1,12 @@
 package org.audiopulse.hardware;
 
-import org.audiopulse.utilities.SignalProcessing;
-
 public class AcousticConverter {
 	//TODO: put this into a resource file
-	private double VPerDU_output = 1;		//V for 1 amplitude at outpu
-	private double VPerDU_input = 0.020;		//V for 1 amplitude at input
-	private double SPL1V = 72;				//dB SPL for 1V rms electrical signal
-	private double SPL1uV = 0;				//db SPL for 1uV rms micorphone electrical signal
+	private static final double VPerDU_output = 1;		//V for 1 amplitude at outpu
+	private static final double VPerDU_input = 0.020;		//V for 1 amplitude at input
+	private static final double SPL1V = 72;				//dB SPL for 1V rms electrical signal
+	private static final double SPL1uV = 0;				//db SPL for 1uV rms micorphone electrical signal
+	private static final double SQRT2=Math.sqrt(2.0);
 	
 	public AcousticConverter() {
 		//TODO: determine that mic & headphone jack are connected to something
@@ -62,7 +61,7 @@ public class AcousticConverter {
 		double a = getOutputLevel(x);
 		double gain = spl - a;
 		for (int n=0; n<x.length; n++) {
-			x[n] *= Math.pow(10, gain/20);
+			x[n] *= Math.pow(10, gain/20.0);
 		}
 		return x;
 	}
@@ -87,6 +86,13 @@ public class AcousticConverter {
 		return 20*Math.log10(rms*VPerDU_input*1e6) + SPL1uV;		//SPL = dBuV + SPL1uV
 	}
 	
+	public double getFrequencyInputLevel(double Pxx) {
+		//Given a frequency power Pxx, calculates the equivalent 
+		//dB SPL level
+		double rms=  Pxx*SQRT2;
+		return 20*Math.log10(rms*VPerDU_input*1e6) + SPL1uV;		//SPL = dBuV + SPL1uV
+	}
+	
 	//return dB offset: dB SPL = 10*log10(A^2) + dBOffset
 	public double getDBOffset_output() {
 		return 10*Math.log10(VPerDU_output) + SPL1V;
@@ -102,7 +108,7 @@ public class AcousticConverter {
 		int N = output.length;
 		double[] input = new double[N];
 		for (int n=0; n<N; n++) {
-			input[n] = output[n] * VPerDU_output / VPerDU_input * Math.pow(10, (SPL1V-(SPL1uV+120))/20);
+			input[n] = output[n] * VPerDU_output / VPerDU_input * Math.pow(10, (SPL1V-(SPL1uV+120))/20.0);
 		}
 		return input;
 	}
