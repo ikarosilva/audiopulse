@@ -2,10 +2,11 @@ package org.audiopulse.hardware;
 
 public class AcousticConverter {
 	//TODO: put this into a resource file
-	private static final double VPerDU_output = 1;		//V for 1 amplitude at outpu
+	private static final double ER10CGain=40;			//Gain setting for the ER10C in dB
+	private static final double VPerDU_output = 1;		//V for 1 amplitude at output
 	private static final double VPerDU_input = 0.020;		//V for 1 amplitude at input
 	private static final double SPL1V = 72;				//dB SPL for 1V rms electrical signal
-	private static final double SPL1uV = 0;				//db SPL for 1uV rms micorphone electrical signal
+	private static final double SPL1uV = 0-ER10CGain;				//dB SPL for 1uV rms microphone electrical signal
 	private static final double SQRT2=Math.sqrt(2.0);
 	
 	public AcousticConverter() {
@@ -85,11 +86,11 @@ public class AcousticConverter {
 	public double getInputLevel(double rms) {
 		return 20*Math.log10(rms*VPerDU_input*1e6) + SPL1uV;		//SPL = dBuV + SPL1uV
 	}
-	
-	public double getFrequencyInputLevel(double Pxx) {
-		//Given a frequency power Pxx, calculates the equivalent 
-		//dB SPL level
-		double rms=  Pxx*SQRT2;
+		
+	public static double getFrequencyInputLevel(double Amp) {
+		//Given a frequency peak-to-peak amplitude, Amp, calculates the equivalent 
+		//dB SPL level given setup configuration
+		double rms=  Amp*SQRT2;
 		return 20*Math.log10(rms*VPerDU_input*1e6) + SPL1uV;		//SPL = dBuV + SPL1uV
 	}
 	
