@@ -52,7 +52,8 @@ public class TEOAEProcedure extends TestProcedure{
 				+ " secs at playFs= " + super.playbackSampleFrequency
 				+ " and recFs= " +super.recordingSampleFrequency);
 		Log.v(TAG,"Expected duration of at least = "+ stimulusDuration + " secs" );
-		File file= AudioPulseFileWriter.generateFileName("TEOAE","",super.testEar);
+		File file= AudioPulseFileWriter.generateFileName("TEOAE","",super.testEar,0.0);
+		//File file= AudioPulseFileWriter.generateFileName("TEOAE","",super.testEar); TODO uncomment above
 		fileNames.add(file.getAbsolutePath());
 		fileNamestoDataMap.put(file.getAbsolutePath(),
 				AudioPulseDataAnalyzer.RAWDATA_CLICK);

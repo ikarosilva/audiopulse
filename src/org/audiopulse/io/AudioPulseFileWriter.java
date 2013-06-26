@@ -71,8 +71,9 @@ public class AudioPulseFileWriter extends Thread {
 	}
 	
 	public synchronized static File generateFileName(String testType,
-			String testFrequency, String testEar){
-		String fileName="AP_" + testType + "-" + testEar + '-'+ testFrequency + "kHz-" +new Date().toString()+fileExtension;
+			String testFrequency, String testEar, Double attenuation){
+		String fileName="AP_" + attenuation.toString()+ "-" 
+			+ testType + "-" + testEar + '-'+ testFrequency + "kHz-" +new Date().toString()+fileExtension;
 		File outFile = new File(root, fileName.replace(" ","-").replace(":", "-") );
 		return outFile;
 	}

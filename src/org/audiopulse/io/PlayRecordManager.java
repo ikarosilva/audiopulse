@@ -2,7 +2,9 @@ package org.audiopulse.io;
 
 import java.io.IOException;
 
+import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.utilities.AudioSignal;
+import org.audiopulse.utilities.SignalProcessing;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -95,6 +97,9 @@ public class PlayRecordManager {
 	//set to playback and record, specify stimulus
 	public synchronized void setPlaybackAndRecording(short[] stimulus) {
 		short[] safeStimulus = stimulus.clone();
+		AcousticConverter hardware = new AcousticConverter();
+		Log.v(TAG,"Stimulus set: [0]= " + safeStimulus[0] + " [N]=" + safeStimulus[safeStimulus.length-1]);
+		Log.v(TAG,"Stimulus set: rms = " + SignalProcessing.rms(AudioSignal.convertToMono(AudioSignal.convertStereoToDouble(safeStimulus))));
 		//FIXME: switch on mono / stereo to determine playback length
 		//FIXME: be safer about integer overflows for long buffers!
 		//sync recording length to playback length (assumes stereo interleaved)
