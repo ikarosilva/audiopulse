@@ -78,27 +78,6 @@ public class PlayRecordManager {
 	
 	//TODO: have public functions return success, or possibly throw exceptions
 	
-	@Deprecated
-	public synchronized void setPlaybackOnly(int playbackSampleFreq, double[][] stimulus) {
-		setPlaybackOnly(stimulus);
-	}
-	@Deprecated
-	public synchronized void setPlaybackAndRecording(int playbackSampleFreq, double[][] stimulus, int recordingSampleFreq) {
-		setPlaybackAndRecording(stimulus);
-	}
-	@Deprecated
-	public synchronized void setRecordingOnly(int recordingSampleFrequency, int recordTimeInMillis) {
-		setRecordingOnly(recordTimeInMillis);
-	}
-	
-	@Deprecated
-	public synchronized void setPlaybackOnly(double[][] stimulus) {
-		setPlaybackOnly(AudioSignal.convertStereoToShort(stimulus));
-	}
-	@Deprecated
-	public synchronized void setPlaybackAndRecording(double[][] stimulus) {
-		setPlaybackAndRecording(AudioSignal.convertStereoToShort(stimulus));
-	}
 	
 	//set to playback only, specify stimulus
 	public synchronized void setPlaybackOnly(short[] stimulus) {
@@ -182,25 +161,6 @@ public class PlayRecordManager {
 		stopRequest = true;
 		//TODO: use interrupt on playThread and recordThread, rather than this?
 	}
-	
-	@Deprecated
-	public synchronized double[] getResult() {
-		Log.e(TAG,"Using deprecatecd, non-functional getResult() function");
-		return null;
-	}
-	@Deprecated
-	public void start() {
-		Log.e(TAG,"Using deprecatecd, non-functional start() function");
-	}
-	@Deprecated
-	public synchronized void setPlaybackAndRecording(
-			int playbackSampleFreq, double[][] stimulus,
-			int recordingSampleFreq, int prerollInMillis, int postRollInMillis) {
-		Log.e(TAG,"Using deprecatecd, non-functional setPlaybackAndRecording(int,double[][],int,int,int) function");
-	}
-
-	
-	
 	
 	//run within playbackThread to write samples to hardware output buffer
 	private void playbackLoop() {
