@@ -34,7 +34,7 @@ public class SignalProcessing {
 
 	public static double rms(double[] x) {
 		double rms = 0;
-		int N = x.length;
+		double N = (double) x.length;
 		for (int n=0; n<N; n++) {
 			rms += x[n]*x[n]/N; 		//warning: not rms yet!
 		}
