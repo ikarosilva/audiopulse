@@ -125,7 +125,7 @@ public class Signals {
 		//and synringe coupler set to normal adult ear canal length
 		double level=0;
 		if(Frequency == 2000){
-			level=37;
+			level=50;
 		}else if(Frequency == 3000){
 			level=40;
 		}else if(Frequency == 4000){
@@ -133,7 +133,7 @@ public class Signals {
 		}else{
 			throw new IllegalArgumentException("Invalid DPOAE frquency= " + Frequency);
 		}
-		return level;
+		return 80;//level;
 	}
 
 	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F2) {
@@ -143,13 +143,14 @@ public class Signals {
 		//Otoacoustic emissions from normal‐hearing and hearing‐impaired subjects: Distortion product responses
 		//J. Acoust. Soc. Am. Volume 93, Issue 4, pp. 2050-2060 (1993)
 
-		double sweeps=200;
+		double sweeps=100;//200; TODO: uncoment
 		double epocTime=dpoeaGorgaEpochTime(); //epoch time in seconds 
 		double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
 		double[][] x= new double[2][];
 		Log.v(TAG,"Generating tones at: " + F2 +" and " + (F2/1.2));
 		x[0]=Signals.tone(sampleFrequency,F2,playTime);
-		x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
+		//x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
+		x[1]=Signals.tone(sampleFrequency,1000,playTime);
 		return x;
 	}
 
