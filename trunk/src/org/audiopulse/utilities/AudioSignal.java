@@ -99,7 +99,7 @@ public class AudioSignal {
 		double[] monoSignal = new double [N];
 
 		for (int n=0;n<N; n++) {
-			monoSignal[n] += 1/2 * (signal[0][n] + signal[1][n]);
+			monoSignal[n] += (1.0/2.0) * (signal[0][n] + signal[1][n]);
 		}
 		
 		return monoSignal;
