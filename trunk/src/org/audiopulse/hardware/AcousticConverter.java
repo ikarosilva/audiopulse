@@ -1,13 +1,16 @@
 package org.audiopulse.hardware;
 
+import android.util.Log;
+
 public class AcousticConverter {
 	//TODO: put this into a resource file
-	private static final double ER10CGain=40;			//Gain setting for the ER10C in dB
-	private static final double VPerDU_output = 1;		//V for 1 amplitude at output
+	private static final double ER10CGain=40.0;			//Gain setting for the ER10C in dB
+	private static final double VPerDU_output = 1.0;		//V for 1 amplitude at output
 	private static final double VPerDU_input = 0.020;		//V for 1 amplitude at input
-	private static final double SPL1V = 72;				//dB SPL for 1V rms electrical signal
+	private static final double SPL1V = 72.0;				//dB SPL for 1V rms electrical signal
 	private static final double SPL1uV = 0-ER10CGain;				//dB SPL for 1uV rms microphone electrical signal
 	private static final double SQRT2=Math.sqrt(2.0);
+	private static final String TAG="AcousticConverter";
 	
 	public AcousticConverter() {
 		//TODO: determine that mic & headphone jack are connected to something
@@ -52,7 +55,7 @@ public class AcousticConverter {
 		}
 		if (r==0)								//avoid log(0), return min value instead
 			return Double.MIN_VALUE;
-		r /= N;										//convert to mean-squared
+		r /= ((double) N);										//convert to mean-squared
 		r *= (VPerDU_output*VPerDU_output);			//convert mean-squared value to volts^2
 		return 10*Math.log10(r) + SPL1V;			//convert to dB SPL
 	}
@@ -61,6 +64,7 @@ public class AcousticConverter {
 	public double[] setOutputLevel(double[] x, double spl) {
 		double a = getOutputLevel(x);
 		double gain = spl - a;
+		Log.v(TAG,"a= " + a + " spl=" + spl +" gain=" + gain);
 		for (int n=0; n<x.length; n++) {
 			x[n] *= Math.pow(10, gain/20.0);
 		}
@@ -80,7 +84,7 @@ public class AcousticConverter {
 		}
 		if (r==0)								//avoid log(0), return min value instead
 			return Double.MIN_VALUE;
-		r = Math.sqrt(r/N);		//convert to rms DU
+		r = Math.sqrt(r/((double)N));		//convert to rms DU
 		return getInputLevel(r);
 	}
 	public double getInputLevel(double rms) {
@@ -109,7 +113,7 @@ public class AcousticConverter {
 		int N = output.length;
 		double[] input = new double[N];
 		for (int n=0; n<N; n++) {
-			input[n] = output[n] * VPerDU_output / VPerDU_input * Math.pow(10, (SPL1V-(SPL1uV+120))/20.0);
+			input[n] = output[n] * (VPerDU_output / VPerDU_input )* Math.pow(10, (SPL1V-(SPL1uV+120))/20.0);
 		}
 		return input;
 	}
