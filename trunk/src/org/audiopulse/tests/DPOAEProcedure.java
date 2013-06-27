@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
@@ -21,7 +20,6 @@ public class DPOAEProcedure extends TestProcedure{
 
 	private final String TAG = "DPOAEProcedure";
 	private Bundle data;
-	private short[] results;
 	private HashSet<String> fileNames=new HashSet<String>();
 	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
 	private HashMap<String, Double> DPGRAM= new HashMap<String, Double>();
@@ -52,11 +50,13 @@ public class DPOAEProcedure extends TestProcedure{
 			testFrequencies.add(f);
 			testFrequencies.add(f);
 			testFrequencies.add(f);
+			/*
 			testFrequencies.add(f);
 			testFrequencies.add(f);
 			testFrequencies.add(f);
 			testFrequencies.add(f);
 			testFrequencies.add(f);	
+			*/
 		}
 		clearLog();
 		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
@@ -65,7 +65,9 @@ public class DPOAEProcedure extends TestProcedure{
 		Log.v(TAG,"Starting DPOAE Recording- generating stimuli at Fs = " + super.playbackSampleFrequency);
 		data=new Bundle();
 
-		Double attenuation=-10.0;
+		Double attenuation=-20.0;
+		short[] results;
+		short[] stimulus;
 		for (Double thisFrequency : testFrequencies){
 			sendMessage(TestActivity.Messages.PROGRESS);
 			logToUI("Running DPOAE frequency: " + thisFrequency + " kHz");
@@ -73,14 +75,14 @@ public class DPOAEProcedure extends TestProcedure{
 			//Stimulus is presented at F2
 			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
 					thisFrequency);
-			attenuation=attenuation+10.0;
+			attenuation=attenuation+20.0;
 			probe[0] = hardware.setOutputLevel(probe[0],
 					Signals.dpoaeGorgaAmplitude(thisFrequency)-attenuation);
 			probe[1] = hardware.setOutputLevel(probe[1],
 					Signals.dpoaeGorgaAmplitude(thisFrequency)-attenuation);
 			
 			
-			short[] stimulus=AudioSignal.convertStereoToShort(probe);
+			stimulus=AudioSignal.convertStereoToShort(probe);
 			Log.v(TAG,"probe rms =" + SignalProcessing.rms(probe[0])+ 
 					" stimulus rms= " + SignalProcessing.rms(stimulus));
 			//short[] stimulus=AudioSignal.convertMonoToShort(
@@ -111,14 +113,18 @@ public class DPOAEProcedure extends TestProcedure{
 				file= AudioPulseFileWriter.generateFileName("DPOAE","4",super.testEar,attenuation);
 				fileNames.add(file.getAbsolutePath());
 				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_4KHZ);
-				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_4KHZ);
+				//fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_4KHZ);
+				fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
 				Log.v(TAG,"adding key: " + AudioPulseDataAnalyzer.RAWDATA_4KHZ);
-				data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_4KHZ,results);
+				//data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_4KHZ,results.clone());
+				data.putSerializable(file.getAbsolutePath(),results.clone());
 				
 				file= AudioPulseFileWriter.generateFileName("DPOAE-Stim","4",super.testEar,attenuation);
 				fileNames.add(file.getAbsolutePath());
-				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.STIM_4KHZ);
-				data.putSerializable(AudioPulseDataAnalyzer.STIM_4KHZ,stimulus.clone());
+				//fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.STIM_4KHZ);
+				fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
+				//data.putSerializable(AudioPulseDataAnalyzer.STIM_4KHZ,stimulus.clone());
+				data.putSerializable(file.getAbsolutePath(),stimulus.clone());
 			}
 
 			//TODO: For now hard-code value instead of dynamically get from Resources...
