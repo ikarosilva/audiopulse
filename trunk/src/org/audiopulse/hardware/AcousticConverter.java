@@ -11,6 +11,7 @@ public class AcousticConverter {
 	private static final double SPL1uV = 0-ER10CGain;				//dB SPL for 1uV rms microphone electrical signal
 	private static final double SQRT2=Math.sqrt(2.0);
 	private static final String TAG="AcousticConverter";
+
 	
 	public AcousticConverter() {
 		//TODO: determine that mic & headphone jack are connected to something
@@ -56,6 +57,8 @@ public class AcousticConverter {
 		if (r==0)								//avoid log(0), return min value instead
 			return Double.MIN_VALUE;
 		r /= ((double) N);										//convert to mean-squared
+		//Normalize by sine 1 peak-to-peak sine wave mean square 
+		r=r*2;
 		r *= (VPerDU_output*VPerDU_output);			//convert mean-squared value to volts^2
 		return 10*Math.log10(r) + SPL1V;			//convert to dB SPL
 	}
@@ -85,6 +88,8 @@ public class AcousticConverter {
 		if (r==0)								//avoid log(0), return min value instead
 			return Double.MIN_VALUE;
 		r = Math.sqrt(r/((double)N));		//convert to rms DU
+		//Normalize wrt peak to peak sine wave rms
+		r=r/SQRT2;
 		return getInputLevel(r);
 	}
 	public double getInputLevel(double rms) {
