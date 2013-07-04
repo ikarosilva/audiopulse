@@ -120,20 +120,7 @@ public class Signals {
 		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
 		//but this seems to result in clipping for most phones.
 		//we need to find an optimal maximum level that does not clip the sound
-
-		//Optimized levels for HTC phone and frequency based on manual validation of spectrum
-		//and synringe coupler set to normal adult ear canal length
-		double level=0;
-		if(Frequency == 2000){
-			level=50;
-		}else if(Frequency == 3000){
-			level=40;
-		}else if(Frequency == 4000){
-			level =47;
-		}else{
-			throw new IllegalArgumentException("Invalid DPOAE frquency= " + Frequency);
-		}
-		return 80;//level;
+		return 69;
 	}
 
 	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F2) {
@@ -143,14 +130,15 @@ public class Signals {
 		//Otoacoustic emissions from normal‐hearing and hearing‐impaired subjects: Distortion product responses
 		//J. Acoust. Soc. Am. Volume 93, Issue 4, pp. 2050-2060 (1993)
 
-		double sweeps=100;//200; TODO: uncoment
+		double sweeps=150;//TODO: should be 200, but looks like there are memory issues
+						  //because plotactivity will not launch if too high 
 		double epocTime=dpoeaGorgaEpochTime(); //epoch time in seconds 
 		double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
 		double[][] x= new double[2][];
 		Log.v(TAG,"Generating tones at: " + F2 +" and " + (F2/1.2));
 		x[0]=Signals.tone(sampleFrequency,F2,playTime);
-		//x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
-		x[1]=Signals.tone(sampleFrequency,1000,playTime);
+		x[1]=Signals.tone(sampleFrequency,F2/1.2,playTime);
+		//x[1]=Signals.tone(sampleFrequency,F2,playTime);
 		return x;
 	}
 
@@ -215,7 +203,6 @@ public class Signals {
 	}
 
 	public static short[] interleave(short[] data) {
-		// TODO Auto-generated method stub
 		short[] x=new short[data.length*2];
 		for(int i=0;i<data.length;i=i+2){
 			x[i*2]=data[i];
