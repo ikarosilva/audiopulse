@@ -120,7 +120,11 @@ public class Signals {
 		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
 		//but this seems to result in clipping for most phones.
 		//we need to find an optimal maximum level that does not clip the sound
-		return 69;
+		
+		//From calibration experiments with the ER10C set to 0 dB gain, the linear range of
+		//response-to-stimulus is from 50-30 dB on an acoustic coupler (response will saturate
+		// on either extremes).
+		return 50;
 	}
 
 	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F2) {
