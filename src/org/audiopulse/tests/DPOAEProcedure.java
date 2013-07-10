@@ -8,6 +8,7 @@ import java.util.HashSet;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
+import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.io.AudioPulseFileWriter;
 import org.audiopulse.utilities.AudioSignal;
 import org.audiopulse.utilities.SignalProcessing;
@@ -37,24 +38,24 @@ public class DPOAEProcedure extends TestProcedure{
 		//use this to debug by generating a sweep across levels
 		boolean sweepTrial=true;
 		double f =2000.0;
-		Double att=0.0;
-		Double attStep=0.0;//25.0;
+		Double attStep=10.0;
+		Double att=-attStep;
 		if(super.testName.contentEquals("TEST DPOAE")){
 			testFrequencies.add((double) 2000);
 			sweepTrial=false;
 		}else{
-			
+			/*
 			testFrequencies.add((double) 2000);
 			testFrequencies.add((double) 3000);
 			testFrequencies.add((double) 4000);
-			/*
+			*/
 			//Testing SPL sweep to search for distortion
 			testFrequencies.add(f);
 			testFrequencies.add(f);
 			testFrequencies.add(f);
 			testFrequencies.add(f);
 			testFrequencies.add(f);
-			*/
+			
 		}
 		clearLog();
 		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
@@ -70,6 +71,7 @@ public class DPOAEProcedure extends TestProcedure{
 			logToUI("Running DPOAE frequency: " + thisFrequency + " kHz");
 
 			//Stimulus is presented at F2
+			att=att+attStep;
 			splLevel=Signals.dpoaeGorgaAmplitude(thisFrequency)-att;
 			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
 					thisFrequency);
@@ -78,8 +80,6 @@ public class DPOAEProcedure extends TestProcedure{
 			
 			
 			stimulus=AudioSignal.convertStereoToShort(probe);
-			Log.v(TAG,"probe rms =" + SignalProcessing.rms(probe[0])+ 
-					" stimulus rms= " + SignalProcessing.rms(stimulus));
 			//short[] stimulus=AudioSignal.convertMonoToShort(
 			//		AudioSignal.convertToMono(probe));
 			testIO.setPlaybackAndRecording(stimulus);
@@ -89,49 +89,37 @@ public class DPOAEProcedure extends TestProcedure{
 			double ndTime= System.currentTimeMillis();
 			Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
 			File file=null;
-
+			Log.v("RMS","stimulus spl =" + AcousticConverter.getOutputLevel(stimulus));
+			Log.v("RMS","response spl =" + AcousticConverter.getInputLevel(results));
+			
 			if(sweepTrial == true){
 				file= AudioPulseFileWriter.generateFileName("DPOAE",Double.toString(f),super.testEar,splLevel);
 				fileNames.add(file.getAbsolutePath());
 				fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
 				data.putSerializable(file.getAbsolutePath(),results.clone());
-				file= AudioPulseFileWriter.generateFileName("DPOAE-Stim",Double.toString(f),super.testEar,splLevel);
-				fileNames.add(file.getAbsolutePath());
-				fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
-				data.putSerializable(file.getAbsolutePath(),stimulus.clone());
 			}else if(thisFrequency == 2000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","2",super.testEar,splLevel);
 				fileNames.add(file.getAbsolutePath());
 				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_2KHZ);
 				data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_2KHZ,results.clone());
+				/*
 				//Save stimulus
 				file= AudioPulseFileWriter.generateFileName("DPOAE-Stim","2",super.testEar,splLevel);
 				fileNames.add(file.getAbsolutePath());
 				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.STIM_2KHZ);
 				data.putSerializable(AudioPulseDataAnalyzer.STIM_2KHZ,stimulus.clone());
+				*/
 			} else if(thisFrequency == 3000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","3",super.testEar,splLevel);
 				fileNames.add(file.getAbsolutePath());
 				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_3KHZ);
 				data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_3KHZ,results.clone());
-				//Save stimulus
-				file= AudioPulseFileWriter.generateFileName("DPOAE-Stim","3",super.testEar,splLevel);
-				fileNames.add(file.getAbsolutePath());
-				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.STIM_3KHZ);
-				data.putSerializable(AudioPulseDataAnalyzer.STIM_3KHZ,stimulus.clone());
 			}else if(thisFrequency == 4000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","4",super.testEar,splLevel);
 				fileNames.add(file.getAbsolutePath());
 				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.RAWDATA_4KHZ);
 				data.putSerializable(AudioPulseDataAnalyzer.RAWDATA_4KHZ,results.clone());
-				//Save stimulus
-				file= AudioPulseFileWriter.generateFileName("DPOAE-Stim","4",super.testEar,splLevel);
-				fileNames.add(file.getAbsolutePath());
-				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.STIM_4KHZ);
-				data.putSerializable(AudioPulseDataAnalyzer.STIM_4KHZ,stimulus.clone());
 			}
-			
-			att=att+attStep;
 			
 			//TODO: For now hard-code value instead of dynamically get from Resources...
 			if(super.testName.contentEquals("TEST DPOAE")){
