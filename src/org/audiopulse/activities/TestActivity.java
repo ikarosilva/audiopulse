@@ -153,6 +153,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	}
 
 	//plot audiogram
+	// 
 	public void plotAudiogram(Bundle resultsBundle ) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
 		intent.putExtras(resultsBundle);
@@ -163,20 +164,17 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		else
 			startActivity(intent);
 	}
-
+	
+	// Return back the intent to PltAudiogramActivity, to be bundled
 	@Override
-	protected void onActivityResult (int requestCode, int resultCode, Intent data){
-		if(resultCode == RESULT_OK){
-			switch(requestCode){
-			case CONFIRM_PLOT_CODE:
-				// TODO what doe we use for the result data here? -EW
-				if(calledBySana){
-					// should call setResultOkAndData(Uri)
-				}
-				break;
-			default:
-				// DO nothing
-			}
+	protected void onActivityResult (int requestCode, int resultCode, Intent data)
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if(resultCode == RESULT_OK && requestCode == CONFIRM_PLOT_CODE && calledBySana)
+		{
+			// Get the URI name from the global variable
+			data.getStringExtra("ZIP_URI");
 		}
 	}  
 

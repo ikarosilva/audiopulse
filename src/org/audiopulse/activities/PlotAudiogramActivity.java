@@ -57,6 +57,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -215,7 +216,12 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 							packager.start();
 							
 							//To be returned to the activity that requested the plotting
-							PackagedFile=packager.getOutFile();
+							PackagedFile=packager.getOutFile();		
+							
+							//Add the Packaged filename to the bundle, which is passed to Test Activity.
+							Intent output = new Intent();						
+							output.putExtra("ZIP_URI", PackagedFile.getAbsolutePath());
+							setResult(RESULT_OK, output);							
 							try {
 								packager.join();
 							} catch (InterruptedException e) {
