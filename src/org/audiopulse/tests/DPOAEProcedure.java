@@ -103,9 +103,7 @@ public class DPOAEProcedure extends TestProcedure{
 			Log.v("RMS","stimulus spl =" + AcousticConverter.getOutputLevel(stimulus));
 			Log.v("RMS","response spl =" + AcousticConverter.getInputLevel(results));
 			
-			if(sweepTrial == true){
-				file= AudioPulseFileWriter.generateFileName("DPOAE",Double.toString(f),super.testEar,splLevel);;
-			}else if(thisFrequency == 2000){
+			if(thisFrequency == 2000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","2",super.testEar,splLevel);
 				/*
 				//Save stimulus
