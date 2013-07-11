@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="main_menu">
+        <item>@string/DPOAE_2k</item>
+        <item>@string/DPOAE_3k</item>
+        <item>@string/DPOAE_4k</item>
+        <!-- 
         <item>@string/calibration_title</item>
         <item>@string/TEST_DPOAE</item>
         <item>@string/DPOAE_RIGHT</item>
         <item>@string/DPOAE_LEFT</item>
         <item>@string/TEOAE_RIGHT</item>
         <item>@string/TEOAE_LEFT</item>
-    </array>   
+        -->
+    </array>    
     <array name="calibration_menu">
         <item>@string/tests_device_calibration</item>
         <item>@string/audio_calibration</item>
         <item>@string/menu_debug</item>
     </array>   
+    <string name="DPOAE_2k">DPOAE 2k</string>
+    <string name="DPOAE_3k">DPOAE 3k</string>
+    <string name="DPOAE_4k">DPOAE 4k</string>  
     <string name="calibration_title">Calibration Menu</string>
     <string name="TEST_DPOAE">TEST DPOAE</string>
     <string name="DPOAE_RIGHT">DPOAE Right Ear</string>

@@ -8,5 +8,5 @@
 	    style="@style/menu_style"
 	    android:layout_height="wrap_content"
 	    android:layout_width="fill_parent"
-	    android:entries="@array/calibration_menu" />    
+	     />    <!--  ndroid:entries="@array/calibration_menu" -->
 </LinearLayout>

@@ -85,7 +85,25 @@ public class TestMenuActivity extends AudioPulseActivity
         				Intent testIntent = new Intent(TestMenuActivity.this, TestDPOAEActivity.class);
         				testIntent.putExtras(tests);
         				startActivity(testIntent);
-        			}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
+        			}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_2k))) {
+        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
+        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
+        				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
+        				testIntent.putExtras(tests);
+        				startActivity(testIntent);
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_3k))) {
+        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
+        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
+        				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
+        				testIntent.putExtras(tests);
+        				startActivity(testIntent);
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_4k))) {
+        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
+        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
+        				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
+        				testIntent.putExtras(tests);
+        				startActivity(testIntent);
+        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
         				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
         				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
         				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
