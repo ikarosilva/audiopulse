@@ -34,34 +34,48 @@ public class DPOAEProcedure extends TestProcedure{
 
 		//Loop through all the test frequencies, generating stimulus and collecting the results
 		ArrayList<Double> testFrequencies=new ArrayList<Double>();
-		
+
 		//use this to debug by generating a sweep across levels
 		boolean sweepTrial=true;
-		double f =2000.0;
-		Double attStep=10.0;
+		double f =4000.0;
+		Double attStep=5.0;
 		Double att=-attStep;
 		double oldFrequency=f;
+		if(super.testName.contentEquals("DPOAE 2k")){
+			f=2000;
+		}else if(super.testName.contentEquals("DPOAE 3k")){
+			f=3000;
+		}else if(super.testName.contentEquals("DPOAE 4k")){
+			f=4000;
+		}		
 		if(super.testName.contentEquals("TEST DPOAE")){
 			testFrequencies.add((double) 2000);
 			sweepTrial=false;
 		}else{
-			/*
-			testFrequencies.add((double) 2000);
-			testFrequencies.add((double) 3000);
-			testFrequencies.add((double) 4000);
-			*/
-			//Testing SPL sweep to search for distortion
-			testFrequencies.add(2000.0);
-			testFrequencies.add(2000.0);
-			testFrequencies.add(2000.0);
-			
-			testFrequencies.add(3000.0);
-			testFrequencies.add(3000.0);
-			testFrequencies.add(3000.0);
-			
-			testFrequencies.add(4000.0);
-			testFrequencies.add(4000.0);
-			testFrequencies.add(4000.0);
+			if(sweepTrial){
+				testFrequencies.add(f);
+				testFrequencies.add(f);
+				testFrequencies.add(f);
+				testFrequencies.add(f);
+				//testFrequencies.add(f);
+				//testFrequencies.add(f);
+				//testFrequencies.add(f);
+				//testFrequencies.add(f);
+				//testFrequencies.add(f);	
+			}else{
+				//Testing SPL sweep to search for distortion
+				testFrequencies.add(2000.0);
+				testFrequencies.add(2000.0);
+				testFrequencies.add(2000.0);
+
+				testFrequencies.add(3000.0);
+				testFrequencies.add(3000.0);
+				testFrequencies.add(3000.0);
+
+				testFrequencies.add(4000.0);
+				testFrequencies.add(4000.0);
+				testFrequencies.add(4000.0);
+			}
 		}
 		clearLog();
 		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
@@ -81,15 +95,15 @@ public class DPOAEProcedure extends TestProcedure{
 				oldFrequency=thisFrequency.doubleValue();
 				att=-attStep;
 			}
-				
+
 			att=att+attStep;
 			splLevel=Signals.dpoaeGorgaAmplitude(thisFrequency)-att;
 			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
 					thisFrequency);
 			probe[0] = hardware.setOutputLevel(probe[0],splLevel);
 			probe[1] = hardware.setOutputLevel(probe[1],splLevel);
-			
-			
+
+
 			stimulus=AudioSignal.convertStereoToShort(probe);
 			//short[] stimulus=AudioSignal.convertMonoToShort(
 			//		AudioSignal.convertToMono(probe));
@@ -102,7 +116,7 @@ public class DPOAEProcedure extends TestProcedure{
 			File file=null;
 			Log.v("RMS","stimulus spl =" + AcousticConverter.getOutputLevel(stimulus));
 			Log.v("RMS","response spl =" + AcousticConverter.getInputLevel(results));
-			
+
 			if(thisFrequency == 2000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","2",super.testEar,splLevel);
 				/*
@@ -111,17 +125,17 @@ public class DPOAEProcedure extends TestProcedure{
 				fileNames.add(file.getAbsolutePath());
 				fileNamestoDataMap.put(file.getAbsolutePath(),AudioPulseDataAnalyzer.STIM_2KHZ);
 				data.putSerializable(AudioPulseDataAnalyzer.STIM_2KHZ,stimulus.clone());
-				*/
+				 */
 			} else if(thisFrequency == 3000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","3",super.testEar,splLevel);
 			}else if(thisFrequency == 4000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","4",super.testEar,splLevel);
 			}
-			
+
 			fileNames.add(file.getAbsolutePath());
 			fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
 			data.putSerializable(file.getAbsolutePath(),results.clone());
-			
+
 			//TODO: For now hard-code value instead of dynamically get from Resources...
 			if(super.testName.contentEquals("TEST DPOAE")){
 				//Extra parameters added for TestDPOAEActivity Only!

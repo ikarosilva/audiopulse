@@ -124,7 +124,7 @@ public class Signals {
 		//From calibration experiments with the ER10C set to 0 dB gain, the linear range of
 		//response-to-stimulus is from 50-30 dB on an acoustic coupler (response will saturate
 		// on either extremes).
-		return 50;
+		return 70;
 	}
 
 	public synchronized static double[][] dpoaeGorgaMethod(int sampleFrequency, double F2) {
