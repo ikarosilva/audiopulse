@@ -81,6 +81,19 @@ public abstract class TestProcedure implements Runnable{
 		context = parent.getApplicationContext();
 		Log.v(TAG,"Fs= "+ playbackSampleFrequency);
 	}
+	public TestProcedure (TestActivity parent, String testname, String testear) 
+	{
+		TAG = "TestProcedure";
+		this.uiThreadHandler = new Handler(parent);
+		recordingSampleFrequency=parent.getRecordingSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
+		playbackSampleFrequency=parent.getPlaybackSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
+		testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
+		hardware = new AcousticConverter();
+		this.testEar = testear;
+		this.testName = testname;
+		context = parent.getApplicationContext();
+		Log.v(TAG,"Fs= "+ playbackSampleFrequency);
+	}
 	
 	public int getRecordingSamplingFrequency(){
 		return recordingSampleFrequency;
