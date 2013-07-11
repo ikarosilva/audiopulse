@@ -40,6 +40,7 @@
 package org.audiopulse.activities;
 
 import org.audiopulse.R;
+import org.audiopulse.tests.DPOAEProcedure;
 import org.audiopulse.tests.TestProcedure;
 
 import android.content.Intent;
@@ -84,22 +85,26 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 
 		String caller = this.getCallingPackage();
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
+			
 			// Sana observation meta data - from Sana API ObservationActivity
 			initMetaData();
 			calledBySana = true;
+			
+			String test = getIntent().getAction();
+			testProcedure = new DPOAEProcedure(this, "DPOAE", "RIGHT"); //BUNDLE_TESTEAR_RIGHT
 			/*
-      // can use concept or intent action
-      String test = getIntent().getAction();
-      if(test.equals("org.audiopulse.TEOAE_2KHZ"){
-          //TODO fill in setting up the test procedure
-          // testProcedure = something;
-      } else if(test.equals("org.audiopulse.TEOAE_3KHZ"){
-         //TODO fill in setting up the test procedure
-         // testProcedure = something;
-      } else if(test.equals("org.audiopulse.TEOAE_4KHZ"){
-         //TODO fill in setting up the test procedure
-         // testProcedure = something;
-      }
+		      // can use concept or intent action
+		      String test = getIntent().getAction();
+		      if(test.equals("org.audiopulse.TEOAE_2KHZ"){
+		          //TODO fill in setting up the test procedure
+		          // testProcedure = something;
+		      } else if(test.equals("org.audiopulse.TEOAE_3KHZ"){
+		         //TODO fill in setting up the test procedure
+		         // testProcedure = something;
+		      } else if(test.equals("org.audiopulse.TEOAE_4KHZ"){
+		         //TODO fill in setting up the test procedure
+		         // testProcedure = something;
+		      }
 			 */
 		} else {
 			Log.v(TAG,"Running AudioPulse in standalone mode");
