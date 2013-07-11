@@ -91,7 +91,9 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 			calledBySana = true;
 			
 			String test = getIntent().getAction();
-			testProcedure = new DPOAEProcedure(this, "DPOAE", "RIGHT"); //BUNDLE_TESTEAR_RIGHT
+			testProcedure = new DPOAEProcedure(this); //BUNDLE_TESTEAR_RIGHT
+			//testProcedure = new TestProcedure(this, "DPOAE", "RIGHT"); //BUNDLE_TESTEAR_RIGHT
+			
 			/*
 		      // can use concept or intent action
 		      String test = getIntent().getAction();
