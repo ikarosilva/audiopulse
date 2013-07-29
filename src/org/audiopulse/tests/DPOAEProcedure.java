@@ -39,7 +39,6 @@ public class DPOAEProcedure extends TestProcedure{
 		boolean sweepTrial=true;
 		double f =4000.0;
 		Double attStep=5.0;
-		Double att=-attStep;
 		double oldFrequency=f;
 		if(super.testName.contentEquals("DPOAE 2k")){
 			f=2000;
@@ -47,7 +46,9 @@ public class DPOAEProcedure extends TestProcedure{
 			f=3000;
 		}else if(super.testName.contentEquals("DPOAE 4k")){
 			f=4000;
-		}		
+			attStep=5.0;
+		}	
+		Double att=-attStep;
 		if(super.testName.contentEquals("TEST DPOAE")){
 			testFrequencies.add((double) 2000);
 			sweepTrial=false;
@@ -57,7 +58,7 @@ public class DPOAEProcedure extends TestProcedure{
 				testFrequencies.add(f);
 				testFrequencies.add(f);
 				testFrequencies.add(f);
-				//testFrequencies.add(f);
+				testFrequencies.add(f);
 				//testFrequencies.add(f);
 				//testFrequencies.add(f);
 				//testFrequencies.add(f);
@@ -101,7 +102,7 @@ public class DPOAEProcedure extends TestProcedure{
 			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
 					thisFrequency);
 			probe[0] = hardware.setOutputLevel(probe[0],splLevel);
-			probe[1] = hardware.setOutputLevel(probe[1],splLevel);
+			probe[1] = hardware.setOutputLevel(probe[1],splLevel-10);
 
 
 			stimulus=AudioSignal.convertStereoToShort(probe);
