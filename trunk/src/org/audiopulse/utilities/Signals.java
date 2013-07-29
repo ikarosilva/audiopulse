@@ -134,7 +134,7 @@ public class Signals {
 		//Otoacoustic emissions from normal‐hearing and hearing‐impaired subjects: Distortion product responses
 		//J. Acoust. Soc. Am. Volume 93, Issue 4, pp. 2050-2060 (1993)
 
-		double sweeps=150;//TODO: should be 200, but looks like there are memory issues
+		double sweeps=300;//TODO: should be 200, but looks like there are memory issues
 						  //because plotactivity will not launch if too high 
 		double epocTime=dpoeaGorgaEpochTime(); //epoch time in seconds 
 		double playTime=epocTime*sweeps;//From Gorga, this should be 4.096 seconds
