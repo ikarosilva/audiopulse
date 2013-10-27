@@ -502,8 +502,8 @@ public class DemoView extends View
      *
      * @return The scale factor.
      */
-    public double getScaleX() {
-        return this.scaleX;
+    public float getScaleX() {
+        return (float) this.scaleX;
     }
 
     /**
@@ -512,8 +512,8 @@ public class DemoView extends View
      *
      * @return The scale factor.
      */
-    public double getScaleY() {
-        return this.scaleY;
+    public float getScaleY() {
+        return (float) this.scaleY;
     }
 
     /**

@@ -38,7 +38,7 @@ public class PlayRecordManager {
 	
 	private short[] stimulusData;			//playback data
 	private short[] recordedData;			//short buffer to write recorded samples to
-	private final int recordingPadInMillis = 1000;			//extra time (ms) for recording buffer to cover sync issues (not necessarily used)
+	private final int recordingPadInMillis = 100;			//extra time (ms) for recording buffer to cover sync issues (not necessarily used)
 	
 	private volatile boolean stopRequest;
 	private volatile boolean playbackStarted;
@@ -388,7 +388,7 @@ public class PlayRecordManager {
 						);
 				int bufferSizeInBytes = 2 * recorderBufferLength;
 				if (bufferSizeInBytes < minBuffer) bufferSizeInBytes = minBuffer;
-				recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+				recorder = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION,
 						recordingSampleRate,
 						AudioFormat.CHANNEL_CONFIGURATION_MONO,
 						AudioFormat.ENCODING_PCM_16BIT,
