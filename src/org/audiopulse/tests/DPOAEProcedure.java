@@ -38,7 +38,7 @@ public class DPOAEProcedure extends TestProcedure{
 		//use this to debug by generating a sweep across levels
 		boolean sweepTrial=true;
 		double f =4000.0;
-		Double attStep=5.0;
+		Double attStep=10.0;
 		double oldFrequency=f;
 		if(super.testName.contentEquals("DPOAE 2k")){
 			f=2000;
