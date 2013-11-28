@@ -119,18 +119,6 @@ public class TestMenuActivity extends AudioPulseActivity
         				startActivity(new Intent(TestMenuActivity.this, AudioCalibrationActivity.class));
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.tests_device_calibration))) {
         				startActivity(new Intent(TestMenuActivity.this, InputCalibrationActivity.class));
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.TEOAE_RIGHT))) {
-        				Intent testIntent = new Intent(TestMenuActivity.this, TEOAEActivity.class);
-        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
-        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
-        				testIntent.putExtras(tests);
-        				startActivity(testIntent);
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.TEOAE_LEFT))) {
-        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
-        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_LEFT);
-        				Intent testIntent = new Intent(TestMenuActivity.this, TEOAEActivity.class);
-        				testIntent.putExtras(tests);
-        				startActivity(testIntent);
         			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_debug))) {
         				Intent testIntent = new Intent(TestMenuActivity.this, TestActivity.class);
         				startActivity(testIntent);
