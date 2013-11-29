@@ -26,6 +26,12 @@
         <activity android:name=".activities.TestDPOAEActivity"
             android:configChanges="orientation|keyboardHidden">
         </activity>
+        <activity android:name=".activities.TestDPOAERightEarActivity"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
+        <activity android:name=".activities.TestDPOAELeftEarActivity"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
         <activity android:name=".activities.CalibrationMenuActivity" >
             <intent-filter>
                 <action android:name="org.audiopulse.CAPTURE_MENU"/>
@@ -49,9 +55,6 @@
             android:configChanges="orientation|keyboardHidden">
         </activity>
         <activity android:name="org.audiopulse.activities.InputCalibrationActivity"
-        	android:configChanges="orientation|keyboardHidden">
-        </activity>
-        <activity android:name="org.audiopulse.activities.TEOAEActivity"
         	android:configChanges="orientation|keyboardHidden">
         </activity>
         <activity android:name="org.audiopulse.activities.TestActivity"
