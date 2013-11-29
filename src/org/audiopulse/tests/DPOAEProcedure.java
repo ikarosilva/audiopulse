@@ -58,23 +58,11 @@ public class DPOAEProcedure extends TestProcedure{
 				testFrequencies.add(f);
 				testFrequencies.add(f);
 				testFrequencies.add(f);
-				testFrequencies.add(f);
-				//testFrequencies.add(f);
-				//testFrequencies.add(f);
-				//testFrequencies.add(f);
-				//testFrequencies.add(f);	
+				testFrequencies.add(f);	
 			}else{
-				//Testing SPL sweep to search for distortion
+				//Testing across 3 major frequencies sweep to search for distortion
 				testFrequencies.add(2000.0);
-				testFrequencies.add(2000.0);
-				testFrequencies.add(2000.0);
-
 				testFrequencies.add(3000.0);
-				testFrequencies.add(3000.0);
-				testFrequencies.add(3000.0);
-
-				testFrequencies.add(4000.0);
-				testFrequencies.add(4000.0);
 				testFrequencies.add(4000.0);
 			}
 		}

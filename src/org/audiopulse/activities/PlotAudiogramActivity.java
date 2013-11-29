@@ -58,6 +58,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -159,8 +160,8 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 			dialog.setButton(DialogInterface.BUTTON_POSITIVE,"Exit",
 					new DialogInterface.OnClickListener(){
 				public void onClick(DialogInterface dialog, int which) {
-					//TODO: Pass a NULL URI
-					//if called from Sana
+					Log.i(TAG,"Setting users result to cancell and exiting");
+					setResult(RESULT_CANCELED,null);
 					PlotAudiogramActivity.this.finish();
 				}
 			});
@@ -179,7 +180,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					//TODO: passs URI if called from Sana procedure
 					
-					Log.v(TAG,"Saving files to disk");
+					Log.v(TAG,"Dialog response was:" + which);
 					showDialog(0);
 
 					// Start lengthy operation in a background thread
@@ -220,7 +221,8 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 							
 							//Add the Packaged filename to the bundle, which is passed to Test Activity.
 							Intent output = new Intent();						
-							output.putExtra("ZIP_URI", PackagedFile.getAbsolutePath());
+							output.putExtra("ZIP_URI", Uri.encode(PackagedFile.getAbsolutePath()));
+							Log.i(TAG,"Setting users result to ok and passing intent to activity: " + PackagedFile.getAbsolutePath());
 							setResult(RESULT_OK, output);							
 							try {
 								packager.join();

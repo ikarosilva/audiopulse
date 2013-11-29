@@ -3,12 +3,17 @@
     <!-- general -->
     <string name="app_name">AudioPulse</string>
     
+    <!--  Subject parameters -->
+    <string name="rightear">Right Ear</string>
+	<string name="leftear">Left Ear</string>
+	<string name="testEarKey">testEarKey</string>
+	
     <!--  test activity interface -->
     <string name="begin_test">Begin Test</string>
     <string name="begin_device_calibration">Begin</string>
     <string name="setting_on">On</string>
     <string name="setting_off">Off</string>
-
+   
     <string name="amplitude">Amplitude</string>
     <string name="frequency">Frequency</string>
     <string name="calibration_output">Output</string>

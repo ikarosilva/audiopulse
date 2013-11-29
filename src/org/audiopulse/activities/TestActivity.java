@@ -91,6 +91,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 			calledBySana = true;
 			
 			String test = getIntent().getAction();
+			if(test.equals("org.audiopulse.TEOAE_2KHZ"))
 			testProcedure = new DPOAEProcedure(this); //BUNDLE_TESTEAR_RIGHT
 			//testProcedure = new TestProcedure(this, "DPOAE", "RIGHT"); //BUNDLE_TESTEAR_RIGHT
 			
@@ -182,6 +183,8 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		{
 			// Get the URI name from the global variable
 			data.getStringExtra("ZIP_URI");
+			Log.i(TAG,"Obtained URI from  PlotAudiogramActivity:" + data.toString());
+			Log.i(TAG,"Exiting from AP back to Sana...");
 		}
 	}  
 
