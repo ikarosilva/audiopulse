@@ -49,7 +49,7 @@ public class DPOAEProcedure extends TestProcedure{
 			attStep=5.0;
 		}	
 		Double att=-attStep;
-		if(super.testName.contentEquals("TEST DPOAE")){
+		if(super.testName.contentEquals("DPGRAM")){
 			testFrequencies.add((double) 2000);
 			sweepTrial=false;
 		}else{
@@ -126,7 +126,7 @@ public class DPOAEProcedure extends TestProcedure{
 			data.putSerializable(file.getAbsolutePath(),results.clone());
 
 			//TODO: For now hard-code value instead of dynamically get from Resources...
-			if(super.testName.contentEquals("TEST DPOAE")){
+			if(super.testName.contentEquals("DPGRAM")){
 				//Extra parameters added for TestDPOAEActivity Only!
 				double F1= thisFrequency/1.2;
 				double expected=2*F1 - thisFrequency;
