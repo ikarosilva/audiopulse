@@ -76,14 +76,20 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 
 		//TODO: Get ear being tested from Bundle
 		Bundle request = getIntent().getExtras();
+		if(request != null){
 		testEar = (String) request.get(TestMenuActivity.BUNDLE_TESTEAR_KEY);
 		testName= (String) request.get(TestMenuActivity.BUNDLE_TESTNAME_KEY);
+		}else{
+			testEar="RE";
+			testName="DPOAE";
+		}
 		
 		//TODO: can we put a TestProcedure into a bundle? E.g. by implementing Parcelable, but is that worth it?
 		//		Bundle request = getIntent().getExtras();
 		//		testProcedure = (TestProcedure) request.get("test");
 
 		String caller = this.getCallingPackage();
+		Log.v(TAG,"Calling package is: " + getCallingPackage());
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			
 			// Sana observation meta data - from Sana API ObservationActivity
@@ -91,10 +97,12 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 			calledBySana = true;
 			
 			String test = getIntent().getAction();
-			if(test.equals("org.audiopulse.TEOAE_2KHZ"))
+			//if(test.equals("org.audiopulse.TEOAE_2KHZ"))
+			testName="DPGRAM";
+			Log.v(TAG,"test name is: " + this.testName);
+			if(test.equals("org.audiopulse.TestDPOAERightEarActivity"))
 			testProcedure = new DPOAEProcedure(this); //BUNDLE_TESTEAR_RIGHT
 			//testProcedure = new TestProcedure(this, "DPOAE", "RIGHT"); //BUNDLE_TESTEAR_RIGHT
-			
 			/*
 		      // can use concept or intent action
 		      String test = getIntent().getAction();
@@ -191,6 +199,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 	//TODO: expand on this for other message types. Implement nested class NativeMessageHandler? 
 	//default implementation for handling messages from TestProecdure objects
 	public boolean handleMessage(Message msg) {
+		Log.v(TAG,"handling message " + msg.toString());
 		Bundle data = msg.getData();
 		switch (msg.what) {
 		case Messages.CLEAR_LOG:
@@ -200,10 +209,15 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 			String pm = data.getString("log");
 			appendText(pm);
 			break;
+		case Messages.ANALYSIS_COMPLETE:
+			Bundle results=msg.getData();
+			//Start Plotting activity
+			Log.v(TAG,"calling spectral plot activity ");
+			plotSpectrum(results);
 		}
 		return true;
 	}
-
+	
 	public static class Messages {
 		public static final int CLEAR_LOG = 1;				//clear the test log
 		public static final int LOG = 2;					//add to the test log
