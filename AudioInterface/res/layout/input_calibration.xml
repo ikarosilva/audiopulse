@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/test_view"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<TextView 
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/calibration_input_level" />
+		<TextView android:id="@+id/input_level_meter"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content" />
+	</LinearLayout>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<TextView 
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/calibration_input_rms" />
+		<TextView android:id="@+id/input_rms_meter"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content" />
+	</LinearLayout>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<TextView 
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/calibration_input_pp" />
+		<TextView android:id="@+id/input_pp_meter"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content" />
+	</LinearLayout>
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<TextView 
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/calibration_input_max" />
+		<TextView android:id="@+id/input_max_meter"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content" />
+	</LinearLayout>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<TextView 
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/calibration_input_min" />
+		<TextView android:id="@+id/input_min_meter"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content" />
+	</LinearLayout>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<TextView 
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/calibration_input_clipped" />
+		<TextView android:id="@+id/input_clip_meter"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content" />
+	</LinearLayout>
+
+	<TextView  
+		android:id="@+id/testLog"
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"
+	    />
+			
+</LinearLayout>
