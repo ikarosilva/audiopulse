@@ -40,14 +40,8 @@
 package org.audiopulse.tests;
 
 
-import org.audiopulse.R;
-import org.audiopulse.activities.TestActivity;
-import org.audiopulse.hardware.AcousticConverter;
-import org.audiopulse.io.PlayRecordManager;
-import org.audiopulse.utilities.AudioSignal;
-import org.audiopulse.utilities.SignalProcessing;
-import org.audiopulse.utilities.Signals;
 
+import org.audiopulse.activities.TestActivity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,10 +55,8 @@ public abstract class TestProcedure implements Runnable{
 	private Thread workingThread;		//main worker thread to perform test
 	private Context context;			//
 	
-	protected PlayRecordManager testIO;
-	protected AcousticConverter hardware;
-	protected final int playbackSampleFrequency;
-	protected final int recordingSampleFrequency;
+	protected final int playbackSampleFrequency=(Integer) null;
+	protected final int recordingSampleFrequency=(Integer) null;
 	protected final String testEar;
 	protected final String testName;
 	//TODO: get sample freqs from app data
@@ -72,27 +64,18 @@ public abstract class TestProcedure implements Runnable{
 	public TestProcedure (TestActivity parent) {
 		TAG = "TestProcedure";
 		this.uiThreadHandler = new Handler(parent);
-		recordingSampleFrequency=parent.getRecordingSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
-		playbackSampleFrequency=parent.getPlaybackSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
-		testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
-		hardware = new AcousticConverter();
+		//testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
 		testEar= parent.getTestEar();
 		testName=parent.getTestName();
 		context = parent.getApplicationContext();
-		Log.v(TAG,"Fs= "+ playbackSampleFrequency);
 	}
 	public TestProcedure (TestActivity parent, String testname, String testear) 
 	{
 		TAG = "TestProcedure";
 		this.uiThreadHandler = new Handler(parent);
-		recordingSampleFrequency=parent.getRecordingSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
-		playbackSampleFrequency=parent.getPlaybackSampleFrequency();//this.context.getResources().getInteger(R.integer.samplingFrequency);
-		testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
-		hardware = new AcousticConverter();
 		this.testEar = testear;
 		this.testName = testname;
 		context = parent.getApplicationContext();
-		Log.v(TAG,"Fs= "+ playbackSampleFrequency);
 	}
 	
 	public int getRecordingSamplingFrequency(){
@@ -155,50 +138,6 @@ public abstract class TestProcedure implements Runnable{
 	
 	//return vector of gain you need to apply at each freq
 	//TODO: add phase / delay when we care.
-	protected double[] calibrateChrip(int fHigh) {
-		//TODO
-		//calibrate left, right separately?
-		double chirpDuration = 0.1;
-		double levelOut = 50;
-		double[] chirp = Signals.chirp(playbackSampleFrequency, 0, fHigh, chirpDuration);
-		chirp = hardware.setOutputLevel(chirp, levelOut);
-		int nReps = 5;
-		double[] repeatedChrip = new double[2*chirp.length * nReps];
-		for (int ii=0;ii<nReps;ii++) {
-			//copy chirp into larger repeatedChrip array
-			System.arraycopy(chirp, 0, repeatedChrip, ii*chirp.length, chirp.length);
-			//TODO: right channel also
-		}
-		short[] testSignal = AudioSignal.convertStereoToShort(
-				AudioSignal.monoToStereoLeft(repeatedChrip)
-				);
-		testIO.setPlaybackAndRecording(testSignal);
-		short[] input = testIO.acquire();
-		
-		//TODO: SPEC_N?
-		//TODO: make a getSpectrum that building in acoustic conversion to dB SPL, or that return linear results
-		double[][] expectedResponse = SignalProcessing.getSpectrum(testSignal,playbackSampleFrequency,8);
-		double[][] actualResponse = SignalProcessing.getSpectrum(input,playbackSampleFrequency,8);
-		
-		//TODO: this is really messy, make the code more readable
-		double dBOffsetInput = hardware.getDBOffset_input();
-		double dBOffsetOutput = hardware.getDBOffset_output();
-		
-		int N = actualResponse[1].length;
-		double[] gain = new double[N];
-		for (int n=0; n<N; n++) {
-			gain[n] = (expectedResponse[1][n] + dBOffsetOutput)
-					- (actualResponse[1][n] + dBOffsetInput);
-		}
-		return gain;
-		
-	}
-	protected void calibrateNoise() {
-		//TODO
-	}
-	protected void calibrateClicks(double peakLevel, double intervalInMillis) {
-		//TODO
-	}
 	
 	
 	//this doesn't seem to add enough to justify putting here, costs readability & flexibility in subclasses.

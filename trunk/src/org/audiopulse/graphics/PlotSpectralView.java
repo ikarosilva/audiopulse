@@ -54,7 +54,6 @@ import org.afree.data.xy.XYSeriesCollection;
 import org.afree.graphics.SolidColor;
 import org.afree.ui.Layer;
 import org.afree.ui.LengthAdjustmentType;
-import org.audiopulse.utilities.SignalProcessing;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -101,7 +100,7 @@ public class PlotSpectralView extends DemoView {
 		XYSeries series = new XYSeries(1);
 
 		Log.v(TAG,"estimating spectrum");
-		double[][]XFFT=SignalProcessing.getSpectrum(audioBuffer,sampleRate,fftSize);
+		double[][]XFFT=new double[2][100];
 		Log.v(TAG,"creating dataset");
 		for(int k=0;k<(XFFT[0].length/2);k++)
 			series.add(XFFT[0][k], XFFT[1][k]);

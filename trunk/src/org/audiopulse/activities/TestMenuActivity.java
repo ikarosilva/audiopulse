@@ -76,34 +76,7 @@ public class TestMenuActivity extends AudioPulseActivity
     				
         			//TODO: Tests should return a Bundle containing the data they are suppose to provide,
         			//and URLs to any file location they create
-        			if (itemText.equalsIgnoreCase(getResources().getString(R.string.calibration_title))) {
-        				//Start menu with calibration related activities
-        				startActivity(new Intent(TestMenuActivity.this, CalibrationMenuActivity.class));
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.TEST_DPOAE))) {
-        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
-        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
-        				Intent testIntent = new Intent(TestMenuActivity.this, TestDPOAEActivity.class);
-        				testIntent.putExtras(tests);
-        				startActivity(testIntent);
-        			}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_2k))) {
-        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
-        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
-        				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
-        				testIntent.putExtras(tests);
-        				startActivity(testIntent);
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_3k))) {
-        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
-        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
-        				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
-        				testIntent.putExtras(tests);
-        				startActivity(testIntent);
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_4k))) {
-        				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
-        				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
-        				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
-        				testIntent.putExtras(tests);
-        				startActivity(testIntent);
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
+        			if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
         				tests.putString(BUNDLE_TESTNAME_KEY,itemText);
         				tests.putString(BUNDLE_TESTEAR_KEY,BUNDLE_TESTEAR_RIGHT);
         				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
@@ -115,18 +88,7 @@ public class TestMenuActivity extends AudioPulseActivity
         				Intent testIntent = new Intent(TestMenuActivity.this, DPOAEActivity.class);
         				testIntent.putExtras(tests);
         				startActivity(testIntent);
-        			}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.audio_calibration))) {
-        				startActivity(new Intent(TestMenuActivity.this, AudioCalibrationActivity.class));
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.tests_device_calibration))) {
-        				startActivity(new Intent(TestMenuActivity.this, InputCalibrationActivity.class));
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.menu_debug))) {
-        				Intent testIntent = new Intent(TestMenuActivity.this, TestActivity.class);
-        				startActivity(testIntent);
         			}
-        			
-        			else {
-        				//TODO: launch test activity
-        			} 
         			
         		}
         	}
