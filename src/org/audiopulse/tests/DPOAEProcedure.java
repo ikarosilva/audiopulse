@@ -8,11 +8,7 @@ import java.util.HashSet;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
-import org.audiopulse.hardware.AcousticConverter;
 import org.audiopulse.io.AudioPulseFileWriter;
-import org.audiopulse.utilities.AudioSignal;
-import org.audiopulse.utilities.SignalProcessing;
-import org.audiopulse.utilities.Signals;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +23,21 @@ public class DPOAEProcedure extends TestProcedure{
 
 	public DPOAEProcedure(TestActivity parentActivity) {
 		super(parentActivity);
+	}
+	
+	public synchronized static double dpoaeGorgaAmplitude(double Frequency){
+		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
+		//but this seems to result in clipping for most phones.
+		//we need to find an optimal maximum level that does not clip the sound
+		
+		//From calibration experiments with the ER10C set to 0 dB gain, the linear range of
+		//response-to-stimulus is from 50-30 dB on an acoustic coupler (response will saturate
+		// on either extremes).
+		return 70;
+	}
+	public static double dpoeaGorgaEpochTime(){
+		//return epoch time in seconds
+		return 0.02048;
 	}
 
 	@Override
@@ -86,25 +97,19 @@ public class DPOAEProcedure extends TestProcedure{
 			}
 
 			att=att+attStep;
-			splLevel=Signals.dpoaeGorgaAmplitude(thisFrequency)-att;
-			double[][] probe = Signals.dpoaeGorgaMethod(super.playbackSampleFrequency, 
-					thisFrequency);
-			probe[0] = hardware.setOutputLevel(probe[0],splLevel);
-			probe[1] = hardware.setOutputLevel(probe[1],splLevel-10);
-
-
-			stimulus=AudioSignal.convertStereoToShort(probe);
+			splLevel=dpoaeGorgaAmplitude(thisFrequency)-att;
+			
 			//short[] stimulus=AudioSignal.convertMonoToShort(
 			//		AudioSignal.convertToMono(probe));
-			testIO.setPlaybackAndRecording(stimulus);
+			//TODO: Implement USB connection testIO.setPlaybackAndRecording(stimulus);
 
 			double stTime= System.currentTimeMillis();
-			results = testIO.acquire();
+			//TODO: Implement USB results = testIO.acquire();
+			results=new short[100];
 			double ndTime= System.currentTimeMillis();
 			Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
 			File file=null;
-			Log.v("RMS","stimulus spl =" + AcousticConverter.getOutputLevel(stimulus));
-			Log.v("RMS","response spl =" + AcousticConverter.getInputLevel(results));
+			
 
 			if(thisFrequency == 2000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","2",super.testEar,splLevel);
@@ -131,7 +136,7 @@ public class DPOAEProcedure extends TestProcedure{
 				double F1= thisFrequency/1.2;
 				double expected=2*F1 - thisFrequency;
 				int fftSize=(int) Math.round(
-						Signals.dpoeaGorgaEpochTime()*super.recordingSampleFrequency);
+						dpoeaGorgaEpochTime()*super.recordingSampleFrequency);
 				fftSize=(int) Math.pow(2,Math.floor(Math.log((int) fftSize)/Math.log(2)));
 				data.putLong("N",results.length);
 				data.putShortArray("samples",results);

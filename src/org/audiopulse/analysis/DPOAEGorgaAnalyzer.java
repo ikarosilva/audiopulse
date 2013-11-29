@@ -43,10 +43,6 @@
 package org.audiopulse.analysis;
 
 import java.util.HashMap;
-
-import org.audiopulse.utilities.SignalProcessing;
-import org.audiopulse.utilities.Signals;
-
 import android.util.Log;
 
 public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
@@ -61,6 +57,22 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 	private static int epochSamples; //Size of each epoch from which to do spectral the averaging.
 	HashMap<String, Double> resultMap;
 
+	public synchronized static double dpoaeGorgaAmplitude(double Frequency){
+		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
+		//but this seems to result in clipping for most phones.
+		//we need to find an optimal maximum level that does not clip the sound
+		
+		//From calibration experiments with the ER10C set to 0 dB gain, the linear range of
+		//response-to-stimulus is from 50-30 dB on an acoustic coupler (response will saturate
+		// on either extremes).
+		return 70;
+	}
+
+	public static double dpoeaGorgaEpochTime(){
+		//return epoch time in seconds
+		return 0.02048;
+	}
+	
 	public DPOAEGorgaAnalyzer(short[] data, double Fs, double F2,
 			HashMap<String, Double> resultMap){
 		this.Fs=Fs;
@@ -69,7 +81,7 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 		F1=F2/1.2;
 		this.F12=(2*F1)-F2;//Frequency of the expected response
 		resultMap= new HashMap<String, Double>();
-		epochSamples=(int) Math.round(Signals.dpoeaGorgaEpochTime()*Fs);
+		epochSamples=(int) Math.round(dpoeaGorgaEpochTime()*Fs);
 		epochSamples=(int) Math.pow(2,Math.floor(Math.log((int) epochSamples)/Math.log(2)));
 		this.resultMap=resultMap;
 		if(Fs != 16000){
@@ -87,7 +99,7 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 		//All the analysis will be done in the fft domain 
 		//using the AudioPulseDataAnalyzer interface to obtain the results
 		Log.v(TAG,"Analyzing frequency: " + F2);
-		double[][] XFFT= SignalProcessing.getSpectrum(data,Fs,epochSamples);
+		double[][] XFFT= new double [2][100];//getSpectrum(data,Fs,epochSamples);
 		
 		resultMap.put(TestType,(double) 2);//According to the interface, 2 =DPOAE
 		String strSTIM = null, strSTIM2 = null,strResponse = null,strNoise = null;
