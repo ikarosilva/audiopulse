@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--  Subject Parameters -->
+    <string name="RigtEarKey">RE</string> <!-- Used internally for file name -->
+    <string name="LeftEarKey">LE</string> <!-- Used internally for file name -->
+  
+  <!-- Keys for hastags containing meta information about the test-->
+  <!-- These keys are used by various classes in order to extract information
+       passed by the extra in  the Bundle-->
+    <string name="testEarKey">testEarKey</string> 
+    <string name="testNameKey">testNameKey</string>
+    <string name="testDPOAEKey">DPOAEKey</string>
+    
+    
     <integer name="samplingFrequency">16000</integer>
 </resources>

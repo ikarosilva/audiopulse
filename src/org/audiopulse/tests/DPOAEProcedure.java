@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
@@ -21,15 +22,15 @@ public class DPOAEProcedure extends TestProcedure{
 	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
 	private HashMap<String, Double> DPGRAM= new HashMap<String, Double>();
 
-	public DPOAEProcedure(TestActivity parentActivity) {
-		super(parentActivity);
+	public DPOAEProcedure(TestActivity parentActivity, String testEar) {
+		super(parentActivity, testEar);
 	}
-	
+
 	public synchronized static double dpoaeGorgaAmplitude(double Frequency){
 		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
 		//but this seems to result in clipping for most phones.
 		//we need to find an optimal maximum level that does not clip the sound
-		
+
 		//From calibration experiments with the ER10C set to 0 dB gain, the linear range of
 		//response-to-stimulus is from 50-30 dB on an acoustic coupler (response will saturate
 		// on either extremes).
@@ -50,33 +51,14 @@ public class DPOAEProcedure extends TestProcedure{
 		boolean sweepTrial=true;
 		double f =4000.0;
 		Double attStep=10.0;
-		double oldFrequency=f;
-		if(super.testName.contentEquals("DPOAE 2k")){
-			f=2000;
-		}else if(super.testName.contentEquals("DPOAE 3k")){
-			f=3000;
-		}else if(super.testName.contentEquals("DPOAE 4k")){
-			f=4000;
-			attStep=5.0;
-		}	
+		double oldFrequency=f;	
 		Double att=-attStep;
-		if(super.testName.contentEquals("DPGRAM")){
-			testFrequencies.add((double) 2000);
-			sweepTrial=false;
-		}else{
-			if(sweepTrial){
-				testFrequencies.add(f);
-				testFrequencies.add(f);
-				testFrequencies.add(f);
-				testFrequencies.add(f);
-				testFrequencies.add(f);	
-			}else{
-				//Testing across 3 major frequencies sweep to search for distortion
-				testFrequencies.add(2000.0);
-				testFrequencies.add(3000.0);
-				testFrequencies.add(4000.0);
-			}
-		}
+
+		//Testing across 3 major frequencies sweep to search for distortion
+		testFrequencies.add(2000.0);
+		testFrequencies.add(3000.0);
+		testFrequencies.add(4000.0);
+
 		clearLog();
 		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
 
@@ -98,7 +80,7 @@ public class DPOAEProcedure extends TestProcedure{
 
 			att=att+attStep;
 			splLevel=dpoaeGorgaAmplitude(thisFrequency)-att;
-			
+
 			//short[] stimulus=AudioSignal.convertMonoToShort(
 			//		AudioSignal.convertToMono(probe));
 			//TODO: Implement USB connection testIO.setPlaybackAndRecording(stimulus);
@@ -109,7 +91,7 @@ public class DPOAEProcedure extends TestProcedure{
 			double ndTime= System.currentTimeMillis();
 			Log.v(TAG,"done acquiring signal in = "  + (ndTime-stTime)/1000 + " secs" );
 			File file=null;
-			
+
 
 			if(thisFrequency == 2000){
 				file= AudioPulseFileWriter.generateFileName("DPOAE","2",super.testEar,splLevel);
@@ -131,19 +113,18 @@ public class DPOAEProcedure extends TestProcedure{
 			data.putSerializable(file.getAbsolutePath(),results.clone());
 
 			//TODO: For now hard-code value instead of dynamically get from Resources...
-			if(super.testName.contentEquals("DPGRAM")){
-				//Extra parameters added for TestDPOAEActivity Only!
-				double F1= thisFrequency/1.2;
-				double expected=2*F1 - thisFrequency;
-				int fftSize=(int) Math.round(
-						dpoeaGorgaEpochTime()*super.recordingSampleFrequency);
-				fftSize=(int) Math.pow(2,Math.floor(Math.log((int) fftSize)/Math.log(2)));
-				data.putLong("N",results.length);
-				data.putShortArray("samples",results);
-				data.putFloat("recSampleRate",super.recordingSampleFrequency);
-				data.putDouble("expectedFrequency",expected);
-				data.putInt("fftSize",fftSize);
-			}
+			//Extra parameters added for TestDPOAEActivity Only!
+			double F1= thisFrequency/1.2;
+			double expected=2*F1 - thisFrequency;
+			int fftSize=(int) Math.round(
+					dpoeaGorgaEpochTime()*super.recordingSampleFrequency);
+			fftSize=(int) Math.pow(2,Math.floor(Math.log((int) fftSize)/Math.log(2)));
+			data.putLong("N",results.length);
+			data.putShortArray("samples",results);
+			data.putFloat("recSampleRate",super.recordingSampleFrequency);
+			data.putDouble("expectedFrequency",expected);
+			data.putInt("fftSize",fftSize);
+			
 
 			Log.v(TAG,"Holding data of size: " + results.length + " in class memory until return of PlotAudioGramActivity.");
 			Log.v(TAG,"If data gets accepted by user, will be stored at: " + file.getAbsolutePath());

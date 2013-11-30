@@ -53,6 +53,7 @@ import org.audiopulse.graphics.PlotAudiogramView;
 import org.audiopulse.io.AudioPulseFilePackager;
 import org.audiopulse.io.AudioPulseFileWriter;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -64,7 +65,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 
-public class PlotAudiogramActivity extends AudioPulseActivity {
+public class PlotAudiogramActivity extends Activity {
 	/**
 	 * Called when the activity is starting.
 	 * @param savedInstanceState
@@ -74,6 +75,7 @@ public class PlotAudiogramActivity extends AudioPulseActivity {
 	private String testName;
 	private Bundle data;
 	private File PackagedFile;
+	private static String TAG="PlotAudiogramActivity";
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

@@ -38,13 +38,21 @@
  */ 
 
 package org.audiopulse.activities;
-
+import org.sana.android.app.ObservationActivity;
 import org.audiopulse.R;
 import org.audiopulse.tests.DPOAEProcedure;
 import org.audiopulse.tests.TestProcedure;
+import org.sana.android.app.ObservationActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.widget.Toast;
+import android.media.AudioManager;
+
+import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -52,7 +60,7 @@ import android.view.View;
 import android.widget.TextView;
 
 //TestActivity is a template for all tests.
-public class TestActivity extends AudioPulseActivity implements Handler.Callback
+public class TestActivity extends ObservationActivity implements Handler.Callback
 {
 	public final String TAG="BasicTestActivity";
 
@@ -60,48 +68,33 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 
 	protected TextView testLog;
 	protected TestProcedure testProcedure;
-	protected int recordingSamplingFrequency;
-	protected int playbackSamplingFrequency;
 	private boolean calledBySana;
-	protected String testEar;
-	protected String testName;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.basic_test_layout);
-		recordingSamplingFrequency=this.getResources().getInteger(R.integer.samplingFrequency);
-		playbackSamplingFrequency=this.getResources().getInteger(R.integer.samplingFrequency);
 		testLog = (TextView)this.findViewById(R.id.testLog);
 
 		//TODO: Get ear being tested from Bundle
 		Bundle request = getIntent().getExtras();
-		if(request != null){
-		testEar = (String) request.get(TestMenuActivity.BUNDLE_TESTEAR_KEY);
-		testName= (String) request.get(TestMenuActivity.BUNDLE_TESTNAME_KEY);
-		}else{
-			testEar="RE";
-			testName="DPOAE";
-		}
+		String testEar = request.getString(getResources().getString(R.string.testEarKey));
 		
-		//TODO: can we put a TestProcedure into a bundle? E.g. by implementing Parcelable, but is that worth it?
-		//		Bundle request = getIntent().getExtras();
-		//		testProcedure = (TestProcedure) request.get("test");
-
 		String caller = this.getCallingPackage();
 		Log.v(TAG,"Calling package is: " + getCallingPackage());
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			
 			// Sana observation meta data - from Sana API ObservationActivity
+			
 			initMetaData();
 			calledBySana = true;
 			
 			String test = getIntent().getAction();
 			//if(test.equals("org.audiopulse.TEOAE_2KHZ"))
-			testName="DPGRAM";
-			Log.v(TAG,"test name is: " + this.testName);
 			if(test.equals("org.audiopulse.TestDPOAERightEarActivity"))
-			testProcedure = new DPOAEProcedure(this); //BUNDLE_TESTEAR_RIGHT
+				
+				
+			testProcedure = new DPOAEProcedure(this,testEar); //BUNDLE_TESTEAR_RIGHT
 			//testProcedure = new TestProcedure(this, "DPOAE", "RIGHT"); //BUNDLE_TESTEAR_RIGHT
 			/*
 		      // can use concept or intent action
@@ -151,23 +144,6 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		}
 	}
 
-	//plot recorded signal spectrum
-	public void plotSpectrum(Bundle audioResultsBundle) {
-		Intent intent = new Intent(this.getApplicationContext(), PlotSpectralActivity.class);
-		intent.putExtras(audioResultsBundle);
-		// Added conditional to see if we want confirmation that plot is accepted
-		// such as when running headless - EW
-		if(calledBySana)
-			startActivityForResult(intent, CONFIRM_PLOT_CODE);
-		else
-			startActivity(intent);
-	}
-
-	//plot recorded waveform
-	public void plotWaveform(Bundle audioResultsBundle) {
-		//TODO
-	}
-
 	//plot audiogram
 	// 
 	public void plotAudiogram(Bundle resultsBundle ) {
@@ -213,7 +189,7 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 			Bundle results=msg.getData();
 			//Start Plotting activity
 			Log.v(TAG,"calling spectral plot activity ");
-			plotSpectrum(results);
+			plotAudiogram(results);
 		}
 		return true;
 	}
@@ -225,19 +201,5 @@ public class TestActivity extends AudioPulseActivity implements Handler.Callback
 		public static final int IO_COMPLETE = 4;			//io phase is complete
 		public static final int ANALYSIS_COMPLETE = 5;		//analysis block complete
 		public static final int PROCEDURE_COMPLETE = 6;		//entire test procedure is complete
-	}
-
-	public int getRecordingSampleFrequency() {
-		return recordingSamplingFrequency;
-	}
-	public int getPlaybackSampleFrequency() {
-		return playbackSamplingFrequency;
-	}
-
-	public String getTestEar() {
-		return testEar;
-	}
-	public String getTestName() {
-		return testName;
 	}
 }
