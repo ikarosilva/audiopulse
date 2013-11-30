@@ -38,9 +38,6 @@
  */ 
 
 package org.audiopulse.tests;
-
-
-
 import org.audiopulse.activities.TestActivity;
 import android.content.Context;
 import android.os.Bundle;
@@ -49,8 +46,7 @@ import android.os.Message;
 import android.util.Log;
 
 public abstract class TestProcedure implements Runnable{
-	protected String TAG;
-	
+	private static final String TAG="TestProcedure";
 	private Handler uiThreadHandler;	//handler back to TestActivity
 	private Thread workingThread;		//main worker thread to perform test
 	private Context context;			//
@@ -58,23 +54,12 @@ public abstract class TestProcedure implements Runnable{
 	protected final int playbackSampleFrequency=(Integer) null;
 	protected final int recordingSampleFrequency=(Integer) null;
 	protected final String testEar;
-	protected final String testName;
 	//TODO: get sample freqs from app data
 	
-	public TestProcedure (TestActivity parent) {
-		TAG = "TestProcedure";
-		this.uiThreadHandler = new Handler(parent);
-		//testIO = new PlayRecordManager(playbackSampleFrequency,recordingSampleFrequency);
-		testEar= parent.getTestEar();
-		testName=parent.getTestName();
-		context = parent.getApplicationContext();
-	}
-	public TestProcedure (TestActivity parent, String testname, String testear) 
+	public TestProcedure (TestActivity parent, String testEar) 
 	{
-		TAG = "TestProcedure";
-		this.uiThreadHandler = new Handler(parent);
-		this.testEar = testear;
-		this.testName = testname;
+		uiThreadHandler = new Handler(parent);
+		this.testEar = testEar;
 		context = parent.getApplicationContext();
 	}
 	
