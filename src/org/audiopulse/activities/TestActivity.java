@@ -62,66 +62,53 @@ import android.widget.TextView;
 //TestActivity is a template for all tests.
 public class TestActivity extends ObservationActivity implements Handler.Callback
 {
-	public final String TAG="BasicTestActivity";
-
+	public static final String TAG="TestActivity";
 	public static final int CONFIRM_PLOT_CODE = 1;
-
 	protected TextView testLog;
 	protected TestProcedure testProcedure;
-	private boolean calledBySana;
+	private static boolean calledBySana;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.basic_test_layout);
 		testLog = (TextView)this.findViewById(R.id.testLog);
-
-		//TODO: Get ear being tested from Bundle
 		Bundle request = getIntent().getExtras();
-		String testEar = request.getString(getResources().getString(R.string.testEarKey));
-		
+		String testEar = null;
 		String caller = this.getCallingPackage();
-		Log.v(TAG,"Calling package is: " + getCallingPackage());
+		Log.v(TAG,"Calling package is: " + getCallingPackage());	
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			
-			// Sana observation meta data - from Sana API ObservationActivity
-			
+			// Sana observation meta data - from Sana API ObservationActivity interface
 			initMetaData();
 			calledBySana = true;
-			
+			Log.v(TAG,"Processing through Sana");
 			String test = getIntent().getAction();
-			//if(test.equals("org.audiopulse.TEOAE_2KHZ"))
-			if(test.equals("org.audiopulse.TestDPOAERightEarActivity"))
-				
-				
-			testProcedure = new DPOAEProcedure(this,testEar); //BUNDLE_TESTEAR_RIGHT
-			//testProcedure = new TestProcedure(this, "DPOAE", "RIGHT"); //BUNDLE_TESTEAR_RIGHT
-			/*
-		      // can use concept or intent action
-		      String test = getIntent().getAction();
-		      if(test.equals("org.audiopulse.TEOAE_2KHZ"){
-		          //TODO fill in setting up the test procedure
-		          // testProcedure = something;
-		      } else if(test.equals("org.audiopulse.TEOAE_3KHZ"){
-		         //TODO fill in setting up the test procedure
-		         // testProcedure = something;
-		      } else if(test.equals("org.audiopulse.TEOAE_4KHZ"){
-		         //TODO fill in setting up the test procedure
-		         // testProcedure = something;
-		      }
-			 */
+			if(test.equals("org.audiopulse.TestDPOAERightEarActivity")){
+				testEar=getResources().getString(R.string.RigtEarKey);
+			}else if (test.equals("org.audiopulse.TestDPOAELeftEarActivity")){
+				testEar=getResources().getString(R.string.LeftEarKey);
+			}else{
+				Log.e(TAG,"Test ear type not identified. setting to null. Testear= " + test);
+				testEar=null;
+			}	
+			testProcedure = new DPOAEProcedure(this,testEar); 
 		} else {
 			Log.v(TAG,"Running AudioPulse in standalone mode");
+			testEar=request.getString(getResources().getString(R.string.testEarKey));
 			calledBySana = false;
 		}
+		testProcedure = new DPOAEProcedure(this,testEar);
+        testProcedure.start();
 	}
 
 	//Begin test -- this function is called by the button in the default layout
 	public void startTest(View callingView)
 	{
-		appendText("Starting Test Procedure");
+		
+		appendText(this.getResources().getString(R.string.startingTest).toString());
 		if (testProcedure==null) {
-			appendText("No TestProecdure set!");
+			appendText(this.getResources().getString(R.string.noProcedure).toString());
 		} else {
 			testProcedure.start();
 		}
@@ -145,7 +132,6 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 	}
 
 	//plot audiogram
-	// 
 	public void plotAudiogram(Bundle resultsBundle ) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
 		intent.putExtras(resultsBundle);
