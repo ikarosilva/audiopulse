@@ -13,6 +13,9 @@
      <string name="Repeat">"Try Again"</string>
      <string name="Exit">"Exit"</string>
      <string name="Save">"Try Again"</string>
+     
+     <string name="startingTest">"Starting Test Procedure"</string>
+     <string name="noProcedure">"No Procedure selected!!"</string>
     
     <string name="amplitude">Amplitude</string>
     <string name="frequency">Frequency</string>

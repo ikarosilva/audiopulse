@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--  Set Stimulus Parameters -->
+	<string name="epochTime">0.02048</string>
+	<integer name="SPLLevel">65</integer>
+
+	<!--  Test frequencies in Hz for F1 and as strings to be converted to double -->
+    <string-array name="TestFrequencyF1Hz">
+        <item>2000</item>
+        <item>3000</item>
+        <item>4000</item>
+    </string-array>
+    <string-array name="TestFrequencyF1SPL">
+        <item>65</item>
+        <item>65</item>
+        <item>65</item>
+    </string-array>
+ 
+    <!--  Test frequencies in Hz vor F2 and as strings to be converted to double -->
+    <!--  F2 is related to F1 by  F2=F1*1.2 -->
+    <string-array name="TestFrequencyF2Hz">      
+        <item>2400</item>
+        <item>3600</item>
+        <item>4800</item>
+    </string-array>
+    <string-array name="TestFrequencyF2SPL">
+        <item>65</item>
+        <item>65</item>
+        <item>65</item>
+    </string-array>
+    
+    <!--  Expected Response frequency in Hz and as strings to be converted to double -->
+    <!--  Response is related to F1 and F2 by  Fresp=2F1-F2 -->
+    <string-array name="ResponseFrequencyHz">      
+        <item>1600</item>
+        <item>2400</item>
+        <item>3200</item>
+        
+    </string-array>
+    
+    
+
+	
+</resources>
