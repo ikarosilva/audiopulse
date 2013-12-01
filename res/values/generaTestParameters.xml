@@ -12,5 +12,6 @@
     <string name="testDPOAEKey">DPOAEKey</string>
     
     
-    <integer name="samplingFrequency">16000</integer>
+    <integer name="recordingSamplingFrequency">16000</integer>
+    <integer name="playbackSamplingFrequency">16000</integer>
 </resources>

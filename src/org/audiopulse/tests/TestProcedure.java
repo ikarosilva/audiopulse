@@ -38,8 +38,15 @@
  */ 
 
 package org.audiopulse.tests;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.audiopulse.activities.TestActivity;
-import android.content.Context;
+import org.audiopulse.analysis.AudioPulseDataAnalyzer;
+import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
+import org.audiopulse.io.AudioPulseFileWriter;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -49,109 +56,116 @@ public abstract class TestProcedure implements Runnable{
 	private static final String TAG="TestProcedure";
 	private Handler uiThreadHandler;	//handler back to TestActivity
 	private Thread workingThread;		//main worker thread to perform test
-	private Context context;			//
-	
-	protected final int playbackSampleFrequency=(Integer) null;
-	protected final int recordingSampleFrequency=(Integer) null;
 	protected final String testEar;
-	//TODO: get sample freqs from app data
 	
 	public TestProcedure (TestActivity parent, String testEar) 
 	{
 		uiThreadHandler = new Handler(parent);
 		this.testEar = testEar;
-		context = parent.getApplicationContext();
-	}
-	
-	public int getRecordingSamplingFrequency(){
-		return recordingSampleFrequency;
-	}
-	public int getPlaybackSamplingFrequency(){
-		return playbackSampleFrequency;
+		parent.getApplicationContext();
 	}
 	
 	//call from Activity to perform test in a new thread
 	public final void start() {
-		if (!getAudioResources()) {
-			Log.e(TAG,"Failed to get audio focus!");
-			//TODO: treat this more seriously
-		}
 		workingThread = new Thread( this , "TestMainThread");
-		workingThread.setPriority(Thread.MAX_PRIORITY);
 		workingThread.start();
-		releaseAudioResources();
 	}
 	
-	//run() should implement entire test procedure, including calibration and analysis
-	public abstract void run();
+	
+	public void run(){
+		//Loop through all the test frequencies, generating stimulus and collecting the results
+				ArrayList<Double> testFrequencies=new ArrayList<Double>();
 
-	
-	protected boolean getAudioResources() {
-		android.media.AudioManager mgr = (android.media.AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
+				//use this to debug by generating a sweep across levels
+				boolean sweepTrial=true;
+				double f =4000.0;
+				Double attStep=10.0;
+				double oldFrequency=f;	
+				Double att=-attStep;
 
-		//TODO the following code was copied out of context, but it roughly what we want
-//		 requestAudioFocus (AudioManager.OnAudioFocusChangeListener l, int streamType, int durationHint)
-//		Context.getSystemService(Context.AUDIO_SERVICE)
-//		if (isBluetoothA2dpOn()) {
-//		    // Adjust output for Bluetooth.
-//		} else if (isSpeakerphoneOn()) {
-//		    // Adjust output for Speakerphone.
-//		} else if (isWiredHeadsetOn()) {
-//		    // Adjust output for headsets
-//		} else { 
-//		    // If audio plays and noone can hear it, is it still playing?
-//		}
-//		private class NoisyAudioStreamReceiver extends BroadcastReceiver {
-//		    @Override
-//		    public void onReceive(Context context, Intent intent) {
-//		        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-//		            // Pause the playback
-//		        }
-//		    }
-//		}
-//
-//		private IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-//
-//		    registerReceiver(myNoisyAudioStreamReceiver(), intentFilter);
-		return true;
+				//Testing across 3 major frequencies sweep to search for distortion
+				testFrequencies.add(2000.0);
+				testFrequencies.add(3000.0);
+				testFrequencies.add(4000.0);
+
+				clearLog();
+				HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
+
+				//create {f1, f2} tones in {left, right} channel of stereo stimulus
+				data=new Bundle();
+				short[] results;
+				short[] stimulus;
+				double splLevel=0;
+				for (Double thisFrequency : testFrequencies){
+					sendMessage(TestActivity.Messages.PROGRESS);
+					logToUI("Running DPOAE frequency: " + thisFrequency + " kHz");
+
+					
+					att=att+attStep;
+					splLevel=dpoaeGorgaAmplitude(thisFrequency);
+
+				   //TODO: Implement USB connection testIO.setPlaybackAndRecording(stimulus);
+
+					double stTime= System.currentTimeMillis();
+					//TODO: Implement USB results = testIO.acquire();
+					results=new short[100];
+					File file=null;
+					file= AudioPulseFileWriter.generateFileName("DPOAE",thisFrequency.toString()+"Hz",super.testEar,splLevel);
+					
+
+					fileNames.add(file.getAbsolutePath());
+					fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
+					data.putSerializable(file.getAbsolutePath(),results.clone());
+
+					//TODO: For now hard-code value instead of dynamically get from Resources...
+					//Extra parameters added for TestDPOAEActivity Only!
+					double F1= thisFrequency/1.2;
+					double expected=2*F1 - thisFrequency;
+					int fftSize=(int) Math.round(
+							dpoeaGorgaEpochTime()*super.recordingSampleFrequency);
+					fftSize=(int) Math.pow(2,Math.floor(Math.log((int) fftSize)/Math.log(2)));
+					data.putLong("N",results.length);
+					data.putShortArray("samples",results);
+					data.putFloat("recSampleRate",super.recordingSampleFrequency);
+					data.putDouble("expectedFrequency",expected);
+					data.putInt("fftSize",fftSize);
+					
+
+					sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
+
+					try {
+						localDPGRAM = analyzeResults(results,
+								super.recordingSampleFrequency,
+								thisFrequency,localDPGRAM);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
+
+					//The file passed here is not used in the analysis (ie not opened and read)!!
+					//It is used when the analysis gets accepted by the user: the app packages
+					//the file with stored the data for transmission with timestamp on the file name
+					data.putSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames,fileNames);
+					data.putSerializable(AudioPulseDataAnalyzer.FileNameRawData_MAP,fileNamestoDataMap);
+					for (String tmpkey: localDPGRAM.keySet()){
+						DPGRAM.put(tmpkey,localDPGRAM.get(tmpkey));
+					}
+				}
+				sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
+			}
+
+			//Analysis of the results on the raw data
+			private HashMap<String, Double> analyzeResults(short[] data, 
+					double Fs, double F1, 
+					HashMap<String, Double> DPGRAM) throws Exception {
+				AudioPulseDataAnalyzer dpoaeAnalysis=
+						new DPOAEGorgaAnalyzer(data,Fs,F1,DPGRAM);
+				return dpoaeAnalysis.call();
+
+			}
 	}
-	protected void releaseAudioResources() {
-		//TODO
-//		abandonAudioFocus(AudioManager.OnAudioFocusChangeListener l)
-//	    unregisterReceiver(myNoisyAudioStreamReceiver);
-	}
 	
-	//return vector of gain you need to apply at each freq
-	//TODO: add phase / delay when we care.
-	
-	
-	//this doesn't seem to add enough to justify putting here, costs readability & flexibility in subclasses.
-//	private abstract interface TestParameters {
-//		//implementations of this interface should have internal
-//		//members such as tone frequency, level, etc.
-//		public double[][] createStimulus(double sanmpleFrequency, AcousticConverter hardware);
-//	}
-//	private LinkedList<TestParameters> testList;
-//	public boolean addTest(TestParameters params) {
-//		return testList.add(params);
-//	}
-//	public void clearTests() {
-//		testList.clear();
-//	}
-//	public TestParameters nextTest() {
-//		return testList.poll();
-//	}
-//	
-		
-	
-	//TODO: clean up these messaging functions
-	//send a message to parent Activity
-	@Deprecated
-	protected void sendMessage(Bundle data) {
-		Message m = this.uiThreadHandler.obtainMessage();
-		m.setData(data);
-		this.uiThreadHandler.sendMessage(m);
-	}
 	protected void sendMessage(int what) {
 		Message m = this.uiThreadHandler.obtainMessage(what);
 		this.uiThreadHandler.sendMessage(m);
