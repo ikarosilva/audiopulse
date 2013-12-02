@@ -7,8 +7,14 @@ public interface UsbAudioInterface {
 	public abstract int initialize(int recfs1,int playfs2,
 			int recBit, int playBit,int recCh, int playCh);
 
+	public abstract void finish();
+	
+	//Should we have callbacks?
 	public abstract int playMultiTone(double[] Frequency,
-			double[] SPL, double milliseconds) throws InterruptedException;
+			double[] SPL, double epochTime, int numberOfSweeps) throws InterruptedException;
+	
+	public abstract int[] getAveragedRecordedPowerSpectrum();
+	public abstract int[] getAveragedRecordedWaveForm();
 
 	public abstract double getRecFs();
 	public abstract double getPlayFs();
