@@ -48,7 +48,7 @@ import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.AudioPulseDataAnalyzer;
 import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
 import org.audiopulse.io.AudioPulseFileWriter;
-import org.audiopulse.io.UsbAudio;
+import org.audiopulse.io.UsbAudioInterface;
 
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -62,7 +62,7 @@ public class TestProcedure implements Runnable{
 	private Thread workingThread;		//main worker thread to perform test
 	protected final String testEar;
 	Resources resources;
-	UsbAudio audioInterface;
+	UsbAudioInterface audioInterface;
 
 	public TestProcedure (TestActivity parent, String testEar, Resources resources) 
 	{
@@ -89,22 +89,26 @@ public class TestProcedure implements Runnable{
 				resources.getInteger(R.integer.recordingChannelConfig),
 				resources.getInteger(R.integer.playbackChannelConfig));
 		
-
+		
 		//Loop through all the test frequencies, generating stimulus and collecting the results	
 		String[] F1Hz = resources.getStringArray(R.array.TestFrequencyF1Hz);
 		String[] F2Hz = resources.getStringArray(R.array.TestFrequencyF2Hz);
 		String[] F1SPL = resources.getStringArray(R.array.TestFrequencyF1SPL);
 		String[] F2SPL = resources.getStringArray(R.array.TestFrequencyF2SPL);
-
+		double epochTime=Double.valueOf(resources.getString(R.string.epochTime));
+		int numberOfSweeps=Integer.valueOf(resources.getString(R.string.numberOfSweeps));
+		String testName=resources.getString(R.string.DPOAETestName);
+		
 		for (int i=0;i<F1Hz.length;i++){
 
-			//TODO: Implement USB connection testIO.setPlaybackAndRecording(stimulus);
-
-			double stTime= System.currentTimeMillis();
-			//TODO: Implement USB results = testIO.acquire();
-			results=new short[100];
+			double[] multiToneFrequency={Double.valueOf(F1Hz[i]),Double.valueOf(F2Hz[i])};
+			double[] multiToneLevel={Double.valueOf(F1SPL[i]),Double.valueOf(F2SPL[i])};
+			
+			audioInterface.playMultiTone(multiToneLevel,multiToneLevel,epochTime,numberOfSweeps);
+			int[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
+			int[] x=audioInterface.getAveragedRecordedWaveForm();
 			File file=null;
-			file= AudioPulseFileWriter.generateFileName("DPOAE",thisFrequency.toString()+"Hz",super.testEar,splLevel);
+			file= AudioPulseFileWriter.generateFileName(testName,F1Hz[i]+"Hz",testEar,Double.valueOf(F1SPL[i]));
 
 
 			fileNames.add(file.getAbsolutePath());

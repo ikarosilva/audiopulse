@@ -11,7 +11,6 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 	
 	public int initialize(int recfs, int playfs, int recBit,
 			int playBit, int recCh, int playCh) {
-		// TODO Auto-generated method stub
 		rFs=recfs;
 		pFs=playfs;
 		rBit=recBit;
@@ -22,9 +21,9 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 	}
 
 	public int playMultiTone(double[] Frequency, double[] SPL,
-			double milliseconds) throws InterruptedException {
+			double epochTime,int numberOfSweeps) throws InterruptedException {
 		// Dummy driver for now just wait a few seconds and return when done
-		this.wait((long) milliseconds);
+		this.wait((long) epochTime*numberOfSweeps);
 		return 0;
 	}
 
@@ -50,6 +49,26 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 
 	public double gtePlayChConfig() {
 		return pCh;
+	}
+
+	public void finish() {
+		
+	}
+
+	public int[] getAveragedRecordedPowerSpectrum() {
+		//Simulate returning of spectrum
+		int[] spec=new int[rFs];
+		for(int i=0;i<rFs;i++)
+			spec[i]= (int) (Math.random()*100);
+				
+		return spec;
+	}
+
+	public int[] getAveragedRecordedWaveForm() {
+		int[] spec=new int[rFs];
+		for(int i=0;i<rFs;i++)
+			spec[i]= (int) (Math.random()*100);	
+		return spec;
 	}
 
 }
