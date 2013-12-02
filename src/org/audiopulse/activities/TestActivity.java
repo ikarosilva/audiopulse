@@ -40,22 +40,13 @@
 package org.audiopulse.activities;
 import org.sana.android.app.ObservationActivity;
 import org.audiopulse.R;
-import org.audiopulse.tests.DPOAEProcedure;
 import org.audiopulse.tests.TestProcedure;
-import org.sana.android.app.ObservationActivity;
-
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.widget.Toast;
-import android.media.AudioManager;
-
-import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -67,7 +58,8 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 	protected TextView testLog;
 	protected TestProcedure testProcedure;
 	private static boolean calledBySana;
-
+	public Resources resources = getResources();
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -92,13 +84,12 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 				Log.e(TAG,"Test ear type not identified. setting to null. Testear= " + test);
 				testEar=null;
 			}	
-			testProcedure = new DPOAEProcedure(this,testEar); 
 		} else {
 			Log.v(TAG,"Running AudioPulse in standalone mode");
 			testEar=request.getString(getResources().getString(R.string.testEarKey));
 			calledBySana = false;
 		}
-		testProcedure = new DPOAEProcedure(this,testEar);
+		testProcedure = new TestProcedure(this,testEar,resources);
         testProcedure.start();
 	}
 

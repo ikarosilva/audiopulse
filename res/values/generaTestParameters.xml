@@ -12,6 +12,16 @@
     <string name="testDPOAEKey">DPOAEKey</string>
     
     
+    <!-- Audio Interface parameters-->
     <integer name="recordingSamplingFrequency">16000</integer>
-    <integer name="playbackSamplingFrequency">16000</integer>
+    <integer name="playbackSamplingFrequency">48000</integer>
+    
+    <integer name="recordingBitDepth">32</integer>
+    <integer name="playbackBitDepth">16</integer>
+    
+    <!-- 0 = mono, 1= stereo -->
+    <integer name="recordingChannelConfig">0</integer>
+    <integer name="playbackChannelConfig">1</integer>
+    
+    
 </resources>
