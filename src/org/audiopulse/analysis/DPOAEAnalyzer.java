@@ -45,44 +45,27 @@ package org.audiopulse.analysis;
 import java.util.HashMap;
 import android.util.Log;
 
-public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
+public class DPOAEAnalyzer {
 
 	private final static String TAG="DPOAEGorgaAnalyzer";
-	private short[] data;
+	private int[] XFFT;
 	private final static double spectralToleranceHz=50;
 	private double Fs;
 	private double F1;
 	private double F2;
 	private double F12;
-	private static int epochSamples; //Size of each epoch from which to do spectral the averaging.
 	HashMap<String, Double> resultMap;
-
-	public synchronized static double dpoaeGorgaAmplitude(double Frequency){
-		//FIXME: Gorga's test requires a stimulus at 65 dB SPL
-		//but this seems to result in clipping for most phones.
-		//we need to find an optimal maximum level that does not clip the sound
-		
-		//From calibration experiments with the ER10C set to 0 dB gain, the linear range of
-		//response-to-stimulus is from 50-30 dB on an acoustic coupler (response will saturate
-		// on either extremes).
-		return 70;
-	}
-
-	public static double dpoeaGorgaEpochTime(){
-		//return epoch time in seconds
-		return 0.02048;
-	}
+	private String fileSuffix;
 	
-	public DPOAEGorgaAnalyzer(short[] data, double Fs, double F2,
-			HashMap<String, Double> resultMap){
+	public DPOAEAnalyzer(int [] XFFT, double Fs, double F2, double F1, double Fres,
+			HashMap<String, Double> resultMap, String fileSuffix){
 		this.Fs=Fs;
-		this.data=data;
+		this.XFFT=XFFT;
 		this.F2=F2;
-		F1=F2/1.2;
-		this.F12=(2*F1)-F2;//Frequency of the expected response
+		this.F1=F1;
+		this.F12=Fres;//Frequency of the expected response
+		this.fileSuffix=fileSuffix;
 		resultMap= new HashMap<String, Double>();
-		epochSamples=(int) Math.round(dpoeaGorgaEpochTime()*Fs);
-		epochSamples=(int) Math.pow(2,Math.floor(Math.log((int) epochSamples)/Math.log(2)));
 		this.resultMap=resultMap;
 		if(Fs != 16000){
 			Log.v(TAG,"Unexpected sampling frequency:" + Fs);
@@ -100,8 +83,6 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 		//using the AudioPulseDataAnalyzer interface to obtain the results
 		Log.v(TAG,"Analyzing frequency: " + F2);
 		double[][] XFFT= new double [2][100];//getSpectrum(data,Fs,epochSamples);
-		
-		resultMap.put(TestType,(double) 2);//According to the interface, 2 =DPOAE
 		String strSTIM = null, strSTIM2 = null,strResponse = null,strNoise = null;
 
 		if(F2==2000){
@@ -157,37 +138,16 @@ public class DPOAEGorgaAnalyzer implements AudioPulseDataAnalyzer {
 		
 	}
 
-
-	public double getResponseLevel(short[] rawdata, double frequency, int Fs) {
-		// not implemented
-		return Double.NaN;
-	}
-
-
 	public double getResponseLevel(double[][] dataFFT, double frequency) {	
 		double [] amp=getFreqAmplitude(dataFFT,frequency,spectralToleranceHz);
 		Log.v(TAG,"response level= " + amp[0]);
 		return amp[0];
 	}
 
-
-	public double getNoiseLevel(short[] rawdata, double frequency, int Fs) {
-		// not implemented
-		return Double.NaN;
-	}
-
-
 	public double getNoiseLevel(double[][] dataFFT, double frequency) {
 		double[] amp=getFreqAmplitude(dataFFT,frequency,spectralToleranceHz);
 		return getFreqNoiseAmplitude(dataFFT,frequency,(int) amp[1]);
 	}
-
-
-	public double getStimulusLevel(short[] rawdata, double frequency, int Fs) {
-		// not implemented
-		return Double.NaN;
-	}
-
 
 	public double getStimulusLevel(double[][] dataFFT, double frequency) {
 		double [] amp=getFreqAmplitude(dataFFT,frequency,spectralToleranceHz);

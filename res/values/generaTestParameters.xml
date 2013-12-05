@@ -9,7 +9,7 @@
        passed by the extra in  the Bundle-->
     <string name="testEarKey">testEarKey</string> 
     <string name="testNameKey">testNameKey</string>
-    <string name="testDPOAEKey">DPOAEKey</string>
+    <string name="DPOAETestName">DPOAE</string>
     
     
     <!-- Audio Interface parameters-->
@@ -22,6 +22,6 @@
     <!-- 0 = mono, 1= stereo -->
     <integer name="recordingChannelConfig">0</integer>
     <integer name="playbackChannelConfig">1</integer>
-    
+   
     
 </resources>
