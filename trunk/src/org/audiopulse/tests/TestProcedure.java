@@ -42,6 +42,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
@@ -62,7 +63,10 @@ public class TestProcedure implements Runnable{
 	private Thread workingThread;		//main worker thread to perform test
 	protected final String testEar;
 	Resources resources;
+	private Bundle data;
 	UsbAudioInterface audioInterface;
+	private HashSet<String> fileNames=new HashSet<String>();
+	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
 
 	public TestProcedure (TestActivity parent, String testEar, Resources resources) 
 	{
@@ -89,20 +93,27 @@ public class TestProcedure implements Runnable{
 				resources.getInteger(R.integer.recordingChannelConfig),
 				resources.getInteger(R.integer.playbackChannelConfig));
 		
+		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
 		
+		int recFs=resources.getInteger(R.integer.recordingSamplingFrequency);
 		//Loop through all the test frequencies, generating stimulus and collecting the results	
 		String[] F1Hz = resources.getStringArray(R.array.TestFrequencyF1Hz);
 		String[] F2Hz = resources.getStringArray(R.array.TestFrequencyF2Hz);
 		String[] F1SPL = resources.getStringArray(R.array.TestFrequencyF1SPL);
 		String[] F2SPL = resources.getStringArray(R.array.TestFrequencyF2SPL);
+		String[] responseFrequency = resources.getStringArray(R.array.ResponseFrequencyHz);
+		String[] fileSuffix= resources.getStringArray(R.array.FileName);
+		
 		double epochTime=Double.valueOf(resources.getString(R.string.epochTime));
 		int numberOfSweeps=Integer.valueOf(resources.getString(R.string.numberOfSweeps));
 		String testName=resources.getString(R.string.DPOAETestName);
 		
 		for (int i=0;i<F1Hz.length;i++){
-
-			double[] multiToneFrequency={Double.valueOf(F1Hz[i]),Double.valueOf(F2Hz[i])};
+			
+			double F2=Double.valueOf(F2Hz[i]); //frequency of hearing being tested in Hz
+			double[] multiToneFrequency={Double.valueOf(F1Hz[i]),F2};
 			double[] multiToneLevel={Double.valueOf(F1SPL[i]),Double.valueOf(F2SPL[i])};
+			double responseF=Double.valueOf(responseFrequency[i]);
 			
 			audioInterface.playMultiTone(multiToneLevel,multiToneLevel,epochTime,numberOfSweeps);
 			int[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
@@ -113,28 +124,18 @@ public class TestProcedure implements Runnable{
 
 			fileNames.add(file.getAbsolutePath());
 			fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
-			data.putSerializable(file.getAbsolutePath(),results.clone());
+			data.putSerializable(file.getAbsolutePath(),XFFT.clone());
 
-			//TODO: For now hard-code value instead of dynamically get from Resources...
-			//Extra parameters added for TestDPOAEActivity Only!
-			double F1= thisFrequency/1.2;
-			double expected=2*F1 - thisFrequency;
-			int fftSize=(int) Math.round(
-					dpoeaGorgaEpochTime()*super.recordingSampleFrequency);
-			fftSize=(int) Math.pow(2,Math.floor(Math.log((int) fftSize)/Math.log(2)));
-			data.putLong("N",results.length);
-			data.putShortArray("samples",results);
-			data.putFloat("recSampleRate",super.recordingSampleFrequency);
-			data.putDouble("expectedFrequency",expected);
-			data.putInt("fftSize",fftSize);
+			data.putIntArray("samples",XFFT);
+			data.putFloat("recSampleRate",recFs);
+			data.putDouble("expectedFrequency",responseF);
+			data.putInt("fftSize",XFFT.length);
 
 
 			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 
 			try {
-				localDPGRAM = analyzeResults(results,
-						super.recordingSampleFrequency,
-						thisFrequency,localDPGRAM);
+				localDPGRAM = analyzeResults(XFFT,recFs,F2,localDPGRAM,resources);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -154,11 +155,11 @@ public class TestProcedure implements Runnable{
 	}
 
 	//Analysis of the results on the raw data
-	private HashMap<String, Double> analyzeResults(short[] data, 
+	private HashMap<String, Double> analyzeResults(int[] data, 
 			double Fs, double F1, 
-			HashMap<String, Double> DPGRAM) throws Exception {
+			HashMap<String, Double> DPGRAM,Resources resources) throws Exception {
 		AudioPulseDataAnalyzer dpoaeAnalysis=
-				new DPOAEGorgaAnalyzer(data,Fs,F1,DPGRAM);
+				new DPOAEGorgaAnalyzer(data,Fs,F1,DPGRAM, Resources  resources);
 		return dpoaeAnalysis.call();
 
 	}
