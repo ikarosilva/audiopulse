@@ -36,18 +36,5 @@
         <item>2400</item>
         <item>3200</item>
     </string-array>
-    
-    <!--  Hashmap Keys for storing and plotting results -->
-    
-    <!--  Filename suffix based on test type and testing frequency (F2) -->
-	<string-array name="FileName">      
-        <item>DPOAE-F2kHz</item>
-        <item>DPOAE-F3kHz</item>
-        <item>DPOAE-F4kHz</item>
-    </string-array>
-    
-	
-	
-	
-	
+    	
 </resources>
