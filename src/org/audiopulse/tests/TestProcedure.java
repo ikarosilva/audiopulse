@@ -39,15 +39,12 @@
 
 package org.audiopulse.tests;
 import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
 import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
-import org.audiopulse.analysis.AudioPulseDataAnalyzer;
-import org.audiopulse.analysis.DPOAEGorgaAnalyzer;
+import org.audiopulse.analysis.DPOAEAnalyzer;
 import org.audiopulse.io.AudioPulseFileWriter;
 import org.audiopulse.io.UsbAudioInterface;
 
@@ -67,6 +64,7 @@ public class TestProcedure implements Runnable{
 	UsbAudioInterface audioInterface;
 	private HashSet<String> fileNames=new HashSet<String>();
 	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
+	private HashMap<String, Double> DPGRAM= new HashMap<String, Double>();
 
 	public TestProcedure (TestActivity parent, String testEar, Resources resources) 
 	{
@@ -92,61 +90,71 @@ public class TestProcedure implements Runnable{
 				resources.getInteger(R.integer.recordingBitDepth),
 				resources.getInteger(R.integer.recordingChannelConfig),
 				resources.getInteger(R.integer.playbackChannelConfig));
-		
+
 		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
-		
+
 		int recFs=resources.getInteger(R.integer.recordingSamplingFrequency);
 		//Loop through all the test frequencies, generating stimulus and collecting the results	
 		String[] F1Hz = resources.getStringArray(R.array.TestFrequencyF1Hz);
 		String[] F2Hz = resources.getStringArray(R.array.TestFrequencyF2Hz);
 		String[] F1SPL = resources.getStringArray(R.array.TestFrequencyF1SPL);
 		String[] F2SPL = resources.getStringArray(R.array.TestFrequencyF2SPL);
-		String[] responseFrequency = resources.getStringArray(R.array.ResponseFrequencyHz);
+		String[] FresHz = resources.getStringArray(R.array.ResponseFrequencyHz);
 		String[] fileSuffix= resources.getStringArray(R.array.FileName);
-		
+
 		double epochTime=Double.valueOf(resources.getString(R.string.epochTime));
 		int numberOfSweeps=Integer.valueOf(resources.getString(R.string.numberOfSweeps));
 		String testName=resources.getString(R.string.DPOAETestName);
-		
+
 		for (int i=0;i<F1Hz.length;i++){
-			
+
 			double F2=Double.valueOf(F2Hz[i]); //frequency of hearing being tested in Hz
-			double[] multiToneFrequency={Double.valueOf(F1Hz[i]),F2};
+			double F1=Double.valueOf(F1Hz[i]);
+			double[] multiToneFrequency={F1,F2};
 			double[] multiToneLevel={Double.valueOf(F1SPL[i]),Double.valueOf(F2SPL[i])};
-			double responseF=Double.valueOf(responseFrequency[i]);
-			
-			audioInterface.playMultiTone(multiToneLevel,multiToneLevel,epochTime,numberOfSweeps);
+			double Fres=Double.valueOf(FresHz[i]);
+
+
+			//Call the USB interface with the stimulus parameters and obtain the data
+			try {
+				audioInterface.playMultiTone(multiToneFrequency,multiToneLevel,epochTime,numberOfSweeps);
+			} catch (InterruptedException e1) {
+				Log.v(TAG,"Cannot play stimulus");
+				e1.printStackTrace();
+			}
 			int[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
 			int[] x=audioInterface.getAveragedRecordedWaveForm();
+
+
+			//Get information that will generate the file name for this specific stimulus
 			File file=null;
 			file= AudioPulseFileWriter.generateFileName(testName,F1Hz[i]+"Hz",testEar,Double.valueOf(F1SPL[i]));
-
-
 			fileNames.add(file.getAbsolutePath());
 			fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
 			data.putSerializable(file.getAbsolutePath(),XFFT.clone());
 
 			data.putIntArray("samples",XFFT);
 			data.putFloat("recSampleRate",recFs);
-			data.putDouble("expectedFrequency",responseF);
+			data.putDouble("expectedFrequency",Fres);
 			data.putInt("fftSize",XFFT.length);
 
 
 			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 
 			try {
-				localDPGRAM = analyzeResults(XFFT,recFs,F2,localDPGRAM,resources);
+				//localDPGRAM = DPOAEAnalyzer(XFFT,recFs,F2,localDPGRAM);
+				DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(XFFT,recFs,F2,F1,Fres);
+				localDPGRAM=dpoaeAnalysis.call();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
-			data.putSerializable(AudioPulseDataAnalyzer.Results_MAP,DPGRAM);
+			data.putSerializable(DPOAEAnalyzer.Results_MAP,DPGRAM);
 
 			//The file passed here is not used in the analysis (ie not opened and read)!!
 			//It is used when the analysis gets accepted by the user: the app packages
 			//the file with stored the data for transmission with timestamp on the file name
-			data.putSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames,fileNames);
-			data.putSerializable(AudioPulseDataAnalyzer.FileNameRawData_MAP,fileNamestoDataMap);
+			data.putSerializable(DPOAEAnalyzer.MetaData_RawFileNames,fileNames);
+			data.putSerializable(DPOAEAnalyzer.FileNameRawData_MAP,fileNamestoDataMap);
 			for (String tmpkey: localDPGRAM.keySet()){
 				DPGRAM.put(tmpkey,localDPGRAM.get(tmpkey));
 			}
@@ -154,39 +162,28 @@ public class TestProcedure implements Runnable{
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 	}
 
-	//Analysis of the results on the raw data
-	private HashMap<String, Double> analyzeResults(int[] data, 
-			double Fs, double F1, 
-			HashMap<String, Double> DPGRAM,Resources resources) throws Exception {
-		AudioPulseDataAnalyzer dpoaeAnalysis=
-				new DPOAEGorgaAnalyzer(data,Fs,F1,DPGRAM, Resources  resources);
-		return dpoaeAnalysis.call();
-
+	protected void sendMessage(int what) {
+		Message m = this.uiThreadHandler.obtainMessage(what);
+		this.uiThreadHandler.sendMessage(m);
 	}
-}
+	protected void sendMessage(int what, Bundle data) {
+		Message m = this.uiThreadHandler.obtainMessage(what);
+		m.setData(data);
+		this.uiThreadHandler.sendMessage(m);
+	}
 
-protected void sendMessage(int what) {
-	Message m = this.uiThreadHandler.obtainMessage(what);
-	this.uiThreadHandler.sendMessage(m);
-}
-protected void sendMessage(int what, Bundle data) {
-	Message m = this.uiThreadHandler.obtainMessage(what);
-	m.setData(data);
-	this.uiThreadHandler.sendMessage(m);
-}
+	//Print message to testLog TextView
+	protected void logToUI(String str)
+	{
+		Log.i(TAG,str);
+		Bundle data = new Bundle();
+		data.putString("log", str);
+		sendMessage(TestActivity.Messages.LOG,data);
+	}
 
-//Print message to testLog TextView
-protected void logToUI(String str)
-{
-	Log.i(TAG,str);
-	Bundle data = new Bundle();
-	data.putString("log", str);
-	sendMessage(TestActivity.Messages.LOG,data);
-}
-
-protected void clearLog() {
-	sendMessage(TestActivity.Messages.CLEAR_LOG);
-}
+	protected void clearLog() {
+		sendMessage(TestActivity.Messages.CLEAR_LOG);
+	}
 
 
 }

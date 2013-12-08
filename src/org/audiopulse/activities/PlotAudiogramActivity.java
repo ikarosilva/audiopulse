@@ -47,8 +47,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
-import org.audiopulse.analysis.AudioPulseDataAnalyzer;
+import org.audiopulse.analysis.DPOAEAnalyzer;
 import org.audiopulse.graphics.PlotAudiogramView;
 import org.audiopulse.io.AudioPulseFilePackager;
 import org.audiopulse.io.AudioPulseFileWriter;
@@ -76,6 +75,9 @@ public class PlotAudiogramActivity extends Activity {
 	private Bundle data;
 	private File PackagedFile;
 	private static String TAG="PlotAudiogramActivity";
+	ArrayList<Double> responseData= new ArrayList<Double>();
+	ArrayList<Double> noiseData= new ArrayList<Double>();
+	ArrayList<Double> stimData= new ArrayList<Double>();
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -86,49 +88,45 @@ public class PlotAudiogramActivity extends Activity {
 		//Get Data generated according to the AudioPulseDataAnalyzer interface
 		//this should be a HashMap with keys defined in the interface
 
-		results=(HashMap<String, Double>) data.getSerializable(AudioPulseDataAnalyzer.Results_MAP);
-		fileNames = (HashSet<String>) data.getSerializable(AudioPulseDataAnalyzer.MetaData_RawFileNames);
+		results=(HashMap<String, Double>) data.getSerializable(DPOAEAnalyzer.Results_MAP);
+		fileNames = (HashSet<String>) data.getSerializable(DPOAEAnalyzer.MetaData_RawFileNames);
 	
 		//Decode test name from the results and the mapping in the interface
 		Log.v(TAG,"results= "+ results.toString());
 		Log.v(TAG,"results keys= "+ results.keySet());
 
-		testName=AudioPulseDataAnalyzer.testName.get(
-				results.get(AudioPulseDataAnalyzer.TestType).intValue());
+		testName=DPOAEAnalyzer.TestType;
 
 		//Loop through the bundle to get the results 
 		//The arrays should be interleaved, with odd samples representing X
 		//and even samples representing Y coordinates
-		ArrayList<Double> responseData= new ArrayList<Double>();
-		ArrayList<Double> noiseData= new ArrayList<Double>();
-		ArrayList<Double> stimData= new ArrayList<Double>();
-		for(String key: AudioPulseDataAnalyzer.responseKeys){
+		for(String key: DPOAEAnalyzer.responseKeys){
 			Double tmpdata = results.get(key);
 			if(tmpdata !=null){
 				//Get frequency
-				responseData.add(AudioPulseDataAnalyzer.frequencyMapping.get(key));
+				responseData.add(DPOAEAnalyzer.frequencyMapping.get(key));
 				responseData.add(tmpdata);
 			}else{
 				Log.v(TAG,"null key: "+ key);
 			}
 		}
 
-		for(String key: AudioPulseDataAnalyzer.noiseKeys){
+		for(String key: DPOAEAnalyzer.noiseKeys){
 			Double tmpdata = results.get(key);
 			if(tmpdata !=null){
 				//Get frequency
-				noiseData.add(AudioPulseDataAnalyzer.frequencyMapping.get(key));
+				noiseData.add(DPOAEAnalyzer.frequencyMapping.get(key));
 				noiseData.add(tmpdata);
 			}else{
 				Log.v(TAG,"null key: "+ key);
 			}
 		}
 
-		for(String key: AudioPulseDataAnalyzer.stimKeys){
+		for(String key: DPOAEAnalyzer.stimKeys){
 			Double tmpdata = results.get(key);
 			if(tmpdata !=null){
 				//Get frequency
-				stimData.add(AudioPulseDataAnalyzer.frequencyMapping.get(key));
+				stimData.add(DPOAEAnalyzer.frequencyMapping.get(key));
 				stimData.add(tmpdata);
 			}else{
 				Log.v(TAG,"null key: "+ key);
@@ -136,6 +134,8 @@ public class PlotAudiogramActivity extends Activity {
 		}
 
 		Log.v(TAG,"finished xtracting data from bundle");  	
+		//NOTE: PlotAudiogramView assumes data is being send in an interleaved array where
+		// odd samples are X-axis and even samples go in the Y-axis
 		PlotAudiogramView mView = new PlotAudiogramView(this,testName,responseData,noiseData,stimData);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(mView);
@@ -192,7 +192,7 @@ public class PlotAudiogramActivity extends Activity {
 							Iterator<String> it = fileNames.iterator();
 							@SuppressWarnings("unchecked")
 							HashMap<String,String> fileNamestoDataMap = (HashMap<String,String>) data.getSerializable(
-									AudioPulseDataAnalyzer.FileNameRawData_MAP);
+									DPOAEAnalyzer.FileNameRawData_MAP);
 							String tmpName;
 							String dataName;
 							List<String> fileList = new ArrayList<String>();
