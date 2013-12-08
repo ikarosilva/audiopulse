@@ -10,7 +10,7 @@
     <string name="testEarKey">testEarKey</string> 
     <string name="testNameKey">testNameKey</string>
     <string name="DPOAETestName">DPOAE</string>
-    
+    <string name="DPOAETestProtocolName">Gorga</string>
     
     <!-- Audio Interface parameters-->
     <integer name="recordingSamplingFrequency">16000</integer>
