@@ -57,82 +57,23 @@ public class DPOAEAnalyzer {
 	private double Fs;
 	private double F1;
 	private double F2;
-	private double Fres;
-	HashMap<String, Double> resultMap;
-	private String NoiseKey;
-	public static final String Results_MAP="AudioPulseDataAnalyzerMap"; //Bundle Key
-	public static final String MetaData_RawFileNames="AudioPulseMetaDataRawFileNames";//Bundle Key
+	private double Fres;	
+	public final String protocol;
+	public final String fileName;
 
-
-	//********Define test Keys for storing test information
-
-	//Define Analysis parameter Names (to be used by classes that extend 
-	//AudioPulseDataAnalyzer  interface
-	public static final String RESPONSE_2KHZ="resp2kHz";
-	public static final String RESPONSE_3KHZ="resp3kHz";
-	public static final String RESPONSE_4KHZ="resp4kHz";
-	public static final String NOISE_2KHZ="noise2kHz";
-	public static final String NOISE_3KHZ="noise3kHz";
-	public static final String NOISE_4KHZ="noise4kHz";
-	public static final String STIM_2KHZ="stim2kHz";
-	public static final String STIM_3KHZ="stim3kHz";
-	public static final String STIM_4KHZ="stim4kHz";
-
-	//Used by DPOAEs 
-	public static final String STIM2_2KHZ="stim2kHz";
-	public static final String STIM2_3KHZ="stim3kHz";
-	public static final String STIM2_4KHZ="stim4kHz";
-
-	//Define the Names of the raw recording arrays that will be
-	//saved to file after user accepts the plotted analysis
-	public static final String RAWDATA_2KHZ="raw2kHz";
-	public static final String RAWDATA_3KHZ="raw3kHz";
-	public static final String RAWDATA_4KHZ="raw4kHz";
-	public static final String RAWDATA_CLICK="rawClick";
-
-
-	public static final Set<String> responseKeys = new HashSet<String>() {{  
-		add(RESPONSE_2KHZ); add(RESPONSE_3KHZ); add(RESPONSE_4KHZ);  
-	}};
-
-	public static final HashMap<String,Double>  frequencyMapping =new HashMap<String,Double>(){{  
-		put(RESPONSE_2KHZ,(double) 2); put(RESPONSE_3KHZ,(double) 3); put(RESPONSE_4KHZ,(double) 4); 
-		put(NOISE_2KHZ,(double) 2); put(NOISE_3KHZ,(double) 3); put(NOISE_4KHZ,(double) 4);
-		put(STIM_2KHZ,(double) 2); put(STIM_3KHZ,(double) 3); put(STIM_4KHZ,(double) 4);
-		put(RAWDATA_2KHZ,(double) 2); put(RAWDATA_3KHZ,(double) 3); put(RAWDATA_4KHZ,(double) 4);
-	}};
-
-	public static final Set<String> noiseKeys = new HashSet<String>() {{  
-		add(NOISE_2KHZ); add(NOISE_3KHZ); add(NOISE_4KHZ);  
-	}};  
-
-	public static final Set<String> stimKeys = new HashSet<String>() {{  
-		add(STIM_2KHZ); add(STIM_3KHZ); add(STIM_4KHZ);  
-	}};
-
-	//Used by DPOAEs
-	public static final Set<String> stim2Keys = new HashSet<String>() {{  
-		add(STIM2_2KHZ); add(STIM2_3KHZ); add(STIM2_4KHZ);  
-	}};
-
-	//Maps filenames with respective data arrays (RAWDATA_X names)
-    public static final String FileNameRawData_MAP="AudioPulseFileNameRawDataMap";//Bundle Key
-    
-	//*******Done defining test keys
-
-
-	public DPOAEAnalyzer(int [] XFFT, double Fs, double F2, double F1, double Fres){
+	public DPOAEAnalyzer(int [] XFFT, double Fs, double F2, double F1, double Fres,
+			String protocol, String fileName){
 		this.Fs=Fs;
 		this.XFFT=XFFT;
 		this.F2=F2;
 		this.F1=F1;
 		this.Fres=Fres;//Frequency of the expected response
-		resultMap= new HashMap<String, Double>();
-		this.resultMap=resultMap;
+		this.protocol=protocol;
+		this.fileName=fileName;
 	}
 
 
-	public HashMap<String, Double> call() throws Exception {
+	public DPOAEResults call() throws Exception {
 		// TODO This function calculates the "Audiogram" results that will be 
 		//plotted and save as the final analysis of the data. 
 		//For now, using generic as return type to allow for flexibility,
@@ -143,12 +84,13 @@ public class DPOAEAnalyzer {
 		Log.v(TAG,"Analyzing frequency: " + F2);
 		double[][] XFFT= new double [2][100];//getSpectrum(data,Fs,epochSamples);
 		String strSTIM = null, strSTIM2 = null,strResponse = null,strNoise = null;
-
-		resultMap.put(Double.toString(F1), getStimulusLevel(XFFT,F1));
-		resultMap.put(Double.toString(F2), getStimulusLevel(XFFT,F2));
-		resultMap.put(Double.toString(Fres), getResponseLevel(XFFT,Fres));
-		resultMap.put("N"+Double.toString(F2), getNoiseLevel(XFFT,Fres));
-		return resultMap;
+		double F1SPL=getStimulusLevel(XFFT,F1);
+		double F2SPL=getStimulusLevel(XFFT,F2);
+		double respSPL=getResponseLevel(XFFT,Fres);
+		double noiseSPL=getNoiseLevel(XFFT,Fres);
+		DPOAEResults dResults=new DPOAEResults(respSPL,noiseSPL,F1SPL,F2SPL,Fres,F1,F2,XFFT,fileName,protocol);
+		//Double.toString(F2)
+		return dResults;
 	}
 
 	public static double[] getFreqAmplitude(double[][] XFFT, double desF, double tolerance){

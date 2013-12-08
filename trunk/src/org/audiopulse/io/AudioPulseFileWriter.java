@@ -50,10 +50,10 @@ public class AudioPulseFileWriter extends Thread {
 	private static final String TAG="AudioPulseWriteFile";
 	private static final File root = Environment.getExternalStorageDirectory();
 	private final File outFile;
-	private final short[] data;
+	private final double[] data;
 	private final static String fileExtension=".raw";
 	
-	public AudioPulseFileWriter(File f, short[] d){
+	public AudioPulseFileWriter(File f, double[] d){
 		outFile=f;
 		data=d;
 	}
@@ -78,7 +78,7 @@ public class AudioPulseFileWriter extends Thread {
 		return outFile;
 	}
 	
-	public synchronized static void writeFile(File outFile, short[] samples) throws Exception {
+	public synchronized static void writeFile(File outFile, double[] samples) throws Exception {
 		//Write Short file to disk
 		FileOutputStream fos = null;
 		ObjectOutputStream out = null;

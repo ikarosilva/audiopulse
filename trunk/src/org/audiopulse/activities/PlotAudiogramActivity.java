@@ -43,11 +43,8 @@ package org.audiopulse.activities;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import org.audiopulse.analysis.DPOAEAnalyzer;
+import org.audiopulse.analysis.DPOAEResults;
 import org.audiopulse.graphics.PlotAudiogramView;
 import org.audiopulse.io.AudioPulseFilePackager;
 import org.audiopulse.io.AudioPulseFileWriter;
@@ -69,8 +66,7 @@ public class PlotAudiogramActivity extends Activity {
 	 * Called when the activity is starting.
 	 * @param savedInstanceState
 	 */
-	private HashMap<String, Double> results;
-	private HashSet<String> fileNames;
+	private List<String> fileNames;
 	private String testName;
 	private Bundle data;
 	private File PackagedFile;
@@ -78,7 +74,9 @@ public class PlotAudiogramActivity extends Activity {
 	ArrayList<Double> responseData= new ArrayList<Double>();
 	ArrayList<Double> noiseData= new ArrayList<Double>();
 	ArrayList<Double> stimData= new ArrayList<Double>();
+	private ArrayList<DPOAEResults> DPGRAM = new ArrayList<DPOAEResults>();
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -88,51 +86,29 @@ public class PlotAudiogramActivity extends Activity {
 		//Get Data generated according to the AudioPulseDataAnalyzer interface
 		//this should be a HashMap with keys defined in the interface
 
-		results=(HashMap<String, Double>) data.getSerializable(DPOAEAnalyzer.Results_MAP);
-		fileNames = (HashSet<String>) data.getSerializable(DPOAEAnalyzer.MetaData_RawFileNames);
-	
-		//Decode test name from the results and the mapping in the interface
-		Log.v(TAG,"results= "+ results.toString());
-		Log.v(TAG,"results keys= "+ results.keySet());
-
-		testName=DPOAEAnalyzer.TestType;
+		DPGRAM=(ArrayList<DPOAEResults>) data.getSerializable("DPGRAM");
 
 		//Loop through the bundle to get the results 
 		//The arrays should be interleaved, with odd samples representing X
 		//and even samples representing Y coordinates
-		for(String key: DPOAEAnalyzer.responseKeys){
-			Double tmpdata = results.get(key);
-			if(tmpdata !=null){
-				//Get frequency
-				responseData.add(DPOAEAnalyzer.frequencyMapping.get(key));
-				responseData.add(tmpdata);
-			}else{
-				Log.v(TAG,"null key: "+ key);
-			}
+		for(DPOAEResults dpoae: DPGRAM){
+			responseData.add(dpoae.respHz);
+			responseData.add(dpoae.respSPL);
+			
+			noiseData.add(dpoae.respHz);
+			noiseData.add(dpoae.noiseSPL);
+			
+			stimData.add(dpoae.stim1Hz);
+			stimData.add(dpoae.stim1SPL);
+			
+			stimData.add(dpoae.stim2Hz);
+			stimData.add(dpoae.stim2SPL);
+			
+			testName=dpoae.protocol;
+			fileNames.add(dpoae.fileName);
 		}
-
-		for(String key: DPOAEAnalyzer.noiseKeys){
-			Double tmpdata = results.get(key);
-			if(tmpdata !=null){
-				//Get frequency
-				noiseData.add(DPOAEAnalyzer.frequencyMapping.get(key));
-				noiseData.add(tmpdata);
-			}else{
-				Log.v(TAG,"null key: "+ key);
-			}
-		}
-
-		for(String key: DPOAEAnalyzer.stimKeys){
-			Double tmpdata = results.get(key);
-			if(tmpdata !=null){
-				//Get frequency
-				stimData.add(DPOAEAnalyzer.frequencyMapping.get(key));
-				stimData.add(tmpdata);
-			}else{
-				Log.v(TAG,"null key: "+ key);
-			}
-		}
-
+		
+		
 		Log.v(TAG,"finished xtracting data from bundle");  	
 		//NOTE: PlotAudiogramView assumes data is being send in an interleaved array where
 		// odd samples are X-axis and even samples go in the Y-axis
@@ -189,27 +165,16 @@ public class PlotAudiogramActivity extends Activity {
 					new Thread(new Runnable() {
 						public void run() {
 							
-							Iterator<String> it = fileNames.iterator();
-							@SuppressWarnings("unchecked")
-							HashMap<String,String> fileNamestoDataMap = (HashMap<String,String>) data.getSerializable(
-									DPOAEAnalyzer.FileNameRawData_MAP);
-							String tmpName;
-							String dataName;
-							List<String> fileList = new ArrayList<String>();
-							short [] results;
-							while(it.hasNext()){
-								tmpName=it.next();
-								dataName=fileNamestoDataMap.get(tmpName.toString());
-								Log.v(TAG,"saving raw data : " + dataName+ " to files as: " +tmpName );
-								results=(short []) data.getSerializable(dataName);
-								Log.v(TAG,"results size= "  + results.length );
-								AudioPulseFileWriter writer= new AudioPulseFileWriter(new File(tmpName),results);
+							List<String> fileList=new ArrayList<String>();
+							for(DPOAEResults dpoae: DPGRAM){
+								Log.v(TAG,"saving fft data : " +  dpoae.dataFFT.length );
+								AudioPulseFileWriter writer= new AudioPulseFileWriter(new File(dpoae.fileName),dpoae.dataFFT[1]);
 								writer.start();
 								try {
 									writer.join();
-									Log.v(TAG,"Adding file to zip: " + tmpName);
+									Log.v(TAG,"Adding file to zip: " + dpoae.fileName);
 									//Add file to list of files to be zipped
-									fileList.add(tmpName);
+									fileList.add(dpoae.fileName);
 								} catch (InterruptedException e) {
 									Log.e(TAG,"InterruptedException caught: " + e.getMessage() );
 								}	

@@ -39,12 +39,12 @@
 
 package org.audiopulse.tests;
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.DPOAEAnalyzer;
+import org.audiopulse.analysis.DPOAEResults;
 import org.audiopulse.io.AudioPulseFileWriter;
 import org.audiopulse.io.UsbAudioInterface;
 
@@ -62,9 +62,7 @@ public class TestProcedure implements Runnable{
 	Resources resources;
 	private Bundle data;
 	UsbAudioInterface audioInterface;
-	private HashSet<String> fileNames=new HashSet<String>();
-	private HashMap<String,String> fileNamestoDataMap=new HashMap<String,String>();
-	private HashMap<String, Double> DPGRAM= new HashMap<String, Double>();
+	private ArrayList<DPOAEResults> DPGRAM = new ArrayList<DPOAEResults>();
 
 	public TestProcedure (TestActivity parent, String testEar, Resources resources) 
 	{
@@ -91,8 +89,6 @@ public class TestProcedure implements Runnable{
 				resources.getInteger(R.integer.recordingChannelConfig),
 				resources.getInteger(R.integer.playbackChannelConfig));
 
-		HashMap<String, Double> localDPGRAM = new HashMap<String, Double>();
-
 		int recFs=resources.getInteger(R.integer.recordingSamplingFrequency);
 		//Loop through all the test frequencies, generating stimulus and collecting the results	
 		String[] F1Hz = resources.getStringArray(R.array.TestFrequencyF1Hz);
@@ -100,11 +96,11 @@ public class TestProcedure implements Runnable{
 		String[] F1SPL = resources.getStringArray(R.array.TestFrequencyF1SPL);
 		String[] F2SPL = resources.getStringArray(R.array.TestFrequencyF2SPL);
 		String[] FresHz = resources.getStringArray(R.array.ResponseFrequencyHz);
-		String[] fileSuffix= resources.getStringArray(R.array.FileName);
 
 		double epochTime=Double.valueOf(resources.getString(R.string.epochTime));
 		int numberOfSweeps=Integer.valueOf(resources.getString(R.string.numberOfSweeps));
 		String testName=resources.getString(R.string.DPOAETestName);
+		String testProtocolName=resources.getString(R.string.DPOAETestProtocolName);
 
 		for (int i=0;i<F1Hz.length;i++){
 
@@ -123,41 +119,21 @@ public class TestProcedure implements Runnable{
 				e1.printStackTrace();
 			}
 			int[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
-			int[] x=audioInterface.getAveragedRecordedWaveForm();
-
 
 			//Get information that will generate the file name for this specific stimulus
 			File file=null;
 			file= AudioPulseFileWriter.generateFileName(testName,F1Hz[i]+"Hz",testEar,Double.valueOf(F1SPL[i]));
-			fileNames.add(file.getAbsolutePath());
-			fileNamestoDataMap.put(file.getAbsolutePath(),file.getAbsolutePath());
-			data.putSerializable(file.getAbsolutePath(),XFFT.clone());
-
-			data.putIntArray("samples",XFFT);
-			data.putFloat("recSampleRate",recFs);
-			data.putDouble("expectedFrequency",Fres);
-			data.putInt("fftSize",XFFT.length);
-
-
 			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
 
 			try {
 				//localDPGRAM = DPOAEAnalyzer(XFFT,recFs,F2,localDPGRAM);
-				DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(XFFT,recFs,F2,F1,Fres);
-				localDPGRAM=dpoaeAnalysis.call();
+				DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(XFFT,recFs,F2,F1,Fres,
+						file.getAbsolutePath(),testProtocolName);
+				DPGRAM.add(dpoaeAnalysis.call());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			data.putSerializable(DPOAEAnalyzer.Results_MAP,DPGRAM);
-
-			//The file passed here is not used in the analysis (ie not opened and read)!!
-			//It is used when the analysis gets accepted by the user: the app packages
-			//the file with stored the data for transmission with timestamp on the file name
-			data.putSerializable(DPOAEAnalyzer.MetaData_RawFileNames,fileNames);
-			data.putSerializable(DPOAEAnalyzer.FileNameRawData_MAP,fileNamestoDataMap);
-			for (String tmpkey: localDPGRAM.keySet()){
-				DPGRAM.put(tmpkey,localDPGRAM.get(tmpkey));
-			}
+			data.putSerializable("DPGRAM",DPGRAM);
 		}
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 	}
