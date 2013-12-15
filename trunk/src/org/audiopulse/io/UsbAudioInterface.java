@@ -21,7 +21,7 @@ public interface UsbAudioInterface {
 	public abstract double getRecBitLength();
 	public abstract double getPlayBitLength();
 	public abstract double getRecChConfig();
-	public abstract double gtePlayChConfig();
+	public abstract double getPlayChConfig();
 
 
 }

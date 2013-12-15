@@ -47,7 +47,7 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 		return rCh;
 	}
 
-	public double gtePlayChConfig() {
+	public double getPlayChConfig() {
 		return pCh;
 	}
 
