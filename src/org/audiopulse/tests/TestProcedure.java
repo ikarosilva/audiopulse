@@ -43,9 +43,11 @@ import java.util.ArrayList;
 
 import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
+import org.audiopulse.activities.TestActivity;
 import org.audiopulse.analysis.DPOAEAnalyzer;
 import org.audiopulse.analysis.DPOAEResults;
 import org.audiopulse.io.AudioPulseFileWriter;
+import org.audiopulse.io.UsbAudioEmulator;
 import org.audiopulse.io.UsbAudioInterface;
 
 import android.content.res.Resources;
@@ -64,11 +66,14 @@ public class TestProcedure implements Runnable{
 	UsbAudioInterface audioInterface;
 	private ArrayList<DPOAEResults> DPGRAM = new ArrayList<DPOAEResults>();
 
-	public TestProcedure (TestActivity parent, String testEar, Resources resources) 
+	public TestProcedure (TestActivity testActivity, String testEar, Resources resources) 
 	{
-		uiThreadHandler = new Handler(parent);
 		this.testEar = testEar;
-		parent.getApplicationContext();
+		Log.v(TAG,"Getting context");
+		testActivity.getApplicationContext();
+		Log.v(TAG,"Getting handler");
+		uiThreadHandler = new Handler(testActivity);
+		Log.v(TAG,"setting resources");
 		this.resources=resources;
 	}
 
@@ -80,16 +85,28 @@ public class TestProcedure implements Runnable{
 
 
 	public void run(){
-
+		
+		logToUI("Starting test...");
+		if(resources.equals(null))
+			Log.e(TAG,"resource is null!!");
+	
+		if(resources.getString(R.string.AudioInterfaceType).equals("emulator")){
+			Log.v(TAG,"creating audio interface of type: emulator");
+			audioInterface= new UsbAudioEmulator();
+		}
 		//Initialize audio interface based on XML configuration settings
+		Log.v(TAG,"initializing interface");
 		audioInterface.initialize(resources.getInteger(R.integer.recordingSamplingFrequency),
 				resources.getInteger(R.integer.playbackSamplingFrequency),
 				resources.getInteger(R.integer.recordingBitDepth),
 				resources.getInteger(R.integer.recordingBitDepth),
 				resources.getInteger(R.integer.recordingChannelConfig),
 				resources.getInteger(R.integer.playbackChannelConfig));
-
+		
+		logToUI("---Audio interface initiliazed");
 		int recFs=resources.getInteger(R.integer.recordingSamplingFrequency);
+		Log.v(TAG,"recording Fs set to:" + recFs);
+		
 		//Loop through all the test frequencies, generating stimulus and collecting the results	
 		String[] F1Hz = resources.getStringArray(R.array.TestFrequencyF1Hz);
 		String[] F2Hz = resources.getStringArray(R.array.TestFrequencyF2Hz);
@@ -97,11 +114,17 @@ public class TestProcedure implements Runnable{
 		String[] F2SPL = resources.getStringArray(R.array.TestFrequencyF2SPL);
 		String[] FresHz = resources.getStringArray(R.array.ResponseFrequencyHz);
 
+		logToUI("---Testing " + F1Hz.length + " different frequencies");
 		double epochTime=Double.valueOf(resources.getString(R.string.epochTime));
+		Log.v(TAG,"epochTime:" + epochTime);
+		
 		int numberOfSweeps=Integer.valueOf(resources.getString(R.string.numberOfSweeps));
+		Log.v(TAG,"Sweeps:" + numberOfSweeps);
+		
 		String testName=resources.getString(R.string.DPOAETestName);
 		String testProtocolName=resources.getString(R.string.DPOAETestProtocolName);
-
+		Log.v(TAG,"protocol= " + testProtocolName);
+		double playTime=epochTime*numberOfSweeps;
 		for (int i=0;i<F1Hz.length;i++){
 
 			double F2=Double.valueOf(F2Hz[i]); //frequency of hearing being tested in Hz
@@ -110,31 +133,43 @@ public class TestProcedure implements Runnable{
 			double[] multiToneLevel={Double.valueOf(F1SPL[i]),Double.valueOf(F2SPL[i])};
 			double Fres=Double.valueOf(FresHz[i]);
 
-
+			Log.v(TAG,"F1= " + F1 + " @ " + F1SPL[i] + " dB, F2= " 
+					+ F2 + " @ " + F2SPL[i] + " dB Fres= " + Fres);
+			logToUI("---Testing frequency: " + F2 + " kHz");
+			
 			//Call the USB interface with the stimulus parameters and obtain the data
 			try {
+				Log.v(TAG,"playing multitone");
+				logToUI("---Playing stimulus for: " + playTime + " seconds");
 				audioInterface.playMultiTone(multiToneFrequency,multiToneLevel,epochTime,numberOfSweeps);
 			} catch (InterruptedException e1) {
-				Log.v(TAG,"Cannot play stimulus");
+				Log.e(TAG,"Could not play stimulus!!");
+				logToUI("*****Error: could not play stimulus!!");
 				e1.printStackTrace();
 			}
+			Log.v(TAG,"getting FFT");
+			logToUI("---Acquiring Power Spectrum data..");
 			int[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
 
 			//Get information that will generate the file name for this specific stimulus
 			File file=null;
 			file= AudioPulseFileWriter.generateFileName(testName,F1Hz[i]+"Hz",testEar,Double.valueOf(F1SPL[i]));
-			sendMessage(TestActivity.Messages.IO_COMPLETE); //Not exactly true because we delegate writing of file to another thread...
-
 			try {
-				//localDPGRAM = DPOAEAnalyzer(XFFT,recFs,F2,localDPGRAM);
+				Log.v(TAG,"Estimating response of size:" + XFFT.length);
 				DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(XFFT,recFs,F2,F1,Fres,
 						file.getAbsolutePath(),testProtocolName);
+				Log.v(TAG,"adding data to dpgram analysis");
 				DPGRAM.add(dpoaeAnalysis.call());
 			} catch (Exception e) {
+				Log.e(TAG,"could analyze data!!");
+				logToUI("***Error: could analyze data!!");
 				e.printStackTrace();
 			}
-			data.putSerializable("DPGRAM",DPGRAM);
+			logToUI("---Saving data...");
+			if(DPGRAM != null)
+				data.putSerializable("DPGRAM",DPGRAM);
 		}
+		logToUI("---Plotting audiogram ...");
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 	}
 
@@ -156,6 +191,7 @@ public class TestProcedure implements Runnable{
 		data.putString("log", str);
 		sendMessage(TestActivity.Messages.LOG,data);
 	}
+	
 
 	protected void clearLog() {
 		sendMessage(TestActivity.Messages.CLEAR_LOG);

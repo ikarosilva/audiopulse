@@ -44,6 +44,7 @@ import org.audiopulse.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -52,7 +53,7 @@ import android.widget.TextView;
 //Contains menu from which tests can be selected and run
 public class AudioPulseActivity extends Activity
 {
-	public static final String TAG="TestMenuActivity";
+	public static final String TAG="AudioPulseActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -80,8 +81,11 @@ public class AudioPulseActivity extends Activity
         				tests.putString(getResources().getString(R.string.testEarKey),
 						                getResources().getString(R.string.LeftEarKey));
         			}
+        			Log.v(TAG,"creating intent");
         			Intent testIntent = new Intent(AudioPulseActivity.this, TestActivity.class);
+        			Log.v(TAG,"putting extras");
     				testIntent.putExtras(tests);
+    				Log.v(TAG,"starting test activityfor :" + itemText);
     				startActivity(testIntent);
         		}
         	}

@@ -58,17 +58,24 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 	protected TextView testLog;
 	protected TestProcedure testProcedure;
 	private static boolean calledBySana;
-	public Resources resources = getResources();
+	public Resources resources = null;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.v(TAG,"setting content view");
 		setContentView(R.layout.basic_test_layout);
+		Log.v(TAG,"finding test log");
 		testLog = (TextView)this.findViewById(R.id.testLog);
+		Log.v(TAG,"getting extras");
 		Bundle request = getIntent().getExtras();
 		String testEar = null;
+		Log.v(TAG,"getting package name");
 		String caller = this.getCallingPackage();
-		Log.v(TAG,"Calling package is: " + getCallingPackage());	
+		Log.v(TAG,"Calling package is: " + getCallingPackage());
+		resources=getResources();
+		Log.v(TAG,"got resources");		
+		
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
 			
 			// Sana observation meta data - from Sana API ObservationActivity interface
@@ -91,6 +98,7 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 		}
 		testProcedure = new TestProcedure(this,testEar,resources);
         testProcedure.start();
+        
 	}
 
 	//Begin test -- this function is called by the button in the default layout
@@ -179,4 +187,6 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 		public static final int ANALYSIS_COMPLETE = 5;		//analysis block complete
 		public static final int PROCEDURE_COMPLETE = 6;		//entire test procedure is complete
 	}
+
+
 }

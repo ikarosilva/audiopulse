@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--  Set Stimulus Parameters -->
+    <!--  Set Stimulus Parameters  TODO: number of sweeps should be 400, shortened it for testing -->
 	<string name="epochTime">0.02048</string>
 	<string name="numberOfSweeps">400</string>
 

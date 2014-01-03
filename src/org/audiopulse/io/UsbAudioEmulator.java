@@ -1,7 +1,10 @@
 package org.audiopulse.io;
 
+import android.util.Log;
+
 public class UsbAudioEmulator implements UsbAudioInterface{
 
+	private static final String TAG="UsbAudioEmulator";
 	private static int rFs;
 	private static int pFs;
 	private static int rBit;
@@ -23,7 +26,8 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 	public int playMultiTone(double[] Frequency, double[] SPL,
 			double epochTime,int numberOfSweeps) throws InterruptedException {
 		// Dummy driver for now just wait a few seconds and return when done
-		this.wait((long) epochTime*numberOfSweeps);
+		Log.v(TAG,"playing sound for " + epochTime*numberOfSweeps + " seconds");
+		Thread.sleep((long) (epochTime*numberOfSweeps*1000));
 		return 0;
 	}
 
@@ -57,15 +61,17 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 
 	public int[] getAveragedRecordedPowerSpectrum() {
 		//Simulate returning of spectrum
+		Log.v(TAG,"returning power spectrum");
 		int[] spec=new int[rFs];
 		for(int i=0;i<rFs;i++)
-			spec[i]= (int) (Math.random()*100);
+			spec[i]= 65;
 				
 		return spec;
 	}
 
 	public int[] getAveragedRecordedWaveForm() {
 		int[] spec=new int[rFs];
+		Log.v(TAG,"returning waveform");
 		for(int i=0;i<rFs;i++)
 			spec[i]= (int) (Math.random()*100);	
 		return spec;
