@@ -2,7 +2,23 @@ package org.audiopulse.io;
 
 public interface UsbAudioInterface {
 
-	//Initialization should return  0 if sucessful and >0 if error!
+	/*
+	 * Parameters and their units
+	 * 
+	 * recfs1 - Recording sampling frequency in kHz
+	 * playfs2 - playback sampling frequency in kHz
+	 * recBit - recording bit resolution 
+	 * playBit - playback bit resolytion 
+	 * recCh - recording channel configuration 0 - mono, 1 -stereo
+	 * playCh - playback channel configuration 0- mono 1-stereo
+	 * 
+	 * numberOfSweep - number of stimulus presentation (epochs) to be averaged (integer)
+	 * epochTime - stimulus duration in seconds
+	 */
+	
+	
+	
+	//Initialization should return  0 if successful and >0 if error!
 	//Parameters are fetched from the XLM resource file
 	public abstract int initialize(int recfs1,int playfs2,
 			int recBit, int playBit,int recCh, int playCh);

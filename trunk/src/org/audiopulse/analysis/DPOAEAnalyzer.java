@@ -82,16 +82,29 @@ public class DPOAEAnalyzer {
 		//All the analysis will be done in the fft domain 
 		//using the AudioPulseDataAnalyzer interface to obtain the results
 		Log.v(TAG,"Analyzing frequency: " + F2);
-		double[][] XFFT= new double [2][100];//getSpectrum(data,Fs,epochSamples);
+		double[][] PXFFT= getSpectrum(XFFT,Fs);
 		String strSTIM = null, strSTIM2 = null,strResponse = null,strNoise = null;
-		double F1SPL=getStimulusLevel(XFFT,F1);
-		double F2SPL=getStimulusLevel(XFFT,F2);
-		double respSPL=getResponseLevel(XFFT,Fres);
-		double noiseSPL=getNoiseLevel(XFFT,Fres);
-		DPOAEResults dResults=new DPOAEResults(respSPL,noiseSPL,F1SPL,F2SPL,Fres,F1,F2,XFFT,fileName,protocol);
+		double F1SPL=getStimulusLevel(PXFFT,F1);
+		double F2SPL=getStimulusLevel(PXFFT,F2);
+		double respSPL=getResponseLevel(PXFFT,Fres);
+		double noiseSPL=getNoiseLevel(PXFFT,Fres);
+		//This is a little messy...maybe use getters ???
+		DPOAEResults dResults=new DPOAEResults(respSPL,noiseSPL,F1SPL,F2SPL,
+				Fres,F1,F2,PXFFT,fileName,protocol);
 		//Double.toString(F2)
 		return dResults;
 	}
+
+	private double[][] getSpectrum(int[] xFFT2, double fs2) {
+		// Reformat data to two arrays where the first is the frequency index
+		double[][] PFFT=new double[2][xFFT2.length];
+		for(int n=0;n<xFFT2.length;n++){
+			PFFT[0][n]=(double) n/fs2;
+			PFFT[1][n]=xFFT2[n];
+		}
+		return null;
+	}
+
 
 	public static double[] getFreqAmplitude(double[][] XFFT, double desF, double tolerance){
 

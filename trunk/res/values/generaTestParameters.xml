@@ -13,6 +13,7 @@
     <string name="DPOAETestProtocolName">Gorga</string>
     
     <!-- Audio Interface parameters-->
+    <string name="AudioInterfaceType">emulator</string>
     <integer name="recordingSamplingFrequency">16000</integer>
     <integer name="playbackSamplingFrequency">48000</integer>
     
