@@ -86,7 +86,7 @@ public class DPOAEAnalyzer {
 		double noiseSPL=getNoiseLevel(PXFFT,Fres);
 		//This is a little messy...maybe use getters ???
 		DPOAEResults dResults=new DPOAEResults(respSPL,noiseSPL,F1SPL,F2SPL,
-				Fres,F1,F2,PXFFT,fileName,protocol);
+				Fres,F1,F2,PXFFT[1],fileName,protocol);
 		if(dResults == null)
 			Log.e(TAG,"Received null results!");
 		return dResults;

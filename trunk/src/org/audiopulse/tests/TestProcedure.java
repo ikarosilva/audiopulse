@@ -169,10 +169,10 @@ public class TestProcedure implements Runnable{
 				e.printStackTrace();
 			}
 			logToUI("---Saving data...");
+			//TODO: Consider using Parceable objects if performance becomese an issue!!
 			if(DPGRAM != null)
 				data.putSerializable("DPGRAM",DPGRAM);
 		}
-		Log.v(TAG,"Size of bundle is= " + DPGRAM.size());
 		logToUI("---Plotting audiogram ...");
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 	}
@@ -190,7 +190,7 @@ public class TestProcedure implements Runnable{
 	//Print message to testLog TextView
 	protected void logToUI(String str)
 	{
-		Log.i(TAG,str);
+		Log.v(TAG,str);
 		Bundle data = new Bundle();
 		data.putString("log", str);
 		sendMessage(TestActivity.Messages.LOG,data);

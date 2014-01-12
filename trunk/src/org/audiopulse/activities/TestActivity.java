@@ -132,12 +132,15 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 
 	//plot audiogram
 	public void plotAudiogram(Bundle resultsBundle ) {
+		Log.v(TAG, "generating plotting intent");
 		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
+		Log.v(TAG, "obtaining bundle");
 		intent.putExtras(resultsBundle);
 		if(calledBySana){
 			Log.v(TAG,"plotting data for Sana...");
 			startActivityForResult(intent, CONFIRM_PLOT_CODE);
 		}else{
+			Log.v(TAG, "starting activity");
 			startActivity(intent);
 		}
 	}
