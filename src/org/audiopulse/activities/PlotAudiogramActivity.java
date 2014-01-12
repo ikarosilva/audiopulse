@@ -91,20 +91,20 @@ public class PlotAudiogramActivity extends Activity {
 		//The arrays should be interleaved, with odd samples representing X
 		//and even samples representing Y coordinates
 		for(DPOAEResults dpoae: DPGRAM){
-			responseData.add(dpoae.respHz);
-			responseData.add(dpoae.respSPL);
+			responseData.add(dpoae.getRespHz());
+			responseData.add(dpoae.getRespSPL());
 			
-			noiseData.add(dpoae.respHz);
-			noiseData.add(dpoae.noiseSPL);
+			noiseData.add(dpoae.getRespHz());
+			noiseData.add(dpoae.getNoiseSPL());
 			
-			stimData.add(dpoae.stim1Hz);
-			stimData.add(dpoae.stim1SPL);
+			stimData.add(dpoae.getStim1Hz());
+			stimData.add(dpoae.getStim1SPL());
 			
-			stimData.add(dpoae.stim2Hz);
-			stimData.add(dpoae.stim2SPL);
+			stimData.add(dpoae.getStim2Hz());
+			stimData.add(dpoae.getStim2SPL());
 			
-			testName=dpoae.protocol;
-			fileNames.add(dpoae.fileName);
+			testName=dpoae.getProtocol();
+			fileNames.add(dpoae.getFileName());
 		}
 		
 		
@@ -166,14 +166,15 @@ public class PlotAudiogramActivity extends Activity {
 							
 							List<String> fileList=new ArrayList<String>();
 							for(DPOAEResults dpoae: DPGRAM){
-								Log.v(TAG,"saving fft data : " +  dpoae.dataFFT.length );
-								AudioPulseFileWriter writer= new AudioPulseFileWriter(new File(dpoae.fileName),dpoae.dataFFT[1]);
+								//Store only the PSD, not the frequency x axis
+								AudioPulseFileWriter writer= new AudioPulseFileWriter(
+										new File(dpoae.getFileName()),dpoae.getDataFFT());
 								writer.start();
 								try {
 									writer.join();
-									Log.v(TAG,"Adding file to zip: " + dpoae.fileName);
+									Log.v(TAG,"Adding file to zip: " + dpoae.getFileName());
 									//Add file to list of files to be zipped
-									fileList.add(dpoae.fileName);
+									fileList.add(dpoae.getFileName());
 								} catch (InterruptedException e) {
 									Log.e(TAG,"InterruptedException caught: " + e.getMessage() );
 								}	
