@@ -75,6 +75,7 @@ public class TestProcedure implements Runnable{
 		uiThreadHandler = new Handler(testActivity);
 		Log.v(TAG,"setting resources");
 		this.resources=resources;
+		data=new Bundle();
 	}
 
 	//call from Activity to perform test in a new thread
@@ -103,7 +104,7 @@ public class TestProcedure implements Runnable{
 				resources.getInteger(R.integer.recordingChannelConfig),
 				resources.getInteger(R.integer.playbackChannelConfig));
 		
-		logToUI("---Audio interface initiliazed");
+		logToUI("Audio interface initiliazed");
 		int recFs=resources.getInteger(R.integer.recordingSamplingFrequency);
 		Log.v(TAG,"recording Fs set to:" + recFs);
 		
@@ -114,7 +115,7 @@ public class TestProcedure implements Runnable{
 		String[] F2SPL = resources.getStringArray(R.array.TestFrequencyF2SPL);
 		String[] FresHz = resources.getStringArray(R.array.ResponseFrequencyHz);
 
-		logToUI("---Testing " + F1Hz.length + " different frequencies");
+		logToUI("Testing " + F1Hz.length + " different frequencies");
 		double epochTime=Double.valueOf(resources.getString(R.string.epochTime));
 		Log.v(TAG,"epochTime:" + epochTime);
 		
@@ -150,6 +151,8 @@ public class TestProcedure implements Runnable{
 			Log.v(TAG,"getting FFT");
 			logToUI("---Acquiring Power Spectrum data..");
 			int[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
+			if(XFFT == null)
+				Log.e(TAG,"XFFT is null");
 
 			//Get information that will generate the file name for this specific stimulus
 			File file=null;
@@ -161,14 +164,15 @@ public class TestProcedure implements Runnable{
 				Log.v(TAG,"adding data to dpgram analysis");
 				DPGRAM.add(dpoaeAnalysis.call());
 			} catch (Exception e) {
-				Log.e(TAG,"could analyze data!!");
-				logToUI("***Error: could analyze data!!");
+				Log.e(TAG,"could not analyze data!!");
+				logToUI("***Error: could not analyze data!!");
 				e.printStackTrace();
 			}
 			logToUI("---Saving data...");
 			if(DPGRAM != null)
 				data.putSerializable("DPGRAM",DPGRAM);
 		}
+		Log.v(TAG,"Size of bundle is= " + DPGRAM.size());
 		logToUI("---Plotting audiogram ...");
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 	}

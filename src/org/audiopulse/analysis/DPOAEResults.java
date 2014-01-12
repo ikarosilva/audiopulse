@@ -1,7 +1,13 @@
 package org.audiopulse.analysis;
 
-public class DPOAEResults {
+import java.io.Serializable;
 
+public class DPOAEResults implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7151583590731408124L;
 	//AudioPulseDataAnalyzer  interface
 	public final double respSPL;
 	public final double noiseSPL;

@@ -59,7 +59,7 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 	protected TestProcedure testProcedure;
 	private static boolean calledBySana;
 	public Resources resources = null;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -75,9 +75,9 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 		Log.v(TAG,"Calling package is: " + getCallingPackage());
 		resources=getResources();
 		Log.v(TAG,"got resources");		
-		
+
 		if (caller != null && getCallingPackage().compareToIgnoreCase("org.moca") == 0){
-			
+
 			// Sana observation meta data - from Sana API ObservationActivity interface
 			initMetaData();
 			calledBySana = true;
@@ -97,14 +97,14 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 			calledBySana = false;
 		}
 		testProcedure = new TestProcedure(this,testEar,resources);
-        testProcedure.start();
-        
+		testProcedure.start();
+
 	}
 
 	//Begin test -- this function is called by the button in the default layout
 	public void startTest(View callingView)
 	{
-		
+
 		appendText(this.getResources().getString(R.string.startingTest).toString());
 		if (testProcedure==null) {
 			appendText(this.getResources().getString(R.string.noProcedure).toString());
@@ -134,20 +134,20 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 	public void plotAudiogram(Bundle resultsBundle ) {
 		Intent intent = new Intent(this.getApplicationContext(), PlotAudiogramActivity.class);
 		intent.putExtras(resultsBundle);
-		// Added conditional to see if we want confirmation that plot is accepted
-		// such as when running headless - EW
-		if(calledBySana)
+		if(calledBySana){
+			Log.v(TAG,"plotting data for Sana...");
 			startActivityForResult(intent, CONFIRM_PLOT_CODE);
-		else
+		}else{
 			startActivity(intent);
+		}
 	}
-	
+
 	// Return back the intent to PltAudiogramActivity, to be bundled
 	@Override
 	protected void onActivityResult (int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
-		
+
 		if(resultCode == RESULT_OK && requestCode == CONFIRM_PLOT_CODE && calledBySana)
 		{
 			// Get the URI name from the global variable
@@ -173,12 +173,17 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 		case Messages.ANALYSIS_COMPLETE:
 			Bundle results=msg.getData();
 			//Start Plotting activity
-			Log.v(TAG,"calling spectral plot activity ");
-			plotAudiogram(results);
+			if(results == null){
+				Log.e(TAG,"results are empty!");	
+				appendText("*Results are empty! Cannot generate plot");
+			}else{
+				Log.v(TAG,"plotting audiogram");
+				plotAudiogram(results);
+			}
 		}
 		return true;
 	}
-	
+
 	public static class Messages {
 		public static final int CLEAR_LOG = 1;				//clear the test log
 		public static final int LOG = 2;					//add to the test log
