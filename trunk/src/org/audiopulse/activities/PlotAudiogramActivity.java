@@ -80,9 +80,8 @@ public class PlotAudiogramActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.v(TAG,"extracting bundled data for plotting");
 		data = getIntent().getExtras();
-
-		Log.v(TAG,"extracting bundled data");
 		//Get Data generated according to the AudioPulseDataAnalyzer interface
 		//this should be a HashMap with keys defined in the interface
 

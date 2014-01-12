@@ -42,15 +42,11 @@
 //and Android Client or Desktop environment
 package org.audiopulse.analysis;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import android.util.Log;
 
 public class DPOAEAnalyzer {
 
-	private final static String TAG="DPOAEGorgaAnalyzer";
+	private final static String TAG="DPOAEAnalyzer";
 	public static final String TestType="DPOAE";
 	private int[] XFFT;
 	private final static double spectralToleranceHz=50;
@@ -81,9 +77,9 @@ public class DPOAEAnalyzer {
 
 		//All the analysis will be done in the fft domain 
 		//using the AudioPulseDataAnalyzer interface to obtain the results
-		Log.v(TAG,"Analyzing frequency: " + F2);
+		if(XFFT == null)
+			Log.e(TAG,"received null spectrum!");
 		double[][] PXFFT= getSpectrum(XFFT,Fs);
-		String strSTIM = null, strSTIM2 = null,strResponse = null,strNoise = null;
 		double F1SPL=getStimulusLevel(PXFFT,F1);
 		double F2SPL=getStimulusLevel(PXFFT,F2);
 		double respSPL=getResponseLevel(PXFFT,Fres);
@@ -91,40 +87,40 @@ public class DPOAEAnalyzer {
 		//This is a little messy...maybe use getters ???
 		DPOAEResults dResults=new DPOAEResults(respSPL,noiseSPL,F1SPL,F2SPL,
 				Fres,F1,F2,PXFFT,fileName,protocol);
-		//Double.toString(F2)
+		if(dResults == null)
+			Log.e(TAG,"Received null results!");
 		return dResults;
 	}
 
-	private double[][] getSpectrum(int[] xFFT2, double fs2) {
+	private double[][] getSpectrum(int[] xFFT2, double fs) {
 		// Reformat data to two arrays where the first is the frequency index
 		double[][] PFFT=new double[2][xFFT2.length];
+		double step= (double) fs/(2.0*(xFFT2.length-1));
 		for(int n=0;n<xFFT2.length;n++){
-			PFFT[0][n]=(double) n/fs2;
+			PFFT[0][n]=n*step;
 			PFFT[1][n]=xFFT2[n];
 		}
-		return null;
+		return PFFT;
 	}
 
-
-	public static double[] getFreqAmplitude(double[][] XFFT, double desF, double tolerance){
+	public static int getFreqIndex(double[][] XFFT, double desF){
 
 		//Search through the spectrum to get the closest bin 
 		//to the respective frequencies
-		double dminF=Short.MAX_VALUE;
+		double dminF=Double.MAX_VALUE; //set initial value to very high level
 		double dF; 
 		//Results will be stored in a vector where first row is the closest
 		//bin from the FFT wrt the frequency and second row is the power in that
 		//bin. 
-		double[] Amp={Double.NaN, Double.NaN};
+		int index=-1;
 		for(int n=0;n<XFFT[0].length;n++){
 			dF=Math.abs(XFFT[0][n]-desF);
-			if( dF < dminF ){
+			if( dF < dminF && dF<spectralToleranceHz){
 				dminF=dF;
-				Amp[0]=XFFT[1][n];
-				Amp[1]=(double) n;
+				index=n;
 			}		
 		}
-		return Amp;
+		return index;
 	}
 
 	public static double getFreqNoiseAmplitude(double[][] XFFT, double desF, int Find){
@@ -138,25 +134,24 @@ public class DPOAEAnalyzer {
 				noiseLevel+= XFFT[1][(Find+i-3)];
 			}
 		}
-		Log.v(TAG,"noise level= " + noiseLevel/6);
 		return (noiseLevel/6);
-
 	}
 
 	public double getResponseLevel(double[][] dataFFT, double frequency) {	
-		double [] amp=getFreqAmplitude(dataFFT,frequency,spectralToleranceHz);
-		Log.v(TAG,"response level= " + amp[0]);
-		return amp[0];
+		int ind=getFreqIndex(dataFFT,frequency);
+		double[] amp={dataFFT[0][ind],dataFFT[1][ind]};
+		return amp[1];
 	}
 
 	public double getNoiseLevel(double[][] dataFFT, double frequency) {
-		double[] amp=getFreqAmplitude(dataFFT,frequency,spectralToleranceHz);
-		return getFreqNoiseAmplitude(dataFFT,frequency,(int) amp[1]);
+		int ind=getFreqIndex(dataFFT,frequency);
+		double[] amp={dataFFT[0][ind],dataFFT[1][ind]};
+		return getFreqNoiseAmplitude(dataFFT,frequency,ind);
 	}
 
 	public double getStimulusLevel(double[][] dataFFT, double frequency) {
-		double [] amp=getFreqAmplitude(dataFFT,frequency,spectralToleranceHz);
-		Log.v(TAG,"stimulus level= " + amp[0]);
+		int ind=getFreqIndex(dataFFT,frequency);
+		double[] amp={dataFFT[0][ind],dataFFT[1][ind]};
 		return amp[0];
 	}
 }
