@@ -27,7 +27,7 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 			double epochTime,int numberOfSweeps) throws InterruptedException {
 		// Dummy driver for now just wait a few seconds and return when done
 		Log.v(TAG,"playing sound for " + epochTime*numberOfSweeps + " seconds");
-		Thread.sleep((long) (epochTime*numberOfSweeps*1000));
+		Thread.sleep((long) (epochTime*numberOfSweeps*100));
 		return 0;
 	}
 
