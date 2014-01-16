@@ -157,10 +157,11 @@ public class TestProcedure implements Runnable{
 			//Get information that will generate the file name for this specific stimulus
 			File file=null;
 			file= AudioPulseFileWriter.generateFileName(testName,F1Hz[i]+"Hz",testEar,Double.valueOf(F1SPL[i]));
+			Log.v(TAG,"Generated file name: " + file);
 			try {
 				Log.v(TAG,"Estimating response of size:" + XFFT.length);
 				DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(XFFT,recFs,F2,F1,Fres,
-						file.getAbsolutePath(),testProtocolName);
+						testProtocolName,file.getAbsolutePath());
 				Log.v(TAG,"adding data to dpgram analysis");
 				DPGRAM.add(dpoaeAnalysis.call());
 			} catch (Exception e) {
