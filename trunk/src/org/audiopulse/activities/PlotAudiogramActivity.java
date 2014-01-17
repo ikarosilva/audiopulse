@@ -66,7 +66,7 @@ public class PlotAudiogramActivity extends Activity {
 	 * Called when the activity is starting.
 	 * @param savedInstanceState
 	 */
-	private List<String> fileNames;
+	private ArrayList<String> fileNames = new ArrayList<String>();
 	private String testName;
 	private Bundle data;
 	private File PackagedFile;
@@ -84,26 +84,33 @@ public class PlotAudiogramActivity extends Activity {
 		data = getIntent().getExtras();
 		//Get Data generated according to the AudioPulseDataAnalyzer interface
 		//this should be a HashMap with keys defined in the interface
-
+		Log.v(TAG,"deserializing dpgram");
 		DPGRAM=(ArrayList<DPOAEResults>) data.getSerializable("DPGRAM");
 
 		//Loop through the bundle to get the results 
 		//The arrays should be interleaved, with odd samples representing X
 		//and even samples representing Y coordinates
+		Log.v(TAG,"looping through frequency data");
 		for(DPOAEResults dpoae: DPGRAM){
+			Log.v(TAG,"adding response data");
 			responseData.add(dpoae.getRespHz());
 			responseData.add(dpoae.getRespSPL());
 			
+			Log.v(TAG,"adding noise data");
 			noiseData.add(dpoae.getRespHz());
 			noiseData.add(dpoae.getNoiseSPL());
 			
+			Log.v(TAG,"adding stim data");
 			stimData.add(dpoae.getStim1Hz());
 			stimData.add(dpoae.getStim1SPL());
 			
+			Log.v(TAG,"adding stim2 data");
 			stimData.add(dpoae.getStim2Hz());
 			stimData.add(dpoae.getStim2SPL());
 			
+			Log.v(TAG,"adding protocol info");
 			testName=dpoae.getProtocol();
+			Log.v(TAG,"adding file name:" +dpoae.getFileName());
 			fileNames.add(dpoae.getFileName());
 		}
 		

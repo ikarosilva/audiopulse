@@ -2,12 +2,15 @@ package org.audiopulse.analysis;
 
 import java.io.Serializable;
 
+import android.util.Log;
+
 public class DPOAEResults implements Serializable{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7151583590731408124L;
+	private static final String TAG="DPOAEResults";
 	//AudioPulseDataAnalyzer  interface
 	final double respSPL;
 	final double noiseSPL;
