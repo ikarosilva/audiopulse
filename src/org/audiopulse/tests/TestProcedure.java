@@ -126,6 +126,8 @@ public class TestProcedure implements Runnable{
 		String testProtocolName=resources.getString(R.string.DPOAETestProtocolName);
 		Log.v(TAG,"protocol= " + testProtocolName);
 		double playTime=epochTime*numberOfSweeps;
+		logToUI("---Playing stimulus for: " + playTime + " seconds each.");
+		
 		for (int i=0;i<F1Hz.length;i++){
 
 			double F2=Double.valueOf(F2Hz[i]); //frequency of hearing being tested in Hz
@@ -133,46 +135,33 @@ public class TestProcedure implements Runnable{
 			double[] multiToneFrequency={F1,F2};
 			double[] multiToneLevel={Double.valueOf(F1SPL[i]),Double.valueOf(F2SPL[i])};
 			double Fres=Double.valueOf(FresHz[i]);
-
-			Log.v(TAG,"F1= " + F1 + " @ " + F1SPL[i] + " dB, F2= " 
-					+ F2 + " @ " + F2SPL[i] + " dB Fres= " + Fres);
-			logToUI("---Testing frequency: " + F2 + " kHz");
+			File file=null;
+			DPOAEResults responseData = null;
+			
+			Log.v(TAG,"F1= " + F1 + " @ " + F1SPL[i] + " dB, F2= " + F2 + " @ " + F2SPL[i] + " dB Fres= " + Fres);
+			logToUI("---Testinging frequency: F1= " + F1 + " kHz,  F2= " + F2 +  " kHz");
 			
 			//Call the USB interface with the stimulus parameters and obtain the data
 			try {
-				Log.v(TAG,"playing multitone");
-				logToUI("---Playing stimulus for: " + playTime + " seconds");
 				audioInterface.playMultiTone(multiToneFrequency,multiToneLevel,epochTime,numberOfSweeps);
 			} catch (InterruptedException e1) {
-				Log.e(TAG,"Could not play stimulus!!");
 				logToUI("*****Error: could not play stimulus!!");
-				e1.printStackTrace();
 			}
-			Log.v(TAG,"getting FFT");
-			logToUI("---Acquiring Power Spectrum data..");
 			int[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
-			if(XFFT == null)
-				Log.e(TAG,"XFFT is null");
 
-			//Get information that will generate the file name for this specific stimulus
-			File file=null;
+			//Get information that will generate the candidate file name for this specific stimulus if test gets accepted
 			file= AudioPulseFileWriter.generateFileName(testName,F1Hz[i]+"Hz",testEar,Double.valueOf(F1SPL[i]));
-			Log.v(TAG,"Generated file name: " + file);
 			try {
 				Log.v(TAG,"Estimating response of size:" + XFFT.length);
-				DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(XFFT,recFs,F2,F1,Fres,
-						testProtocolName,file.getAbsolutePath());
-				Log.v(TAG,"adding data to dpgram analysis");
-				DPGRAM.add(dpoaeAnalysis.call());
+				DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(XFFT,recFs,F2,F1,Fres,testProtocolName,file.getAbsolutePath());
+				responseData = dpoaeAnalysis.call();
+				DPGRAM.add(responseData);
 			} catch (Exception e) {
-				Log.e(TAG,"could not analyze data!!");
 				logToUI("***Error: could not analyze data!!");
-				e.printStackTrace();
 			}
-			logToUI("---Saving data...");
-			//TODO: Consider using Parceable objects if performance becomese an issue!!
-			if(DPGRAM != null)
-				data.putSerializable("DPGRAM",DPGRAM);
+			logToUI("---Response SPL: " + Math.round(responseData.getRespSPL()) + 
+					" dB, Noise SPL: " + Math.round(responseData.getNoiseSPL()));
+			data.putSerializable("DPGRAM",DPGRAM);
 		}
 		logToUI("---Plotting audiogram ...");
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);

@@ -61,17 +61,14 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 
 	public int[] getAveragedRecordedPowerSpectrum() {
 		//Simulate returning of spectrum
-		Log.v(TAG,"returning power spectrum");
 		int[] spec=new int[rFs];
 		for(int i=0;i<rFs;i++)
-			spec[i]= 65;
-				
+			spec[i]= (int) (65 + Math.round(Math.random()*20));
 		return spec;
 	}
 
 	public int[] getAveragedRecordedWaveForm() {
 		int[] spec=new int[rFs];
-		Log.v(TAG,"returning waveform");
 		for(int i=0;i<rFs;i++)
 			spec[i]= (int) (Math.random()*100);	
 		return spec;
