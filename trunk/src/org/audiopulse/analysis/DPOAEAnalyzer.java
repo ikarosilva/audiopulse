@@ -56,6 +56,8 @@ public class DPOAEAnalyzer {
 	private double Fres;	
 	public final String protocol;
 	public final String fileName;
+	//Estimated levels above the threshold below will be logged as errors
+	private static final double dBErrorWarningThreshold=70;
 
 	public DPOAEAnalyzer(int [] XFFT, double Fs, double F2, double F1, double Fres,
 			String protocol, String fileName){
@@ -134,12 +136,18 @@ public class DPOAEAnalyzer {
 				noiseLevel+= XFFT[1][(Find+i-3)];
 			}
 		}
-		return (noiseLevel/6);
+		noiseLevel= noiseLevel/6.0;
+		noiseLevel= Math.round(noiseLevel*10)/10.0;
+		if(noiseLevel > dBErrorWarningThreshold)
+			Log.e(TAG,"Estimated noise level is too high: " + noiseLevel);
+		return noiseLevel;
 	}
 
 	public double getResponseLevel(double[][] dataFFT, double frequency) {	
 		int ind=getFreqIndex(dataFFT,frequency);
 		double[] amp={dataFFT[0][ind],dataFFT[1][ind]};
+		if(amp[1] > dBErrorWarningThreshold)
+			Log.e(TAG,"Estimated response level is too high: " + amp[1]);
 		return amp[1];
 	}
 
@@ -152,6 +160,8 @@ public class DPOAEAnalyzer {
 	public double getStimulusLevel(double[][] dataFFT, double frequency) {
 		int ind=getFreqIndex(dataFFT,frequency);
 		double[] amp={dataFFT[0][ind],dataFFT[1][ind]};
-		return amp[0];
+		if(amp[1] > dBErrorWarningThreshold)
+			Log.e(TAG,"Estimated stimulus level is too high: " + amp[1]);
+		return amp[1];
 	}
 }

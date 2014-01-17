@@ -78,9 +78,7 @@ public class PlotAudiogramView extends DemoView {
 		this.responseData = responseData;
 		this.noiseData =noiseData;
 		this.stimData =stimData;
-
 		final AFreeChart chart = createChart2();
-
 		setChart(chart);
 	}
 
@@ -137,6 +135,7 @@ public class PlotAudiogramView extends DemoView {
 		if(! data.isEmpty()){
 			series = new XYSeries(name);
 			for(int i=0;i<(data.size()/2);i++){
+				Log.v(TAG,"Adding: " + data.get(i*2) + " , " + data.get(i*2+1));
 				series.add(data.get(i*2), data.get(i*2+1));		
 			}
 		}else{

@@ -126,7 +126,7 @@ public class TestProcedure implements Runnable{
 		String testProtocolName=resources.getString(R.string.DPOAETestProtocolName);
 		Log.v(TAG,"protocol= " + testProtocolName);
 		double playTime=epochTime*numberOfSweeps;
-		logToUI("---Playing stimulus for: " + playTime + " seconds each.");
+		logToUI("Playing stimulus for: " + playTime + " seconds each.");
 		
 		for (int i=0;i<F1Hz.length;i++){
 
@@ -159,7 +159,7 @@ public class TestProcedure implements Runnable{
 			} catch (Exception e) {
 				logToUI("***Error: could not analyze data!!");
 			}
-			logToUI("---Response SPL: " + Math.round(responseData.getRespSPL()) + 
+			logToUI("     Response SPL: " + Math.round(responseData.getRespSPL()) + 
 					" dB, Noise SPL: " + Math.round(responseData.getNoiseSPL()));
 			data.putSerializable("DPGRAM",DPGRAM);
 		}
