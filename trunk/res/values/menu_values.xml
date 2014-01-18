@@ -3,10 +3,11 @@
     <array name="main_menu">
         <item>@string/DPOAE_RIGHT</item>
         <item>@string/DPOAE_LEFT</item>
+        <item>@string/USB_TEST</item>
     </array>      
     <string name="DPOAE_RIGHT">DPOAE Right Ear</string>
     <string name="DPOAE_LEFT">DPOAE Left Ear</string>
-    <string name="USB_Test">USB Test</string>
+    <string name="USB_TEST">USB Test</string>
     <style name="menu_style">
         <item name="android:textColor">@color/foreground</item>
         <item name="android:textSize">24dp</item>
