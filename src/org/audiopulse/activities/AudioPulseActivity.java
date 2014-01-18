@@ -59,40 +59,46 @@ public class AudioPulseActivity extends Activity
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test_menu);
-		
+
 		// set actions for clickable menu items
 		ListView menuList = (ListView) findViewById(R.id.menu_list);
-        menuList.setOnItemClickListener(
-        	new AdapterView.OnItemClickListener() {
-        		public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
-        			
-        			TextView item = (TextView) itemClicked;
-        			String itemText = item.getText().toString();
-        			        			
-    				//Use this Bundle to pass information to the secondary activiies
-    				Bundle tests = new Bundle();
-    				tests.putString(getResources().getString(R.string.testNameKey),
-							itemText);
-    				
-        			if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
-        				tests.putString(getResources().getString(R.string.testEarKey),
-        						        getResources().getString(R.string.RigtEarKey));
-        			} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_LEFT))) {
-        				tests.putString(getResources().getString(R.string.testEarKey),
-						                getResources().getString(R.string.LeftEarKey));
-        			}
-        			Log.v(TAG,"creating intent");
-        			Intent testIntent = new Intent(AudioPulseActivity.this, TestActivity.class);
-        			Log.v(TAG,"putting extras");
-    				testIntent.putExtras(tests);
-    				Log.v(TAG,"starting test activityfor :" + itemText);
-    				startActivity(testIntent);
-        		}
-        	}
-		);
+		menuList.setOnItemClickListener(
+				new AdapterView.OnItemClickListener() {
+					public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
+
+						TextView item = (TextView) itemClicked;
+						String itemText = item.getText().toString();
+
+						//Use this Bundle to pass information to the secondary activiies
+						Bundle tests = new Bundle();
+						tests.putString(getResources().getString(R.string.testNameKey),
+								itemText);
+
+						if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_RIGHT))) {
+							tests.putString(getResources().getString(R.string.testEarKey),
+									getResources().getString(R.string.RigtEarKey));
+						} else if(itemText.equalsIgnoreCase(getResources().getString(R.string.DPOAE_LEFT))) {
+							tests.putString(getResources().getString(R.string.testEarKey),
+									getResources().getString(R.string.LeftEarKey));
+						}
+
+						Log.v(TAG,"creating intent");
+						Intent testIntent=null;
+						if(itemText.equalsIgnoreCase(getResources().getString(R.string.USB_Test))){
+							testIntent = new Intent(AudioPulseActivity.this, TestActivity.class);
+						}else{
+							testIntent = new Intent(AudioPulseActivity.this, TestActivity.class);	
+						}
+						Log.v(TAG,"putting extras");
+						testIntent.putExtras(tests);
+						Log.v(TAG,"starting test activityfor :" + itemText);
+						startActivity(testIntent);
+					}
+				}
+				);
 	}
-    
-	
-	
-	
+
+
+
+
 }

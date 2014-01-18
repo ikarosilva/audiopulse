@@ -75,13 +75,14 @@ public class PlotAudiogramActivity extends Activity {
 	ArrayList<Double> noiseData= new ArrayList<Double>();
 	ArrayList<Double> stimData= new ArrayList<Double>();
 	private ArrayList<DPOAEResults> DPGRAM = new ArrayList<DPOAEResults>();
-	
+	private String fileName;
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.v(TAG,"extracting bundled data for plotting");
 		data = getIntent().getExtras();
+		fileName=null;
 		//Get Data generated according to the AudioPulseDataAnalyzer interface
 		//this should be a HashMap with keys defined in the interface
 		Log.v(TAG,"deserializing dpgram");
@@ -133,10 +134,6 @@ public class PlotAudiogramActivity extends Activity {
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_BACK:
 		{
-
-			//TODO: Check that the thread that is saving the file is not running (this could happen if the user hits the back
-			//button after hitting the Save& Exit button, so we need to control for that
-
 			//Prompt user on how to continue based on the display of the analyzed results
 			AlertDialog dialog = new AlertDialog.Builder(this).create();
 			dialog.setMessage("Select an option");
@@ -152,8 +149,7 @@ public class PlotAudiogramActivity extends Activity {
 
 			dialog.setButton(DialogInterface.BUTTON_NEGATIVE,"Try Again",
 					new DialogInterface.OnClickListener(){
-				public void onClick(DialogInterface dialog, int which) {
-					// TODO: maybe do nothing here or clear state variables?  
+				public void onClick(DialogInterface dialog, int which) { 
 					//this should go back to the test activity by default
 					PlotAudiogramActivity.this.finish();
 				}
@@ -162,7 +158,7 @@ public class PlotAudiogramActivity extends Activity {
 			dialog.setButton(DialogInterface.BUTTON_NEUTRAL,"Save & Exit",
 					new DialogInterface.OnClickListener(){
 				public void onClick(DialogInterface dialog, int which) {
-					//TODO: passs URI if called from Sana procedure
+					//Pass URI if called from Sana procedure
 					
 					Log.v(TAG,"Dialog response was:" + which);
 					showDialog(0);
@@ -179,9 +175,10 @@ public class PlotAudiogramActivity extends Activity {
 								writer.start();
 								try {
 									writer.join();
-									Log.v(TAG,"Adding file to zip: " + dpoae.getFileName());
+									fileName=dpoae.getFileName();
+									Log.v(TAG,"Adding file to zip: " + fileName);
 									//Add file to list of files to be zipped
-									fileList.add(dpoae.getFileName());
+									fileList.add(fileName);
 								} catch (InterruptedException e) {
 									Log.e(TAG,"InterruptedException caught: " + e.getMessage() );
 								}	
@@ -194,7 +191,9 @@ public class PlotAudiogramActivity extends Activity {
 							PackagedFile=packager.getOutFile();		
 							
 							//Add the Packaged filename to the bundle, which is passed to Test Activity.
-							Intent output = new Intent();						
+							Intent output = new Intent();		
+							//TODO:figure out why output.putExtra is giving an exception!!
+							fileName=PackagedFile.getAbsolutePath();
 							output.putExtra("ZIP_URI", Uri.encode(PackagedFile.getAbsolutePath()));
 							Log.i(TAG,"Setting users result to ok and passing intent to activity: " + PackagedFile.getAbsolutePath());
 							setResult(RESULT_OK, output);							
@@ -224,7 +223,7 @@ public class PlotAudiogramActivity extends Activity {
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		ProgressDialog dialog = new ProgressDialog(this);
-		dialog.setTitle("Saving data");
+		dialog.setTitle("Saving data to: " + fileName);
 		dialog.setMessage("Please wait...");
 		dialog.setIndeterminate(true);
 		dialog.setCancelable(true);
