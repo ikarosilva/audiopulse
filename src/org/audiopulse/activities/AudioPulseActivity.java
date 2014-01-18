@@ -84,8 +84,8 @@ public class AudioPulseActivity extends Activity
 
 						Log.v(TAG,"creating intent");
 						Intent testIntent=null;
-						if(itemText.equalsIgnoreCase(getResources().getString(R.string.USB_Test))){
-							testIntent = new Intent(AudioPulseActivity.this, TestActivity.class);
+						if(itemText.equalsIgnoreCase(getResources().getString(R.string.USB_TEST))){
+							testIntent = new Intent(AudioPulseActivity.this, UsbTestActivity.class);
 						}else{
 							testIntent = new Intent(AudioPulseActivity.this, TestActivity.class);	
 						}
