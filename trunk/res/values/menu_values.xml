@@ -6,7 +6,7 @@
     </array>      
     <string name="DPOAE_RIGHT">DPOAE Right Ear</string>
     <string name="DPOAE_LEFT">DPOAE Left Ear</string>
-    <string name="tests_device_calibration">Device Calibration</string>
+    <string name="USB_Test">USB Test</string>
     <style name="menu_style">
         <item name="android:textColor">@color/foreground</item>
         <item name="android:textSize">24dp</item>

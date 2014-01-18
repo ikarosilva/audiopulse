@@ -3,6 +3,9 @@
     <!-- general -->
     <string name="app_name">AudioPulse</string>
 
+    <!-- usb testing -->
+    <string name="action_settings">Settings</string>
+    
     <!--  test activity interface -->
     <string name="begin_test">Begin Test</string>
     <string name="begin_device_calibration">Begin</string>
