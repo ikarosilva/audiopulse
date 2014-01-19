@@ -60,15 +60,19 @@ public class PlotWaveformActivity extends AudioPulseActivity {
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         Bundle audio_bundle = getIntent().getExtras();
+        Log.v(TAG,"Obtained extra bundle from intent");
         long N=audio_bundle.getLong("N");
-        short[] samples;
-		samples=audio_bundle.getShortArray("samples");
-		float recSampleRate=audio_bundle.getFloat("recSampleRate");
+        Log.v(TAG,"Fetched number of samples N="+ N);
+        double[] samples;
+		samples=audio_bundle.getDoubleArray("samples");
+		Log.v(TAG,"got sample data: " + samples.length);
+		//TODO: Get Fs from Resources instead!!
+		float recSampleRate=audio_bundle.getFloat("recSampleRate");;
 		Log.v(TAG,"creating plot, recSampleRate= " + recSampleRate + " N=" + N + " time =" + N/recSampleRate);
         PlotWaveformView mView = new PlotWaveformView(this,N,samples,recSampleRate);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(mView);
     }
 }

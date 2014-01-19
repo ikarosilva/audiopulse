@@ -116,8 +116,11 @@ public class USBIface {
     public int connect(USBConnHandler handler){
         boolean success;
 
-        this.handler = handler;
-
+        this.handler = handler; 
+        
+        //TODO: Remove line below and comments for real testing
+        handler.handleConnected();
+        /*
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_USB_PERMISSION);
 
@@ -147,9 +150,7 @@ public class USBIface {
                 return -2;
             }
         }
-
-
-
+        */
         return 0;
     }
 
