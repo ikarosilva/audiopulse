@@ -163,6 +163,20 @@
                 android:id="@+id/button8"
                 android:textSize="16sp"
                 android:onClick="getdataButton" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Plot Wave"
+                android:id="@+id/button9"
+                android:textSize="16sp"
+                android:onClick="plotWaveButton" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Plot Spec"
+                android:id="@+id/button10"
+                android:textSize="16sp"
+                android:onClick="plotSpecButton" />
         </LinearLayout>
 
         <LinearLayout
