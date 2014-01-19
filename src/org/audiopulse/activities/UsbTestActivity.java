@@ -173,7 +173,9 @@ public class UsbTestActivity extends Activity {
                     getdata_button.setEnabled(true);
                     reset_button.setEnabled(true);
                     start_button.setEnabled(true);
+                    
                 }
+                
                 public void handleError(){
                     textview.setText("Error with permissions");
                     sw.setChecked(false);
@@ -186,6 +188,7 @@ public class UsbTestActivity extends Activity {
                     reset_button.setEnabled(false);
                     start_button.setEnabled(false);
                 }
+              
             });
 
             if(ret != 0){
@@ -232,14 +235,34 @@ public class UsbTestActivity extends Activity {
     }
 
     public void getdataButton(View view){
-        if(apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
-            APulseIface.APulseData data = apulse.getData();
+        if(true){//apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
+        	//TODO: Change to real data after testing
+            //For now simulate the received data
+        	//APulseIface.APulseData data = apulse.getData();
             app_out.setText("Received buffers");
+            data = new double[512*2];//USBIface.max_transfer_size];
+            for(int i=0;i< data.length;i++)
+            	data[i]=Math.random();
             plotwave_button.setEnabled(true);
             plotspec_button.setEnabled(true);
         } else {
             app_out.setText("Data not ready...");
         }
+    }
+    
+    public void plotWaveButton(View view){ 	
+    	Bundle extraData=new Bundle();
+    	extraData.putDoubleArray("samples",data);
+    	extraData.putLong("N",data.length);
+    	extraData.putFloat("recSampleRate",16000); //TODO: Get this from Resources instead!!
+    	
+    	Intent testIntent = new Intent(UsbTestActivity.this, PlotWaveformActivity.class);
+    	testIntent.putExtras(extraData);
+    	startActivity(testIntent);
+    }
+    
+    public void plotSpecButton(double[] data){
+        //TODO: Call plot activity
     }
 
     protected Button send_button;
@@ -253,7 +276,7 @@ public class UsbTestActivity extends Activity {
     protected Button getdata_button;
     protected Button plotwave_button;
     protected Button plotspec_button;
-
+    private double[] data;
     protected TextView textview;
 
     protected EditText app_out;

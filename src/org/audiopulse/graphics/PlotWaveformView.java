@@ -67,19 +67,16 @@ public class PlotWaveformView extends DemoView {
 	 * @param N 
 	 */
 	private static long N;
-	private static short[] samples;
+	private static double[] samples;
 	private static float recSampleRate;
 	private static final String TAG="PlotWaveformView";
 	
-	public PlotWaveformView(Context context, long N, short[] audioBuffer, float sampleRate) {
+	public PlotWaveformView(Context context, long N, double[] audioBuffer, float sampleRate) {
 		super(context);
 		Log.v(TAG,"Creating waveform view");
 		PlotWaveformView.N=N;
 		PlotWaveformView.samples=audioBuffer;
 		PlotWaveformView.recSampleRate=sampleRate;
-		//PlotWaveformView.N=PlayThreadRunnable.samples.length;
-		//PlotWaveformView.samples=PlayThreadRunnable.samples;
-		//PlotWaveformView.recSampleRate=PlayThreadRunnable.sampleRatePlay;
 		
 		final AFreeChart chart = createChart2();
 		setChart(chart);
