@@ -106,8 +106,9 @@ public class PlotSpectralView extends DemoView {
 		Log.v(TAG,"estimating spectrum");
 		if(fftSize==0){
 			//In this case the spectrum is already calculated
+			double step=sampleRate/(2.0*(audioBuffer.length-1));
 			for(int k=0;k<(audioBuffer.length);k++){
-				series.add((double) k/sampleRate, audioBuffer[k]);
+				series.add(k*step, audioBuffer[k]);
 			}
 		}else{
 			double[][]XFFT=SignalProcessing.getSpectrum(audioBuffer,sampleRate,fftSize);
