@@ -17,6 +17,12 @@
         <activity android:name=".activities.UsbTestActivity"
             android:configChanges="orientation|keyboardHidden" >
         </activity>
+        <activity android:name=".activities.PlotWaveformActivity"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
+        <activity android:name=".activities.PlotSpectralActivity"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
         <activity android:name=".activities.AudioPulseActivity"
             android:label="AudioPulse Tests"
             android:launchMode="singleTask" >

@@ -86,6 +86,10 @@ public class AudioPulseActivity extends Activity
 						Intent testIntent=null;
 						if(itemText.equalsIgnoreCase(getResources().getString(R.string.USB_TEST))){
 							testIntent = new Intent(AudioPulseActivity.this, UsbTestActivity.class);
+						}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.CAL_SPEC))){
+							testIntent = new Intent(AudioPulseActivity.this, PlotWaveformActivity.class);	
+						}else if(itemText.equalsIgnoreCase(getResources().getString(R.string.CAL_WAV))){
+							testIntent = new Intent(AudioPulseActivity.this, PlotSpectralActivity.class);	
 						}else{
 							testIntent = new Intent(AudioPulseActivity.this, TestActivity.class);	
 						}
