@@ -4,10 +4,14 @@
         <item>@string/DPOAE_RIGHT</item>
         <item>@string/DPOAE_LEFT</item>
         <item>@string/USB_TEST</item>
+         <item>@string/CAL_WAV</item>
+          <item>@string/CAL_SPEC</item>
     </array>      
     <string name="DPOAE_RIGHT">DPOAE Right Ear</string>
     <string name="DPOAE_LEFT">DPOAE Left Ear</string>
     <string name="USB_TEST">USB Test</string>
+    <string name="CAL_WAV">Waveform Plot</string>
+    <string name="CAL_SPEC">Spectral Plot</string>
     <style name="menu_style">
         <item name="android:textColor">@color/foreground</item>
         <item name="android:textSize">24dp</item>
