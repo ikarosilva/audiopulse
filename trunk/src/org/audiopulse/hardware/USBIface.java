@@ -20,6 +20,7 @@ import java.util.HashMap;
  * Created by ben on 12/25/13.
  */
 public class USBIface {
+	private static final String TAG="USBIface";
     protected Context context;
     protected Activity activity;
     protected USBConnHandler handler;
@@ -116,11 +117,8 @@ public class USBIface {
     public int connect(USBConnHandler handler){
         boolean success;
 
-        this.handler = handler; 
-        
-        //TODO: Remove line below and comments for real testing
-        handler.handleConnected();
-        /*
+        this.handler = handler;
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_USB_PERMISSION);
 
@@ -150,7 +148,9 @@ public class USBIface {
                 return -2;
             }
         }
-        */
+
+
+
         return 0;
     }
 

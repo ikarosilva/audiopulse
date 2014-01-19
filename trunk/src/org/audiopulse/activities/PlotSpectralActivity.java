@@ -60,18 +60,18 @@ public class PlotSpectralActivity extends AudioPulseActivity {
 	private static final String TAG="PlotSpectralActivity";
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         Bundle audio_bundle = getIntent().getExtras();
         long N=audio_bundle.getLong("N");
-        short[] audioBuffer;
-		audioBuffer=audio_bundle.getShortArray("samples");
+        double[] audioBuffer;
+		audioBuffer=audio_bundle.getDoubleArray("samples");
 		float sampleRate=audio_bundle.getFloat("recSampleRate");
 		double expectedFrequency=audio_bundle.getDouble("expectedFrequency");
 		int fftSize=audio_bundle.getInt("fftSize");
 		Log.v(TAG,"plotting spectrum, fftSize= " + fftSize);
         PlotSpectralView mView = new PlotSpectralView(this,audioBuffer,
         		sampleRate,expectedFrequency, fftSize);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(mView);
     }
 }

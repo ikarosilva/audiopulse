@@ -69,8 +69,6 @@ public class UsbTestActivity extends Activity {
 
         status_button.setEnabled(false);
         getdata_button.setEnabled(false);
-        plotwave_button.setEnabled(false);
-        plotspec_button.setEnabled(false);
         reset_button.setEnabled(false);
         start_button.setEnabled(false);
 
@@ -99,7 +97,6 @@ public class UsbTestActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        
         if (id == R.id.action_settings) {
             return true;
         }
@@ -173,9 +170,7 @@ public class UsbTestActivity extends Activity {
                     getdata_button.setEnabled(true);
                     reset_button.setEnabled(true);
                     start_button.setEnabled(true);
-                    
                 }
-                
                 public void handleError(){
                     textview.setText("Error with permissions");
                     sw.setChecked(false);
@@ -188,7 +183,6 @@ public class UsbTestActivity extends Activity {
                     reset_button.setEnabled(false);
                     start_button.setEnabled(false);
                 }
-              
             });
 
             if(ret != 0){
@@ -224,8 +218,25 @@ public class UsbTestActivity extends Activity {
 
     public void startButton(View view){
         APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
-        tones[0] = new APulseIface.FixedTone(500, 1000, 10000, 65.0, 0);
-        tones[1] = new APulseIface.FixedTone(800, 1000, 10000, 65.0, 1);
+
+        try {
+            short f = Short.decode(((TextView) findViewById(R.id.f_1)).getText().toString());
+            short t1 = Short.decode(((TextView) findViewById(R.id.t1_1)).getText().toString());
+            short t2 = Short.decode(((TextView) findViewById(R.id.t2_1)).getText().toString());
+            short db = Short.decode(((TextView) findViewById(R.id.db_1)).getText().toString());
+
+            tones[0] = new APulseIface.FixedTone(f, t1, t2, (double)db, 0);
+
+            f = Short.decode(((TextView) findViewById(R.id.f_2)).getText().toString());
+            t1 = Short.decode(((TextView) findViewById(R.id.t1_2)).getText().toString());
+            t2 = Short.decode(((TextView) findViewById(R.id.t2_2)).getText().toString());
+            db = Short.decode(((TextView) findViewById(R.id.db_2)).getText().toString());
+
+            tones[1] = new APulseIface.FixedTone(f, t1, t2, (double)db, 1);
+        } catch (NullPointerException e) {
+            app_out.setText("Error with arguments");
+            return;
+        }
 
         apulse.configCapture(2000, 256, 200);
 
@@ -235,21 +246,21 @@ public class UsbTestActivity extends Activity {
     }
 
     public void getdataButton(View view){
-        if(true){//apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
-        	//TODO: Change to real data after testing
-            //For now simulate the received data
-        	//APulseIface.APulseData data = apulse.getData();
-            app_out.setText("Received buffers");
-            data = new double[512*2];//USBIface.max_transfer_size];
-            for(int i=0;i< data.length;i++)
-            	data[i]=Math.random();
-            plotwave_button.setEnabled(true);
-            plotspec_button.setEnabled(true);
+        if(apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
+            APulseIface.APulseData data = apulse.getData();
+            double[] psd = data.getPSD();
+            String out = "";
+            for(int i = 0; i < psd.length; i++){
+                double logd = (psd[i] == 0) ? -Double.NEGATIVE_INFINITY : Math.log10(psd[i]);
+
+                out += String.format("%d:\t%.10f\n",(int)(((double)i)*31.25), logd);
+            }
+            app_out.setText(out);
         } else {
             app_out.setText("Data not ready...");
         }
     }
-    
+
     public void plotWaveButton(View view){ 	
     	Bundle extraData=new Bundle();
     	extraData.putDoubleArray("samples",data);
@@ -261,10 +272,19 @@ public class UsbTestActivity extends Activity {
     	startActivity(testIntent);
     }
     
-    public void plotSpecButton(double[] data){
-        //TODO: Call plot activity
+    public void plotSpecButton(View view){
+    	Bundle extraData=new Bundle();
+    	extraData.putDoubleArray("samples",data);
+    	extraData.putLong("N",data.length);
+    	extraData.putFloat("recSampleRate",16000); //TODO: Get this from Resources instead!!
+		extraData.putDouble("expectedFrequency",1000);
+		extraData.putInt("fftSize",512);
+		
+    	Intent testIntent = new Intent(UsbTestActivity.this, PlotSpectralActivity.class);
+    	testIntent.putExtras(extraData);
+    	startActivity(testIntent);
     }
-
+    
     protected Button send_button;
     protected Button send_clear_button;
     protected Button recv_button;
@@ -277,6 +297,7 @@ public class UsbTestActivity extends Activity {
     protected Button plotwave_button;
     protected Button plotspec_button;
     private double[] data;
+
     protected TextView textview;
 
     protected EditText app_out;
