@@ -46,16 +46,9 @@ public class UsbTestActivity extends Activity {
                     .commit();
         }
 
-        send_button = (Button)findViewById(R.id.button);
-        send_clear_button = (Button)findViewById(R.id.button2);
-        recv_button = (Button)findViewById(R.id.button3);
-        recv_clear_button = (Button)findViewById(R.id.button4);
-
         textview = (TextView) findViewById(R.id.textView);
         toggle_button = (Switch) findViewById(R.id.switch1);
 
-        textsend = (EditText) findViewById(R.id.editText2);
-        textrecv = (EditText) findViewById(R.id.editText);
         app_out = (EditText) findViewById(R.id.editText3);
         Log.v(TAG,"initialized app_out to:" + app_out);
         reset_button = (Button)findViewById(R.id.button5);
@@ -65,19 +58,14 @@ public class UsbTestActivity extends Activity {
         plotwave_button = (Button)findViewById(R.id.button9);
         plotspec_button = (Button)findViewById(R.id.button10);
 
-        send_button.setEnabled(false);
-        recv_button.setEnabled(false);
-
         status_button.setEnabled(false);
         getdata_button.setEnabled(false);
         reset_button.setEnabled(false);
         start_button.setEnabled(false);
 
         apulse = new APulseIface(this);
-
-
         app_out.setKeyListener(null);
-        textrecv.setKeyListener(null);
+
 
         //IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         //registerReceiver(mUsbReceiver, filter);
@@ -120,41 +108,6 @@ public class UsbTestActivity extends Activity {
         }
     }
 
-    public void recvClearButton(View view){
-        textrecv.setText("");
-    }
-
-    public void recvButton(View view){
-        byte[] data = new byte[10];//USBIface.max_transfer_size];
-        int size = apulse.usb.receive(data, 10);
-        String s;
-        try{
-            s = new String(data, "UTF-8");
-        } catch(Exception e){
-            s = "Wrong encoding?";
-        }
-        if(size >= 0){
-            textrecv.setText("test:"+s+":");
-            textview.setText(String.format("Read %d bytes!",size));
-        } else {
-            textrecv.setText("");
-            textview.setText(String.format("Error reading! -- %d",size));
-        }
-    }
-
-    public void sendClearButton(View view){
-        textsend.setText("");
-    }
-
-    public void sendButton(View view){
-        byte[] bytes = textsend.getText().toString().getBytes();
-        int cnt = apulse.usb.send(bytes, bytes.length);
-        if(cnt >= 0){
-            textview.setText("Sent data! -- " + cnt);
-        } else {
-            textview.setText("Error sending data! -- " + cnt);
-        }
-    }
 
     public void connectToggleButton(View view){
         final Switch sw = (Switch)view;
@@ -165,8 +118,6 @@ public class UsbTestActivity extends Activity {
             ret = apulse.usb.connect(new USBIface.USBConnHandler() {
                 public void handleConnected(){
                     textview.setText("Connected successfully!");
-                    send_button.setEnabled(true);
-                    recv_button.setEnabled(true);
                     status_button.setEnabled(true);
                     getdata_button.setEnabled(true);
                     reset_button.setEnabled(true);
@@ -175,9 +126,6 @@ public class UsbTestActivity extends Activity {
                 public void handleError(){
                     textview.setText("Error with permissions");
                     sw.setChecked(false);
-
-                    send_button.setEnabled(false);
-                    recv_button.setEnabled(false);
 
                     status_button.setEnabled(false);
                     getdata_button.setEnabled(false);
@@ -271,6 +219,7 @@ public class UsbTestActivity extends Activity {
     public void plotWaveButton(View view){ 	
     	Bundle extraData=new Bundle();
     	extraData.putDoubleArray("samples",data);
+    	Log.v(TAG,"plotting data with " + data.length + " samples");
     	extraData.putLong("N",data.length);
     	extraData.putFloat("recSampleRate",16000); //TODO: Get this from Resources instead!!
     	
@@ -291,11 +240,6 @@ public class UsbTestActivity extends Activity {
     	testIntent.putExtras(extraData);
     	startActivity(testIntent);
     }
-    
-    protected Button send_button;
-    protected Button send_clear_button;
-    protected Button recv_button;
-    protected Button recv_clear_button;
 
     protected Button reset_button;
     protected Button status_button;
@@ -306,12 +250,7 @@ public class UsbTestActivity extends Activity {
     private double[] data;
 
     protected TextView textview;
-
     protected EditText app_out;
-
     protected Switch toggle_button;
-
-    protected EditText textsend, textrecv;
-
     protected APulseIface apulse;
 }
