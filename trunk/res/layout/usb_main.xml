@@ -326,6 +326,7 @@
                 android:background="#eee"
                 android:gravity="top"
                 android:focusableInTouchMode="false"
+                android:textColor="#000000"
                 android:typeface="monospace" />
         </LinearLayout>
 

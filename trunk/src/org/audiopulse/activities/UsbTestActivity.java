@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 
 public class UsbTestActivity extends Activity {
+	private static final String TAG="UsbTestActivity";
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -56,7 +57,7 @@ public class UsbTestActivity extends Activity {
         textsend = (EditText) findViewById(R.id.editText2);
         textrecv = (EditText) findViewById(R.id.editText);
         app_out = (EditText) findViewById(R.id.editText3);
-
+        Log.v(TAG,"initialized app_out to:" + app_out);
         reset_button = (Button)findViewById(R.id.button5);
         status_button = (Button)findViewById(R.id.button6);
         start_button = (Button)findViewById(R.id.button7);
@@ -200,6 +201,7 @@ public class UsbTestActivity extends Activity {
     }
 
     public void statusButton(View view){
+    	Log.v(TAG,"getting status");
         APulseIface.APulseStatus status = apulse.getStatus();
 
         String out = String.format(
@@ -213,6 +215,7 @@ public class UsbTestActivity extends Activity {
                 status.wgStateString(),
                 status.inStateString(),
                 status.err_code);
+        Log.v(TAG,"setting text");
         app_out.setText(out);
     }
 
@@ -256,6 +259,10 @@ public class UsbTestActivity extends Activity {
                 out += String.format("%d:\t%.10f\n",(int)(((double)i)*31.25), logd);
             }
             app_out.setText(out);
+            Log.v(TAG,"setting data average");
+            this.data=data.getAverage();
+            if(this.data== null)
+            	Log.e(TAG,"Got null average!!");
         } else {
             app_out.setText("Data not ready...");
         }
