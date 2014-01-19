@@ -199,12 +199,10 @@ public class UsbTestActivity extends Activity {
     public void getdataButton(View view){
         if(apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
             APulseIface.APulseData data = apulse.getData();
-            psd = data.getPSD();
+            psd = data.getPSD(); //PSD returns data in dB
             String out = "";
             for(int i = 0; i < psd.length; i++){
-                double logd = (psd[i] == 0) ? -Double.NEGATIVE_INFINITY : Math.log10(psd[i]);
-
-                out += String.format("%d:\t%.10f\n",(int)(((double)i)*31.25), logd);
+                out += String.format("%d:\t%.10f\n",(int)(((double)i)*31.25), psd[i]);
             }
             app_out.setText(out);
             Log.v(TAG,"setting data average");
