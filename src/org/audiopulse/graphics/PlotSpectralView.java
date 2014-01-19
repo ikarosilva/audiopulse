@@ -73,7 +73,7 @@ public class PlotSpectralView extends DemoView {
 	 * @param N 
 	 */
 	private static final String TAG="PlotSpectralView";
-	private static short[] audioBuffer;
+	private static double[] audioBuffer;
 	private static float sampleRate;
 	private static double frange=100; //Range for highlighting where the expected response should 
 	//occur (in Hz)
@@ -82,7 +82,7 @@ public class PlotSpectralView extends DemoView {
 	static double fRangeEnd;
 	static int fftSize;
 
-	public PlotSpectralView(Context context,short[] aBuffer, float Fs, 
+	public PlotSpectralView(Context context,double[] aBuffer, float Fs, 
 			 double eFrequency, int fftN) {
 		super(context);
 		audioBuffer=aBuffer;
