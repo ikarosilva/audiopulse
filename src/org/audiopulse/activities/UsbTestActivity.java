@@ -199,7 +199,7 @@ public class UsbTestActivity extends Activity {
     public void getdataButton(View view){
         if(apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
             APulseIface.APulseData data = apulse.getData();
-            double[] psd = data.getPSD();
+            psd = data.getPSD();
             String out = "";
             for(int i = 0; i < psd.length; i++){
                 double logd = (psd[i] == 0) ? -Double.NEGATIVE_INFINITY : Math.log10(psd[i]);
@@ -230,11 +230,11 @@ public class UsbTestActivity extends Activity {
     
     public void plotSpecButton(View view){
     	Bundle extraData=new Bundle();
-    	extraData.putDoubleArray("samples",data);
+    	extraData.putDoubleArray("samples",psd);
     	extraData.putLong("N",data.length);
     	extraData.putFloat("recSampleRate",16000); //TODO: Get this from Resources instead!!
 		extraData.putDouble("expectedFrequency",1000);
-		extraData.putInt("fftSize",512);
+		extraData.putInt("fftSize",0);
 		
     	Intent testIntent = new Intent(UsbTestActivity.this, PlotSpectralActivity.class);
     	testIntent.putExtras(extraData);
@@ -248,6 +248,7 @@ public class UsbTestActivity extends Activity {
     protected Button plotwave_button;
     protected Button plotspec_button;
     private double[] data;
+    private double[] psd;
 
     protected TextView textview;
     protected EditText app_out;

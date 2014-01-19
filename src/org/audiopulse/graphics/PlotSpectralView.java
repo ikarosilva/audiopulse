@@ -82,8 +82,11 @@ public class PlotSpectralView extends DemoView {
 	static double fRangeEnd;
 	static int fftSize;
 
+	//Assumptions!!
+	//If FFT size is zero, the user is passing the already calculated FFT values
+
 	public PlotSpectralView(Context context,double[] aBuffer, float Fs, 
-			 double eFrequency, int fftN) {
+			double eFrequency, int fftN) {
 		super(context);
 		audioBuffer=aBuffer;
 		sampleRate=Fs;	
@@ -101,11 +104,19 @@ public class PlotSpectralView extends DemoView {
 		XYSeries series = new XYSeries(1);
 
 		Log.v(TAG,"estimating spectrum");
-		double[][]XFFT=SignalProcessing.getSpectrum(audioBuffer,sampleRate,fftSize);
-		Log.v(TAG,"creating dataset");
-		for(int k=0;k<(XFFT[0].length/2);k++)
-			series.add(XFFT[0][k], XFFT[1][k]);
-		
+		if(fftSize==0){
+			//In this case the spectrum is already calculated
+			for(int k=0;k<(audioBuffer.length);k++){
+				series.add((double) k/sampleRate, audioBuffer[k]);
+			}
+		}else{
+			double[][]XFFT=SignalProcessing.getSpectrum(audioBuffer,sampleRate,fftSize);
+			SignalProcessing.getSpectrum(audioBuffer,sampleRate,fftSize);
+			Log.v(TAG,"creating dataset");
+			for(int k=0;k<(XFFT[0].length/2);k++)
+				series.add(XFFT[0][k], XFFT[1][k]);
+		}
+
 		result.addSeries(series);
 		return result;
 	}
