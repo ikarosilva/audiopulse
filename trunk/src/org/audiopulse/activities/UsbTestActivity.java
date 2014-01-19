@@ -61,12 +61,16 @@ public class UsbTestActivity extends Activity {
         status_button = (Button)findViewById(R.id.button6);
         start_button = (Button)findViewById(R.id.button7);
         getdata_button = (Button)findViewById(R.id.button8);
+        plotwave_button = (Button)findViewById(R.id.button9);
+        plotspec_button = (Button)findViewById(R.id.button10);
 
         send_button.setEnabled(false);
         recv_button.setEnabled(false);
 
         status_button.setEnabled(false);
         getdata_button.setEnabled(false);
+        plotwave_button.setEnabled(false);
+        plotspec_button.setEnabled(false);
         reset_button.setEnabled(false);
         start_button.setEnabled(false);
 
@@ -231,6 +235,8 @@ public class UsbTestActivity extends Activity {
         if(apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
             APulseIface.APulseData data = apulse.getData();
             app_out.setText("Received buffers");
+            plotwave_button.setEnabled(true);
+            plotspec_button.setEnabled(true);
         } else {
             app_out.setText("Data not ready...");
         }
@@ -245,7 +251,8 @@ public class UsbTestActivity extends Activity {
     protected Button status_button;
     protected Button start_button;
     protected Button getdata_button;
-
+    protected Button plotwave_button;
+    protected Button plotspec_button;
 
     protected TextView textview;
 
