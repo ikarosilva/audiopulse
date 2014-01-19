@@ -1,6 +1,8 @@
 package org.audiopulse.hardware;
 
 import android.app.Activity;
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -10,6 +12,7 @@ import java.nio.IntBuffer;
  * Created by ben on 1/3/14.
  */
 public class APulseIface {
+	private static final String TAG="APulseIface";
     public APulseIface(Activity activity) {
         this.usb = new USBIface(activity);
         buffer = ByteBuffer.allocateDirect(64);
@@ -239,6 +242,8 @@ public class APulseIface {
             double[] ret = new double[APulseIface.transform_len / 2 + 1];
             for(int i = 0; i < APulseIface.transform_len / 2 + 1; i++){
                 ret[i] = ((double)psd[i]) / (double)0x7FFFFFFF;
+                ret[i]=(ret[i] == 0) ? -Double.NEGATIVE_INFINITY : Math.log10(ret[i]); 
+                Log.w(TAG,"Setting zero to negative infinity in db conversion");
             }
             return ret;
         }
