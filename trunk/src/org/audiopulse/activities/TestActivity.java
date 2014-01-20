@@ -144,6 +144,21 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 			startActivity(intent);
 		}
 	}
+	
+	//Display test results in text
+	public void displayResults(Bundle resultsBundle ) {
+		Log.v(TAG, "generating display intent");
+		Intent intent = new Intent(this.getApplicationContext(), PrintResultsActivity.class);
+		Log.v(TAG, "obtaining bundle");
+		intent.putExtras(resultsBundle);
+		if(calledBySana){
+			Log.v(TAG,"displaying results for Sana...");
+			startActivityForResult(intent, CONFIRM_PLOT_CODE);
+		}else{
+			Log.v(TAG, "starting activity");
+			startActivity(intent);
+		}
+	}
 
 	// Return back the intent to PltAudiogramActivity, to be bundled
 	@Override
@@ -180,8 +195,8 @@ public class TestActivity extends ObservationActivity implements Handler.Callbac
 				Log.e(TAG,"results are empty!");	
 				appendText("*Results are empty! Cannot generate plot");
 			}else{
-				Log.v(TAG,"plotting audiogram");
-				plotAudiogram(results);
+				Log.v(TAG,"displaying results");
+				displayResults(results);
 			}
 		}
 		return true;

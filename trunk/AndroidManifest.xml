@@ -14,6 +14,9 @@
         <activity android:name=".activities.PlotAudiogramActivity"
             android:configChanges="orientation|keyboardHidden" >
         </activity>
+        <activity android:name=".activities.PrintResultsActivity"
+            android:configChanges="orientation|keyboardHidden" >
+        </activity>
         <activity android:name=".activities.UsbTestActivity"
             android:configChanges="orientation|keyboardHidden" >
         </activity>
