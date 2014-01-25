@@ -241,11 +241,14 @@ public class APulseIface {
         public double[] getPSD(){
             double[] ret = new double[APulseIface.transform_len / 2 + 1];
             for(int i = 0; i < APulseIface.transform_len / 2 + 1; i++){
-            	//Normalize the FFT values by 5.931632333347443e+06
+            	//Normalize the FFT values by 1.518497877336946e+09
             	//which is the RMS of a sine wave with peak-to-peak level of 2^31
             	//So that a maximum sine wave in record by the mic should give
             	//0 dB value
-                ret[i] = ((double)psd[i]) /5.931632333347443e+06;
+            	//TODO: Need to figure out how the PSD is being normalized in the board
+            	//Because power for a pure tone peak-to-peak level of 2^31 should 
+            	//be  1.518497877336946e+09
+                ret[i] = ((double)psd[i])/1.0;
                 ret[i]=(ret[i] == 0) ? -Double.NEGATIVE_INFINITY : Math.log10(ret[i]); 
                 Log.w(TAG,"Setting zero to negative infinity in db conversion");
             }
