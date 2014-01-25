@@ -85,7 +85,7 @@
                 android:ems="10"
                 android:id="@+id/f_1"
                 android:layout_weight="1"
-                android:text="1000" />
+                android:text="2000" />
 
             <EditText
                 android:layout_width="fill_parent"
@@ -128,7 +128,7 @@
                 android:ems="10"
                 android:id="@+id/f_2"
                 android:layout_weight="1"
-                android:text="1400" />
+                android:text="2400" />
 
             <EditText
                 android:layout_width="fill_parent"
