@@ -270,8 +270,14 @@ public class UsbTestActivity extends Activity {
 		Bundle extraData=new Bundle();
 		extraData.putDoubleArray("samples",psd);
 		extraData.putLong("N",data.length);
-		extraData.putFloat("recSampleRate",16000); //TODO: Get this from Resources instead!!
-		extraData.putDouble("expectedFrequency",1000);
+		//Get Fs from Resources instead
+		int Fs=getResources().getInteger(R.integer.recordingSamplingFrequency);
+		extraData.putFloat("recSampleRate",Fs); 
+		double expectF=(2.0*f1-f2);
+		expectF=(expectF<=0) ? Fs:expectF;
+		expectF=(expectF> (Fs/2.0)) ? Fs:expectF;
+		
+		extraData.putDouble("expectedFrequency",expectF);
 		extraData.putInt("fftSize",0);
 
 		Intent testIntent = new Intent(UsbTestActivity.this, PlotSpectralActivity.class);
