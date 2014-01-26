@@ -268,16 +268,18 @@ public class UsbTestActivity extends Activity {
 
 	public void plotSpecButton(View view){
 		Bundle extraData=new Bundle();
-		extraData.putDoubleArray("samples",psd);
-		extraData.putLong("N",data.length);
+		extraData.putDoubleArray("psd",psd);
+		extraData.putShort("f1",f1);//Test frequency
+		extraData.putDouble("respSPL",respSPL);
+		extraData.putDouble("noiseSPL",noiseSPL);
 		//Get Fs from Resources instead
 		int Fs=getResources().getInteger(R.integer.recordingSamplingFrequency);
 		extraData.putFloat("recSampleRate",Fs); 
-		double expectF=(2.0*f1-f2);
-		expectF=(expectF<=0) ? Fs:expectF;
-		expectF=(expectF> (Fs/2.0)) ? Fs:expectF;
+		respHz=(2.0*f1-f2);
+		respHz=(respHz<=0) ? Fs:respHz;
+		respHz=(respHz> (Fs/2.0)) ? Fs:respHz;
 		
-		extraData.putDouble("expectedFrequency",expectF);
+		extraData.putDouble("respHz",respHz);
 		extraData.putInt("fftSize",0);
 
 		Intent testIntent = new Intent(UsbTestActivity.this, PlotSpectralActivity.class);
