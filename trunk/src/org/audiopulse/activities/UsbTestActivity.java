@@ -43,8 +43,7 @@ public class UsbTestActivity extends Activity {
 	protected Button status_button;
 	protected Button start_button;
 	protected Button getdata_button;
-	protected Button plotwave_button;
-	protected Button plotspec_button;
+	protected Button plotdata_button;
 	private double[] data;
 	private double[] psd;
 	private static final File root = Environment.getExternalStorageDirectory();
@@ -94,8 +93,7 @@ public class UsbTestActivity extends Activity {
 		status_button = (Button)findViewById(R.id.button6);
 		start_button = (Button)findViewById(R.id.button7);
 		getdata_button = (Button)findViewById(R.id.button8);
-		plotwave_button = (Button)findViewById(R.id.button9);
-		plotspec_button = (Button)findViewById(R.id.button10);
+		plotdata_button = (Button)findViewById(R.id.button10);
 
 		status_button.setEnabled(false);
 		getdata_button.setEnabled(false);
@@ -254,21 +252,10 @@ public class UsbTestActivity extends Activity {
 		}
 	}
 
-	public void plotWaveButton(View view){ 	
-		Bundle extraData=new Bundle();
-		extraData.putDoubleArray("samples",data);
-		Log.v(TAG,"plotting data with " + data.length + " samples");
-		extraData.putLong("N",data.length);
-		extraData.putFloat("recSampleRate",16000); //TODO: Get this from Resources instead!!
-
-		Intent testIntent = new Intent(UsbTestActivity.this, PlotWaveformActivity.class);
-		testIntent.putExtras(extraData);
-		startActivity(testIntent);
-	}
-
-	public void plotSpecButton(View view){
+	public void plotdataButton(View view){
 		Bundle extraData=new Bundle();
 		extraData.putDoubleArray("psd",psd);
+		extraData.putDoubleArray("data",data);
 		extraData.putShort("f1",f1);//Test frequency
 		extraData.putDouble("respSPL",respSPL);
 		extraData.putDouble("noiseSPL",noiseSPL);
