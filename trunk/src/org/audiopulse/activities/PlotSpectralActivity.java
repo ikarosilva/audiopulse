@@ -42,36 +42,60 @@
 
 package org.audiopulse.activities;
 
+import java.util.ArrayList;
+
+import org.audiopulse.R;
+import org.audiopulse.analysis.DPOAEResults;
 import org.audiopulse.graphics.PlotSpectralView;
 
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 /**
  * DeviationRendererDemo02Activity
  */
 public class PlotSpectralActivity extends AudioPulseActivity {
 
-    /**
-     * Called when the activity is starting.
-     * @param savedInstanceState
-     */
+	/**
+	 * Called when the activity is starting.
+	 * @param savedInstanceState
+	 */
 	private static final String TAG="PlotSpectralActivity";
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-    	requestWindowFeature(Window.FEATURE_NO_TITLE);
-        super.onCreate(savedInstanceState);
-        Bundle audio_bundle = getIntent().getExtras();
-        long N=audio_bundle.getLong("N");
-        double[] audioBuffer;
-		audioBuffer=audio_bundle.getDoubleArray("samples");
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.stacked_graphics_layout);
+		Bundle audio_bundle = getIntent().getExtras();
+		double[] psd=audio_bundle.getDoubleArray("psd");
 		float sampleRate=audio_bundle.getFloat("recSampleRate");
-		double expectedFrequency=audio_bundle.getDouble("expectedFrequency");
-		int fftSize=audio_bundle.getInt("fftSize");
-		Log.v(TAG,"plotting spectrum, fftSize= " + fftSize);
-        PlotSpectralView mView = new PlotSpectralView(this,audioBuffer,
-        		sampleRate,expectedFrequency, fftSize);
-        setContentView(mView);
-    }
+		double respHz=audio_bundle.getDouble("respHz");
+		double respSPL=audio_bundle.getDouble("respSPL");
+		double noiseSPL=audio_bundle.getDouble("respSPL");
+		short f1=audio_bundle.getShort("f1");
+		int N=psd.length;
+		Log.v(TAG,"plotting spectrum, fftSize= " + N);
+		
+		//Print numerical results in the log view
+		TextView testLog;
+		testLog = (TextView)this.findViewById(R.id.graphics_Log);
+		double diff=Math.round(10*( respSPL-noiseSPL))/10.0;
+		String display=testLog.getText() + "\n Results for test: " + f1 + " Hz response =  "
+		       + respSPL +" dB SPL, noise =  " + noiseSPL + " dB SPL, resp-noise =  "+ (diff) + " \n";
+	   testLog.setText(display);
+
+	   //Print spectral plot in first graph area
+	  //setContentView(mView);
+	   PlotSpectralView mView = new PlotSpectralView(this,psd,sampleRate,respHz,N);
+	   LinearLayout layout = (LinearLayout) findViewById(R.id.stacked_graphics_view);
+	   layout.addView(mView,1);
+		
+	}
 }
