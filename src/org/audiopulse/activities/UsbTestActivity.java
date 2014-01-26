@@ -325,21 +325,29 @@ public class UsbTestActivity extends Activity {
 
 					respHz=(double) (2.0*f1-f2);
 					dpoaResults=new DPOAEResults(respSPL,noiseSPL,db1,db2,respHz,
-							(double) f1, (double) f2,psd,fileName,protocol);
+							(double) f1, (double) f2,psd,data,fileName,protocol);
 					// Start lengthy operation in a background thread
 					new Thread(new Runnable() {
 						public void run() {
 
 							List<String> fileList=new ArrayList<String>();
 							//Store only the PSD, not the frequency x axis
-							AudioPulseFileWriter writer= new AudioPulseFileWriter(
-									new File(root+"/"+dpoaResults.getFileName()+".raw"),dpoaResults.getDataFFT());
-							writer.start();
+							AudioPulseFileWriter fftWriter= new AudioPulseFileWriter(
+									new File(root+"/"+dpoaResults.getFileName()+"-fft.raw"),
+									dpoaResults.getDataFFT());
+							fftWriter.start();
+							AudioPulseFileWriter wavWriter= new AudioPulseFileWriter(
+									new File(root+"/"+dpoaResults.getFileName()+"-wav.raw"),
+									dpoaResults.getWave());
+							wavWriter.start();
 							try {
-								writer.join();
-								Log.v(TAG,"Adding file to zip: " +root+ fileName + ".raw");
+								Log.v(TAG,"Adding file to zip: " +root+ fileName + "-fft.raw");
+								fftWriter.join();
+								Log.v(TAG,"Adding file to zip: " +root+ fileName + "-wav.raw");
+								wavWriter.join();
 								//Add file to list of files to be zipped
-								fileList.add(root+"/"+fileName+".raw");
+								fileList.add(root+"/"+fileName+"-fft.raw");
+								fileList.add(root+"/"+fileName+"-wav.raw");
 							} catch (InterruptedException e) {
 								Log.e(TAG,"InterruptedException caught: " + e.getMessage() );
 							}	

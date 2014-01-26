@@ -22,11 +22,13 @@ public class DPOAEResults implements Serializable{
 	final double stim2Hz;
 	
 	final double[] dataFFT;
+	final double[] dataWav;
 	final String fileName;
 	final String protocol;
 	
 	public DPOAEResults(double respSPL,double noiseSPL,double stim1SPL, double stim2SPL, double respHz, 
-						double stim1Hz,double stim2Hz,double[] dataFFT, String fileName,String protocol){	
+						double stim1Hz,double stim2Hz,double[] dataFFT,double[] dataWav,
+						String fileName,String protocol){	
 		this.respSPL=respSPL;
 		this.noiseSPL=noiseSPL;
 		this.stim1SPL=stim1SPL;
@@ -37,6 +39,7 @@ public class DPOAEResults implements Serializable{
 		this.dataFFT=dataFFT;
 		this.fileName=fileName;
 		this.protocol=protocol;
+		this.dataWav=dataWav;
 	}
 	
 	public double getRespSPL(){return respSPL;}
@@ -49,5 +52,6 @@ public class DPOAEResults implements Serializable{
 	public double[] getDataFFT(){return dataFFT;}
 	public String getFileName(){return fileName;}
 	public String getProtocol(){return protocol;}
+	public double[] getWave() { return dataWav;}
 
 }
