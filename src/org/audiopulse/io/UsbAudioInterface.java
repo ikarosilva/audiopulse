@@ -29,8 +29,8 @@ public interface UsbAudioInterface {
 	public abstract int playMultiTone(double[] Frequency,
 			double[] SPL, double epochTime, int numberOfSweeps) throws InterruptedException;
 	
-	public abstract int[] getAveragedRecordedPowerSpectrum();
-	public abstract int[] getAveragedRecordedWaveForm();
+	public abstract double[] getAveragedRecordedPowerSpectrum();
+	public abstract double[] getAveragedRecordedWaveForm();
 
 	public abstract double getRecFs();
 	public abstract double getPlayFs();

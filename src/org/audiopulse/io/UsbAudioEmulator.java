@@ -59,19 +59,19 @@ public class UsbAudioEmulator implements UsbAudioInterface{
 		
 	}
 
-	public int[] getAveragedRecordedPowerSpectrum() {
+	public double[] getAveragedRecordedPowerSpectrum() {
 		//Simulate returning of spectrum
-		int[] spec=new int[rFs];
+		double[] spec=new double[rFs];
 		for(int i=0;i<rFs;i++)
-			spec[i]= (int) (65 + Math.round(Math.random()*20));
+			spec[i]= (65 + Math.round(Math.random()*20));
 		return spec;
 	}
 
-	public int[] getAveragedRecordedWaveForm() {
-		int[] spec=new int[rFs];
+	public double[] getAveragedRecordedWaveForm() {
+		double[] wave=new double[rFs];
 		for(int i=0;i<rFs;i++)
-			spec[i]= (int) (Math.random()*100);	
-		return spec;
+			wave[i]= (Math.random()*100);	
+		return wave;
 	}
 
 }
