@@ -314,7 +314,7 @@ public class UsbTestActivity extends Activity {
 
 					respHz=(double) (2.0*f1-f2);
 					dpoaResults=new DPOAEResults(respSPL,noiseSPL,db1,db2,respHz,
-							(double) f1, (double) f2,psd,data,fileName,protocol);
+							f1, f2,psd,data,fileName,protocol);
 					// Start lengthy operation in a background thread
 					new Thread(new Runnable() {
 						public void run() {

@@ -51,15 +51,15 @@ public class DPOAEAnalyzer {
 	private double[] XFFT;
 	private final static double spectralToleranceHz=50;
 	private double Fs;
-	private double F1;
-	private double F2;
+	private short F1;
+	private short F2;
 	private double Fres;	
 	public final String protocol;
 	public final String fileName;
 	//Estimated levels above the threshold below will be logged as errors
 	private static final double dBErrorWarningThreshold=70;
 
-	public DPOAEAnalyzer(double [] XFFT, double Fs, double F2, double F1, double Fres,
+	public DPOAEAnalyzer(double [] XFFT, double Fs, short F2, short F1, double Fres,
 			String protocol, String fileName){
 		this.Fs=Fs;
 		this.XFFT=XFFT;

@@ -130,8 +130,8 @@ public class TestProcedure implements Runnable{
 		
 		for (int i=0;i<F1Hz.length;i++){
 
-			double F2=Double.valueOf(F2Hz[i]); //frequency of hearing being tested in Hz
-			double F1=Double.valueOf(F1Hz[i]);
+			short F2=Short.valueOf(F2Hz[i]); //frequency of hearing being tested in Hz
+			short F1=Short.valueOf(F1Hz[i]);
 			double[] multiToneFrequency={F1,F2};
 			double[] multiToneLevel={Double.valueOf(F1SPL[i]),Double.valueOf(F2SPL[i])};
 			double Fres=Double.valueOf(FresHz[i]);

@@ -132,10 +132,8 @@ public class PlotSpectralView extends DemoView {
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 		renderer.setSeriesPaintType(0, new SolidColor(Color.rgb(0, 255, 0)));
 
-		renderer.setSeriesStroke(0,3.0f);
-		plot.setRenderer(renderer);
-
-		//Plot expected range
+		renderer.setSeriesStroke(0,3.0f);	
+		plot.setRenderer(renderer);	
 		if(expectedFrequency != 0){
 			Marker marker_V = new IntervalMarker(fRangeStart, fRangeEnd);
 			marker_V.setLabelOffsetType(LengthAdjustmentType.EXPAND);
@@ -146,7 +144,6 @@ public class PlotSpectralView extends DemoView {
 			plot.addDomainMarker(marker_V_Start, Layer.BACKGROUND);
 			plot.addDomainMarker(marker_V_End, Layer.BACKGROUND);
 		}
-
 		return chart;
 	}
 }

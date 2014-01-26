@@ -96,14 +96,10 @@ public class PlotSpectralActivity extends AudioPulseActivity {
 	  //setContentView(mView);
 	   PlotSpectralView mView1 = new PlotSpectralView(this,psd,sampleRate,respHz,N);
 	   PlotWaveformView mView2 = new PlotWaveformView(this,N,wave,sampleRate);
-	   LinearLayout layout = (LinearLayout) findViewById(R.id.graphics_canvas);
-	   mView1.canScrollHorizontally(0);
-	   mView1.canScrollVertically(0);
-	   mView1.setClickable(false);
-	   mView2.canScrollHorizontally(0);
-	   mView2.canScrollVertically(0);
-	   layout.addView(mView1,0);
-	   layout.addView(mView2,1);
+	   LinearLayout layout1 = (LinearLayout) findViewById(R.id.graphics_canvas1);
+	   LinearLayout layout2 = (LinearLayout) findViewById(R.id.graphics_canvas2);
+	   layout1.addView(mView2,0);
+	   layout2.addView(mView1,0);
 		
 	}
 }
