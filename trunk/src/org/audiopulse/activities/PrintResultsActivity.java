@@ -96,6 +96,7 @@ public class PrintResultsActivity extends Activity {
 		int ind=1;
 		String display="";
 		double diff;
+		DPOAEResults dpoaeLast=null;
 		for(DPOAEResults dpoae: DPGRAM){		
 			diff=Math.round(10*(dpoae.getRespSPL()-dpoae.getNoiseSPL()))/10.0;
 			display+=testLog.getText() + "\n Results for test #" + ind + ":  " +
@@ -103,8 +104,33 @@ public class PrintResultsActivity extends Activity {
 					+ " dB SPL, noise =  " + dpoae.getNoiseSPL() + " dB SPL, resp-noise =  "
 					+ (diff) + " \n";
 			ind++;	
+			if(ind==(DPGRAM.size()-1))
+				dpoaeLast=dpoae;
 		}
 		testLog.setText(display + "\n\n***Finished! Hit back button to save, cancel, or repeat tests.");
+		
+		//Print and plot last set of  data
+			Bundle extraData=new Bundle();
+			extraData.putDoubleArray("psd",dpoaeLast.getDataFFT());
+			extraData.putDoubleArray("data",dpoaeLast.getWave());
+			extraData.putShort("f1",dpoaeLast.getStim1Hz());//Test frequency
+			extraData.putDouble("respSPL",dpoaeLast.getRespSPL());
+			extraData.putDouble("noiseSPL",dpoaeLast.getNoiseSPL());
+			//Get Fs from Resources instead
+			int Fs=getResources().getInteger(R.integer.recordingSamplingFrequency);
+			extraData.putFloat("recSampleRate",Fs); 
+			double respHz=(double) (2.0*dpoaeLast.getStim1Hz()-dpoaeLast.getStim2Hz());
+			respHz=(respHz<=0) ? Fs:respHz;
+			respHz=(respHz> (Fs/2.0)) ? Fs:respHz;
+			
+			extraData.putDouble("respHz",respHz);
+			extraData.putInt("fftSize",0);
+
+			Intent testIntent = new Intent(PrintResultsActivity.this, PlotSpectralActivity.class);
+			testIntent.putExtras(extraData);
+			startActivity(testIntent);
+		
+		
 	}
 
 	public String getPackageFileName(){

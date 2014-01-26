@@ -102,11 +102,11 @@ public class PlotAudiogramActivity extends Activity {
 			noiseData.add(dpoae.getNoiseSPL());
 			
 			Log.v(TAG,"adding stim data");
-			stimData.add(dpoae.getStim1Hz());
+			stimData.add((double) dpoae.getStim1Hz());
 			stimData.add(dpoae.getStim1SPL());
 			
 			Log.v(TAG,"adding stim2 data");
-			stimData.add(dpoae.getStim2Hz());
+			stimData.add((double) dpoae.getStim2Hz());
 			stimData.add(dpoae.getStim2SPL());
 			
 			Log.v(TAG,"adding protocol info");

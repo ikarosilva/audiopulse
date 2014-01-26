@@ -11,9 +11,15 @@
         android:layout_height="wrap_content" />
 
     <LinearLayout
-        android:id="@+id/graphics_canvas"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:id="@+id/graphics_canvas1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/graphics_canvas2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
     </LinearLayout>
 

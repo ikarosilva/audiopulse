@@ -18,16 +18,16 @@ public class DPOAEResults implements Serializable{
 	final double stim2SPL;
 	
 	final double respHz;
-	final double stim1Hz;
-	final double stim2Hz;
+	final short stim1Hz;
+	final short stim2Hz;
 	
-	final double[] dataFFT;
-	final double[] dataWav;
+	protected double[] dataFFT;
+	protected double[] dataWav;
 	final String fileName;
 	final String protocol;
 	
 	public DPOAEResults(double respSPL,double noiseSPL,double stim1SPL, double stim2SPL, double respHz, 
-						double stim1Hz,double stim2Hz,double[] dataFFT,double[] dataWav,
+						short stim1Hz,short stim2Hz,double[] dataFFT,double[] dataWav,
 						String fileName,String protocol){	
 		this.respSPL=respSPL;
 		this.noiseSPL=noiseSPL;
@@ -47,11 +47,13 @@ public class DPOAEResults implements Serializable{
 	public double getStim1SPL(){return stim1SPL;}
 	public double getStim2SPL(){return stim2SPL;}
 	public double getRespHz(){return respHz;}
-	public double getStim1Hz(){return stim1Hz;}
-	public double getStim2Hz(){return stim2Hz;}
+	public short getStim1Hz(){return stim1Hz;}
+	public short getStim2Hz(){return stim2Hz;}
 	public double[] getDataFFT(){return dataFFT;}
+	public void setDataFFT(double[] FFT){dataFFT=FFT;}
 	public String getFileName(){return fileName;}
 	public String getProtocol(){return protocol;}
 	public double[] getWave() { return dataWav;}
+	public void setWave(double[] data) { dataWav=data;}
 
 }
