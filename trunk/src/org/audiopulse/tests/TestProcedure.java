@@ -147,14 +147,16 @@ public class TestProcedure implements Runnable{
 			} catch (InterruptedException e1) {
 				logToUI("*****Error: could not play stimulus!!");
 			}
-			int[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
-
+			double[] XFFT=audioInterface.getAveragedRecordedPowerSpectrum();
+			double[] wave=audioInterface.getAveragedRecordedWaveForm();
+			
 			//Get information that will generate the candidate file name for this specific stimulus if test gets accepted
 			file= AudioPulseFileWriter.generateFileName(testName,F1Hz[i]+"Hz",testEar,Double.valueOf(F1SPL[i]));
 			try {
 				Log.v(TAG,"Estimating response of size:" + XFFT.length);
 				DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(XFFT,recFs,F2,F1,Fres,testProtocolName,file.getAbsolutePath());
 				responseData = dpoaeAnalysis.call();
+				responseData.setWave(wave);
 				DPGRAM.add(responseData);
 			} catch (Exception e) {
 				logToUI("***Error: could not analyze data!!");
