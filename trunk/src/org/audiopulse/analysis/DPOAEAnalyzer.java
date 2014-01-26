@@ -86,9 +86,9 @@ public class DPOAEAnalyzer {
 		double F2SPL=getStimulusLevel(PXFFT,F2);
 		double respSPL=getResponseLevel(PXFFT,Fres);
 		double noiseSPL=getNoiseLevel(PXFFT,Fres);
-		//This is a little messy...maybe use getters ???
+		//This is a little messy...should make DPOAEResults parceable and pass it as an object.
 		DPOAEResults dResults=new DPOAEResults(respSPL,noiseSPL,F1SPL,F2SPL,
-				Fres,F1,F2,PXFFT[1],fileName,protocol);
+				Fres,F1,F2,PXFFT[1],null,fileName,protocol);
 		if(dResults == null)
 			Log.e(TAG,"Received null results!");
 		return dResults;
