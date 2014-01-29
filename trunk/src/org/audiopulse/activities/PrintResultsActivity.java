@@ -67,7 +67,7 @@ import android.widget.TextView;
 
 //TestActivity is a template for all tests.
 public class PrintResultsActivity extends Activity {
-	public static final String TAG="PrintResultsActivityy";
+	public static final String TAG="PrintResultsActivity";
 	public static final int CONFIRM_PLOT_CODE = 1;
 	protected TextView testLog;
 	private ArrayList<String> fileNames = new ArrayList<String>();
@@ -109,6 +109,10 @@ public class PrintResultsActivity extends Activity {
 		}
 		testLog.setText(display + "\n\n***Finished! Hit back button to save, cancel, or repeat tests.");
 		
+		if(dpoaeLast==null)
+			Log.e(TAG,"dpoae data is null");
+		
+		Log.w(TAG,"printing data from last test");
 		//Print and plot last set of  data
 			Bundle extraData=new Bundle();
 			extraData.putDoubleArray("psd",dpoaeLast.getDataFFT());
@@ -128,8 +132,8 @@ public class PrintResultsActivity extends Activity {
 
 			Intent testIntent = new Intent(PrintResultsActivity.this, PlotSpectralActivity.class);
 			testIntent.putExtras(extraData);
-			startActivity(testIntent);
-		
+			Log.w(TAG,"starting PlotSpectralActivity");
+			startActivity(testIntent);	
 		
 	}
 
