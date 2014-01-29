@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
 import org.audiopulse.activities.TestActivity;
+import org.audiopulse.activities.UsbTestActivity;
 import org.audiopulse.analysis.DPOAEAnalyzer;
 import org.audiopulse.analysis.DPOAEResults;
 import org.audiopulse.io.AudioPulseFileWriter;
@@ -73,6 +74,17 @@ public class TestProcedure implements Runnable{
 		testActivity.getApplicationContext();
 		Log.v(TAG,"Getting handler");
 		uiThreadHandler = new Handler(testActivity);
+		Log.v(TAG,"setting resources");
+		this.resources=resources;
+		data=new Bundle();
+	}
+
+	public TestProcedure(UsbTestActivity usbTestActivity,Resources resources) {
+		this.testEar = resources.getString(R.string.LeftEarKey);//use dummy ear value
+		Log.v(TAG,"Getting context");
+		usbTestActivity.getApplicationContext();
+		Log.v(TAG,"Getting handler");
+		uiThreadHandler = new Handler(usbTestActivity);
 		Log.v(TAG,"setting resources");
 		this.resources=resources;
 		data=new Bundle();
