@@ -81,6 +81,7 @@ public class PlotSpectralActivity extends AudioPulseActivity {
 		double respHz=audio_bundle.getDouble("respHz");
 		double respSPL=audio_bundle.getDouble("respSPL");
 		double noiseSPL=audio_bundle.getDouble("respSPL");
+		Log.w(TAG,"got bundled data");
 		int N=psd.length;
 		Log.v(TAG,"plotting spectrum, fftSize= " + N);
 		
@@ -94,11 +95,14 @@ public class PlotSpectralActivity extends AudioPulseActivity {
 
 	   //Print spectral plot in first graph area
 	  //setContentView(mView);
+	   Log.w(TAG,"obtaining views");
 	   PlotSpectralView mView1 = new PlotSpectralView(this,psd,sampleRate,respHz,N);
-	   PlotWaveformView mView2 = new PlotWaveformView(this,N,wave,sampleRate);
-	   LinearLayout layout1 = (LinearLayout) findViewById(R.id.graphics_canvas1);
+	   //PlotWaveformView mView2 = new PlotWaveformView(this,N,wave,sampleRate);
+	   Log.w(TAG,"finding layout");
+	   //LinearLayout layout1 = (LinearLayout) findViewById(R.id.graphics_canvas1);
 	   LinearLayout layout2 = (LinearLayout) findViewById(R.id.graphics_canvas2);
-	   layout1.addView(mView2,0);
+	   Log.w(TAG,"adding views");
+	   //layout1.addView(mView2,0);
 	   layout2.addView(mView1,0);
 		
 	}
