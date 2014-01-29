@@ -165,7 +165,7 @@ public class TestProcedure implements Runnable{
 					" dB, Noise SPL: " + Math.round(responseData.getNoiseSPL()));
 			data.putSerializable("DPGRAM",DPGRAM);
 		}
-		logToUI("---Plotting audiogram ...");
+		logToUI("---Displaying data ...");
 		sendMessage(TestActivity.Messages.ANALYSIS_COMPLETE,data);
 	}
 
