@@ -276,7 +276,7 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 			responseData = dpoaeAnalysis.call();
 			respSPL=responseData.getRespSPL();
 			noiseSPL=responseData.getNoiseSPL();
-			Log.v(TAG,"noiseSPL = " + noiseSPL);
+			Log.v(TAG,"estimated noiseSPL = " + noiseSPL);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -287,6 +287,7 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 		extraData.putShort("f1", f1);// Test frequency
 		extraData.putDouble("respSPL", respSPL);
 		extraData.putDouble("noiseSPL", noiseSPL);
+		extraData.putDoubleArray("noiseRangeHz",responseData.getNoiseRangeHz());
 		Log.v(TAG, "respSPL=" + respSPL + " noiseSPL= " + noiseSPL);
 		extraData.putFloat("recSampleRate", Fs);
 		extraData.putDouble("respHz", respHz);

@@ -23,6 +23,7 @@ public class DPOAEResults implements Serializable{
 	
 	protected double[] dataFFT;
 	protected double[] dataWav;
+	protected double[] noiseRangeHz;
 	final String fileName;
 	final String protocol;
 	
@@ -55,5 +56,7 @@ public class DPOAEResults implements Serializable{
 	public String getProtocol(){return protocol;}
 	public double[] getWave() { return dataWav;}
 	public void setWave(double[] data) { dataWav=data;}
+	public double[] getNoiseRangeHz() {return noiseRangeHz;	}
+	public void setNoiseRangeHz(double [] x) {noiseRangeHz=x;}
 
 }

@@ -74,26 +74,30 @@ public class PlotSpectralView extends DemoView {
 	private static final String TAG="PlotSpectralView";
 	private static double[] audioBuffer;
 	private static float sampleRate;
-	private static double frange=100; //Range for highlighting where the expected response should 
 	//occur (in Hz)
 	private static double expectedFrequency;
+	static int fftSize;
+	
+	//Range for highlighting where the expected response 
+	//should be and what is the region used for calculation of noise
 	static double fRangeStart;
 	static double fRangeEnd;
-	static int fftSize;
+	
 
 	//Assumptions!!
 	//If FFT size is zero, the user is passing the already calculated FFT values
 
 	public PlotSpectralView(Context context,double[] aBuffer, float Fs, 
-			double eFrequency, int fftN) {
+			double eFrequency, int fftN, double[] noiseRangeHz) {
 		super(context);
 		audioBuffer=aBuffer;
 		sampleRate=Fs;	
 		fftSize=fftN;
 		expectedFrequency=eFrequency;
-		fRangeStart=expectedFrequency-frange;
-		fRangeEnd=expectedFrequency+frange;
+		fRangeStart=noiseRangeHz[0];
+		fRangeEnd=noiseRangeHz[1];
 		Log.v(TAG,"Fs=" + sampleRate + " ,N= " + aBuffer.length);
+		Log.v(TAG,"fRangeStart=" + fRangeStart + " ,fRangeEnd " + fRangeEnd);
 		final AFreeChart chart = createChart2();
 		setChart(chart);
 	}
