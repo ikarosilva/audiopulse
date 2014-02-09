@@ -43,7 +43,6 @@ import java.util.ArrayList;
 
 import org.audiopulse.R;
 import org.audiopulse.activities.TestActivity;
-import org.audiopulse.activities.TestActivity;
 import org.audiopulse.activities.UsbTestActivity;
 import org.audiopulse.analysis.DPOAEAnalyzer;
 import org.audiopulse.analysis.DPOAEResults;

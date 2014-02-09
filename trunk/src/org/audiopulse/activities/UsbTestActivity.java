@@ -262,6 +262,9 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 	}
 
 	public void plotdataButton(View view) {
+		
+		//NOTE: Because for DPOAE we are not interested in waveform data, 
+		//we will only the power spectrum data/results
 		int Fs = getResources()
 				.getInteger(R.integer.recordingSamplingFrequency);
 		respHz = (2.0 * f1 - f2);
@@ -271,9 +274,9 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 		DPOAEResults responseData=null;
 		try {
 			responseData = dpoaeAnalysis.call();
-			responseData.setWave(data);
 			respSPL=responseData.getRespSPL();
 			noiseSPL=responseData.getNoiseSPL();
+			Log.v(TAG,"noiseSPL = " + noiseSPL);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

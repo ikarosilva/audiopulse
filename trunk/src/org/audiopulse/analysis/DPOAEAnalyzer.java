@@ -56,6 +56,7 @@ public class DPOAEAnalyzer {
 	private double Fres;	
 	public final String protocol;
 	public final String fileName;
+	private double Fstep;
 	//Estimated levels above the threshold below will be logged as errors
 	private static final double dBErrorWarningThreshold=70;
 
@@ -68,15 +69,13 @@ public class DPOAEAnalyzer {
 		this.Fres=Fres;//Frequency of the expected response
 		this.protocol=protocol;
 		this.fileName=fileName;
+		Fstep= (double) Fs/(2.0*(XFFT.length-1));
 	}
 
 
 	public DPOAEResults call() throws Exception {
-		// TODO This function calculates the "Audiogram" results that will be 
+		// This function calculates the "Audiogram" results that will be 
 		//plotted and save as the final analysis of the data. 
-		//For now, using generic as return type to allow for flexibility,
-		//but maybe we should consider creating a AP Data Type 
-
 		//All the analysis will be done in the fft domain 
 		//using the AudioPulseDataAnalyzer interface to obtain the results
 		if(XFFT == null)
@@ -89,17 +88,14 @@ public class DPOAEAnalyzer {
 		//This is a little messy...should make DPOAEResults parceable and pass it as an object.
 		DPOAEResults dResults=new DPOAEResults(respSPL,noiseSPL,F1SPL,F2SPL,
 				Fres,F1,F2,PXFFT[1],null,fileName,protocol);
-		if(dResults == null)
-			Log.e(TAG,"Received null results!");
 		return dResults;
 	}
 
 	private double[][] getSpectrum(double[] xFFT2, double fs) {
 		// Reformat data to two arrays where the first is the frequency index
 		double[][] PFFT=new double[2][xFFT2.length];
-		double step= (double) fs/(2.0*(xFFT2.length-1));
 		for(int n=0;n<xFFT2.length;n++){
-			PFFT[0][n]=n*step;
+			PFFT[0][n]=n*Fstep;
 			PFFT[1][n]=xFFT2[n];
 		}
 		return PFFT;
@@ -125,16 +121,18 @@ public class DPOAEAnalyzer {
 		return index;
 	}
 
-	public static double getFreqNoiseAmplitude(double[][] XFFT, double desF, int Find){
+	public double getFreqNoiseAmplitude(double[][] XFFT, double desF, int Find){
 
 		//Estimates noise by getting the average level of 3 frequency bins above and below
 		//the desired response frequency (desF)
 		double noiseLevel=0;	
-		//Get the average from 3 bins below and 3 bins above
-		for(int i=0;i<=6;i++){
-			if(i !=3){
-				noiseLevel+= XFFT[1][(Find+i-3)];
-			}
+		//Get the average from 3 bins below and 3 bins above after a 50Hz offset from the
+		//response FFT bin
+		int offset=(int) Math.round(50/Fstep)+1;
+		
+		for(int i=0;i<3;i++){
+				noiseLevel+= XFFT[1][(Find-offset-2+i)];
+				noiseLevel+= XFFT[1][(Find+offset+i)];
 		}
 		noiseLevel= noiseLevel/6.0;
 		noiseLevel= Math.round(noiseLevel*10)/10.0;
