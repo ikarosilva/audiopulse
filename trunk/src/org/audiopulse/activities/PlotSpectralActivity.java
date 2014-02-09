@@ -41,20 +41,10 @@
 
 
 package org.audiopulse.activities;
-
-import java.util.ArrayList;
-
 import org.audiopulse.R;
-import org.audiopulse.analysis.DPOAEResults;
 import org.audiopulse.graphics.PlotSpectralView;
-import org.audiopulse.graphics.PlotWaveformView;
-
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -76,11 +66,11 @@ public class PlotSpectralActivity extends AudioPulseActivity {
 		setContentView(R.layout.stacked_graphics_layout);
 		Bundle audio_bundle = getIntent().getExtras();
 		double[] psd=audio_bundle.getDoubleArray("psd");
-		double[] wave=audio_bundle.getDoubleArray("data");
 		float sampleRate=audio_bundle.getFloat("recSampleRate");
 		double respHz=audio_bundle.getDouble("respHz");
 		double respSPL=audio_bundle.getDouble("respSPL");
-		double noiseSPL=audio_bundle.getDouble("respSPL");
+		double noiseSPL=audio_bundle.getDouble("noiseSPL");
+		double[] noiseRangeHz=audio_bundle.getDoubleArray("noiseRangeHz");
 		Log.w(TAG,"got bundled data");
 		int N=psd.length;
 		Log.v(TAG,"plotting spectrum, fftSize= " + N);
@@ -94,15 +84,8 @@ public class PlotSpectralActivity extends AudioPulseActivity {
 	   testLog.setText(display);
 
 	   //Print spectral plot in first graph area
-	  //setContentView(mView);
-	   Log.w(TAG,"obtaining views");
-	   PlotSpectralView mView1 = new PlotSpectralView(this,psd,sampleRate,respHz,N);
-	   //PlotWaveformView mView2 = new PlotWaveformView(this,N,wave,sampleRate);
-	   Log.w(TAG,"finding layout");
-	   //LinearLayout layout1 = (LinearLayout) findViewById(R.id.graphics_canvas1);
-	   LinearLayout layout2 = (LinearLayout) findViewById(R.id.graphics_canvas2);
-	   Log.w(TAG,"adding views");
-	   //layout1.addView(mView2,0);
+	   PlotSpectralView mView1 = new PlotSpectralView(this,psd,sampleRate,respHz,N,noiseRangeHz);
+	    LinearLayout layout2 = (LinearLayout) findViewById(R.id.graphics_canvas2);
 	   layout2.addView(mView1,0);
 		
 	}

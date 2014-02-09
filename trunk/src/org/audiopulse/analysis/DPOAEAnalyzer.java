@@ -59,6 +59,7 @@ public class DPOAEAnalyzer {
 	private double Fstep;
 	//Estimated levels above the threshold below will be logged as errors
 	private static final double dBErrorWarningThreshold=70;
+	private double[] noiseRangeHz;
 
 	public DPOAEAnalyzer(double [] XFFT, double Fs, short F2, short F1, double Fres,
 			String protocol, String fileName){
@@ -84,10 +85,12 @@ public class DPOAEAnalyzer {
 		double F1SPL=getStimulusLevel(PXFFT,F1);
 		double F2SPL=getStimulusLevel(PXFFT,F2);
 		double respSPL=getResponseLevel(PXFFT,Fres);
-		double noiseSPL=getNoiseLevel(PXFFT,Fres);
+		double noiseSPL=getNoiseLevel(PXFFT,Fres); //Also sets noiseRangeHz
+		
 		//This is a little messy...should make DPOAEResults parceable and pass it as an object.
 		DPOAEResults dResults=new DPOAEResults(respSPL,noiseSPL,F1SPL,F2SPL,
 				Fres,F1,F2,PXFFT[1],null,fileName,protocol);
+		dResults.setNoiseRangeHz(noiseRangeHz);
 		return dResults;
 	}
 
@@ -129,13 +132,22 @@ public class DPOAEAnalyzer {
 		//Get the average from 3 bins below and 3 bins above after a 50Hz offset from the
 		//response FFT bin
 		int offset=(int) Math.round(50/Fstep)+1;
-		
-		for(int i=0;i<3;i++){
+		Log.v(TAG,"Resp at " + XFFT[0][Find] + " Hz ( " +
+					Find + " ) = "+ XFFT[1][Find]);
+		for(int i=0;i<3;i++){ 
 				noiseLevel+= XFFT[1][(Find-offset-2+i)];
+				Log.v(TAG,"Adding noise at " + XFFT[0][(Find-offset-2+i)] + " Hz ( " +
+						(Find-offset-2+i) + " ) = "+ XFFT[1][(Find-offset-2+i)]);
 				noiseLevel+= XFFT[1][(Find+offset+i)];
+				Log.v(TAG,"Adding noise at " + XFFT[0][(Find+offset+i)]+ " Hz ( " +
+						(Find+offset+i) + " ) = "+ XFFT[1][(Find+offset+i)]);
 		}
 		noiseLevel= noiseLevel/6.0;
 		noiseLevel= Math.round(noiseLevel*10)/10.0;
+		noiseRangeHz=new double[2];
+		noiseRangeHz[0]=XFFT[0][(Find-offset-2)];
+		noiseRangeHz[1]=XFFT[0][(Find+offset+2)];
+		Log.v(TAG,"Average noise is=" + noiseLevel);
 		if(noiseLevel > dBErrorWarningThreshold)
 			Log.e(TAG,"Estimated noise level is too high: " + noiseLevel);
 		return noiseLevel;
@@ -144,6 +156,7 @@ public class DPOAEAnalyzer {
 	public double getResponseLevel(double[][] dataFFT, double frequency) {	
 		int ind=getFreqIndex(dataFFT,frequency);
 		double[] amp={dataFFT[0][ind],dataFFT[1][ind]};
+		amp[1]=Math.round(amp[1]/10)*10;//Keep only one significant digit
 		if(amp[1] > dBErrorWarningThreshold)
 			Log.e(TAG,"Estimated response level is too high: " + amp[1]);
 		return amp[1];
