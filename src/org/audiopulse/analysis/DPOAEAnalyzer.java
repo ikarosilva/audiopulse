@@ -46,6 +46,19 @@ import android.util.Log;
 
 public class DPOAEAnalyzer {
 
+	/* This analysis is based on
+	 * "Otoacoustic emission from normal-hearing and hearing-impaired subjects: Distortion product responses"
+	 * Gorga, et al, 1993, JASA 93 (4)
+	 * 
+	 * In this paper they use the followign parameters:
+	 * Fs= 50 kHz
+	 * Recording Duration= 0.02048 seconds
+	 * Number of trials = 200 ( for a total of 4.096 s)
+	 * 
+	 * So that the number of samples used in the FFT is 1024 and the
+	 * frequency separation in the FFT is 48.8 Hz.
+	 * 
+	 */
 	private final static String TAG="DPOAEAnalyzer";
 	public static final String TestType="DPOAE";
 	private double[] XFFT;
