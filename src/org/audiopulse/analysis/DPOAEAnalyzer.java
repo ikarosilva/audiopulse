@@ -58,6 +58,25 @@ public class DPOAEAnalyzer {
 	 * So that the number of samples used in the FFT is 1024 and the
 	 * frequency separation in the FFT is 48.8 Hz.
 	 * 
+	 * 
+	 * L1= 65 dB SPL, L2 = 50 dB SPL
+	 * 
+	 * Background noise at 4 kHz is expected to be around -20 to -25 dB 
+	 * and up to 10 - 15 dB at 500 Hz
+	 * 
+	 * Mean amplitude of the response ranges from 8 to -2 dB SPL (at 1464 and 8007 Hz
+	 * respectively). Thus SNR is maximum at about 27 dB in 3906 Hz. The variation in
+	 * SNR is mostly due to noise. 
+	 * 
+	 * Used audiometric criterial of 20 dB HL to separate hearing loss. 
+	 * 
+	 * A -6dB SPL for DPOAEs at 4kHz resulted in less thatn 10% misses and false alarms.
+	 * Regression line to audiometric threshold at 4 Khz is (r=-0.85):
+	 * 
+	 *  y = 14.3 - 1.714*SNR
+	 *  
+	 *  SNR of 12 dB at 4kH  identifies 90% of normals and misses 5% of hearing impaired.
+	 * 
 	 */
 	private final static String TAG="DPOAEAnalyzer";
 	public static final String TestType="DPOAE";
