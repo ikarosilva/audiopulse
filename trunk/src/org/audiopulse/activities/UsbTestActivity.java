@@ -52,12 +52,10 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 	private double[] data;
 	private double[] psd;
 	private static final File root = Environment.getExternalStorageDirectory();
-
 	protected TextView textview;
 	protected EditText app_out;
 	protected Switch toggle_button;
 	protected APulseIface apulse;
-
 	short f1;
 	double db1;
 	short f2;
@@ -67,7 +65,33 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 	private static final String protocol = "USbTest";
 	private String fileName; // File name that will be used to save the test
 								// data if the user decide to
+	private privateUsbHandler UsbHandler;
+	
+	//Inner class for Usb Handler
+	class privateUsbHandler extends USBIface.USBConnHandler {
 
+		private Switch sw;
+		public privateUsbHandler(Switch s){
+			sw=s;
+		}
+		public void handleConnected() {
+			textview.setText("Connected successfully!");
+			status_button.setEnabled(true);
+			getdata_button.setEnabled(true);
+			reset_button.setEnabled(true);
+			start_button.setEnabled(true);
+		}
+
+		public void handleError() {
+			textview.setText("Error with permissions");
+			sw.setChecked(false);
+			status_button.setEnabled(false);
+			getdata_button.setEnabled(false);
+			reset_button.setEnabled(false);
+			start_button.setEnabled(false);
+		}
+    }
+	
 	private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
@@ -108,12 +132,16 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 		apulse = new APulseIface(this);
 		app_out.setKeyListener(null);
 
-		// Attempt to connect as soon as activity is launched
-		// toggle_button.setChecked(true);
-		// connectToggleButton(toggle_button);
-
-		// IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-		// registerReceiver(mUsbReceiver, filter);
+		//Attempt to connect to USB as soon as activity is created
+		UsbHandler=new privateUsbHandler(toggle_button);
+		Log.v(TAG,"Attempting to automatically connect to USB device");
+		if (apulse.usb.connect(UsbHandler) != 0) {
+			Log.v(TAG,"Could do connect to USB device...will need manual connection");
+			toggle_button.setChecked(false);
+		}else{
+			Log.v(TAG,"Connected sucessfully to USB device!");
+			toggle_button.setChecked(true);
+		}
 	}
 
 	@Override
@@ -154,35 +182,15 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 	}
 
 	public void connectToggleButton(View view) {
-		final Switch sw = (Switch) view;
 		int ret;
 		app_out.setText("");
-		if (sw.isChecked()) {
+		if (toggle_button.isChecked()) {
 			textview.setText("Attempting to connect...");
-			ret = apulse.usb.connect(new USBIface.USBConnHandler() {
-				public void handleConnected() {
-					textview.setText("Connected successfully!");
-					status_button.setEnabled(true);
-					getdata_button.setEnabled(true);
-					reset_button.setEnabled(true);
-					start_button.setEnabled(true);
-				}
-
-				public void handleError() {
-					textview.setText("Error with permissions");
-					sw.setChecked(false);
-
-					status_button.setEnabled(false);
-					getdata_button.setEnabled(false);
-					reset_button.setEnabled(false);
-					start_button.setEnabled(false);
-				}
-			});
-
+			ret = apulse.usb.connect(UsbHandler);
 			if (ret != 0) {
 				textview.setText(String.format("Error connecting: %d ", ret)
 						+ apulse.usb.error);
-				sw.setChecked(false);
+				toggle_button.setChecked(false);
 			}
 		} else {
 			// Ignore for now
