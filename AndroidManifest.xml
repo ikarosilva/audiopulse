@@ -19,26 +19,18 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name=".activities.PlotAudiogramActivity"
-            android:configChanges="orientation|keyboardHidden" >
-        </activity>
-        <activity
-            android:name=".activities.PrintResultsActivity"
-            android:configChanges="orientation|keyboardHidden" >
-        </activity>
-        <activity
             android:name=".activities.UsbTestActivity"
             android:configChanges="orientation|keyboardHidden" >
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
-            <!-- see for details:
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/usb_device_filter" />
-     
-http://stackoverflow.com/questions/12388914/usb-device-access-pop-up-supression
--->
+        </activity>
+         <activity
+            android:name=".activities.TestEarActivity"
+            android:configChanges="orientation|keyboardHidden" >
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".activities.PlotSpectralActivity"
@@ -50,29 +42,8 @@ http://stackoverflow.com/questions/12388914/usb-device-access-pop-up-supression
             android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.TestActivity"
-            android:configChanges="orientation|keyboardHidden" >
-
-            <!--
-            <intent-filter>
-                <category android:name="android.intent.catesgory.DEFAULT" />
-                <action android:name="org.audiopulse.TestDPOAELeftEarActivity" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <action android:name="org.audiopulse.TestDPOAERightEarActivity" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <action android:name="org.audiopulse.CAPTURE_MENU" />
-            </intent-filter>
-            -->
-        </activity>
     </application>
-
 </manifest>
