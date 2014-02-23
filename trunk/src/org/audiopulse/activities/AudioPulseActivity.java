@@ -87,7 +87,7 @@ public class AudioPulseActivity extends Activity
 						if(itemText.equalsIgnoreCase(getResources().getString(R.string.USB_TEST))){
 							testIntent = new Intent(AudioPulseActivity.this, UsbTestActivity.class);
 						}else{
-							testIntent = new Intent(AudioPulseActivity.this, TestActivity.class);	
+							testIntent = new Intent(AudioPulseActivity.this, TestEarActivity.class);	
 						}
 						Log.v(TAG,"putting extras");
 						testIntent.putExtras(tests);

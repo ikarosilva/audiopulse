@@ -39,24 +39,25 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 
-public class UsbTestActivity extends Activity implements Handler.Callback {
-	private static final String TAG = "UsbTestActivity";
+public class TestEarActivity extends Activity implements Handler.Callback {
+	private static final String TAG = "TestEarActivity";
 	protected Button reset_button;
 	protected Button status_button;
 	protected Button start_button;
 	protected Button getdata_button;
 	protected Button plotdata_button;
-	private double[] data;
 	private double[] psd;
 	private static final File root = Environment.getExternalStorageDirectory();
 	protected TextView textview;
 	protected EditText app_out;
 	protected Switch toggle_button;
 	protected APulseIface apulse;
-	short f1;
-	double db1;
-	short f2;
-	double db2;
+	private static final short f1=2000;
+	private static final double db1=65;
+	private static final short f2=2400;
+	private static final double db2=55;
+	private static final short t1=1000;
+	private static final short t2=2000;
 	DPOAEResults dpoaResults;
 	double respSPL, noiseSPL, respHz;
 	private static final String protocol = "USbTest";
@@ -103,7 +104,7 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.usb_main);
+		setContentView(R.layout.usb_ear_test);
 
 		if (savedInstanceState == null) {
 			getFragmentManager().beginTransaction()
@@ -216,28 +217,10 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 		APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
 
 		try {
-			f1 = Short.decode(((TextView) findViewById(R.id.f_1)).getText()
-					.toString());
-			short t1 = Short.decode(((TextView) findViewById(R.id.t1_1))
-					.getText().toString());
-			short t2 = Short.decode(((TextView) findViewById(R.id.t2_1))
-					.getText().toString());
-			db1 = (double) Short.decode(((TextView) findViewById(R.id.db_1))
-					.getText().toString());
-
 			tones[0] = new APulseIface.FixedTone(f1, t1, t2, db1, 0);
-
-			f2 = Short.decode(((TextView) findViewById(R.id.f_2)).getText()
-					.toString());
-			t1 = Short.decode(((TextView) findViewById(R.id.t1_2)).getText()
-					.toString());
-			t2 = Short.decode(((TextView) findViewById(R.id.t2_2)).getText()
-					.toString());
-			db2 = (double) Short.decode(((TextView) findViewById(R.id.db_2))
-					.getText().toString());
-
 			tones[1] = new APulseIface.FixedTone(f2, t1, t2, db2, 1);
 		} catch (NullPointerException e) {
+			Log.v(TAG,"Invalid inputs: f1= " + f1 + " f2= " + f2 + " db1= " + db1 + " db2= " + db2);
 			app_out.setText("Error with arguments");
 			return;
 		}
@@ -257,10 +240,6 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 						(int) (((double) i) * 31.25), psd[i]);
 			}
 			app_out.setText(out);
-			Log.v(TAG, "setting data average");
-			this.data = data.getAverage();
-			if (this.data == null)
-				Log.e(TAG, "Got null average!!");
 		} else {
 			app_out.setText("Data not ready...");
 		}
@@ -288,7 +267,6 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 		Log.v(TAG,"handling call back ");
 		Bundle extraData = new Bundle();
 		extraData.putDoubleArray("psd", psd);
-		extraData.putDoubleArray("data", data);
 		extraData.putShort("f1", f1);// Test frequency
 		extraData.putDouble("respSPL", respSPL);
 		extraData.putDouble("noiseSPL", noiseSPL);
@@ -297,7 +275,7 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 		extraData.putFloat("recSampleRate", Fs);
 		extraData.putDouble("respHz", respHz);
 		extraData.putInt("fftSize", 0);
-		Intent testIntent = new Intent(UsbTestActivity.this,
+		Intent testIntent = new Intent(TestEarActivity.this,
 				PlotSpectralActivity.class);
 		testIntent.putExtras(extraData);
 		startActivity(testIntent);
@@ -320,7 +298,7 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 							Log.i(TAG,
 									"Setting users result to cancell and exiting");
 							setResult(RESULT_CANCELED, null);
-							UsbTestActivity.this.finish();
+							TestEarActivity.this.finish();
 						}
 					});
 
@@ -329,7 +307,7 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 						public void onClick(DialogInterface dialog, int which) {
 							// this should go back to the test activity by
 							// default
-							UsbTestActivity.this.finish();
+							TestEarActivity.this.finish();
 						}
 					});
 
@@ -350,8 +328,9 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 									"-");
 
 							respHz = (double) (2.0 * f1 - f2);
+							//Set waveform data to null because we are not interesed
 							dpoaResults = new DPOAEResults(respSPL, noiseSPL,
-									db1, db2, respHz, f1, f2, psd, data,
+									db1, db2, respHz, f1, f2, psd, null,
 									fileName, protocol);
 							// Start lengthy operation in a background thread
 							new Thread(new Runnable() {
@@ -422,7 +401,7 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 									}
 
 									dismissDialog(0);
-									UsbTestActivity.this.finish();
+									TestEarActivity.this.finish();
 								}
 							}).start();
 						}
