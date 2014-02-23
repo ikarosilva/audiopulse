@@ -54,22 +54,6 @@
                 android:orientation="horizontal" >
 
                 <Button
-                    android:id="@+id/button5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:onClick="resetButton"
-                    android:text="Reset"
-                    android:textSize="16sp" />
-
-                <Button
-                    android:id="@+id/button6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:onClick="statusButton"
-                    android:text="Get Status"
-                    android:textSize="16sp" />
-
-                <Button
                     android:id="@+id/button7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
