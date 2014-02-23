@@ -41,8 +41,6 @@ import android.widget.TextView;
 
 public class TestEarActivity extends Activity implements Handler.Callback {
 	private static final String TAG = "TestEarActivity";
-	protected Button reset_button;
-	protected Button status_button;
 	protected Button start_button;
 	protected Button getdata_button;
 	protected Button plotdata_button;
@@ -64,6 +62,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	private String fileName; // File name that will be used to save the test
 								// data if the user decide to
 	private privateUsbHandler UsbHandler;
+	private Handler mHandler = new Handler();
 	
 	//Inner class for Usb Handler
 	class privateUsbHandler extends USBIface.USBConnHandler {
@@ -74,18 +73,14 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		}
 		public void handleConnected() {
 			textview.setText("Connected successfully!");
-			status_button.setEnabled(true);
 			getdata_button.setEnabled(true);
-			reset_button.setEnabled(true);
 			start_button.setEnabled(true);
 		}
 
 		public void handleError() {
 			textview.setText("Error with permissions");
 			sw.setChecked(false);
-			status_button.setEnabled(false);
 			getdata_button.setEnabled(false);
-			reset_button.setEnabled(false);
 			start_button.setEnabled(false);
 		}
     }
@@ -116,15 +111,10 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 		app_out = (EditText) findViewById(R.id.editText3);
 		Log.v(TAG, "initialized app_out to:" + app_out);
-		reset_button = (Button) findViewById(R.id.button5);
-		status_button = (Button) findViewById(R.id.button6);
 		start_button = (Button) findViewById(R.id.button7);
 		getdata_button = (Button) findViewById(R.id.button8);
 		plotdata_button = (Button) findViewById(R.id.button10);
-
-		status_button.setEnabled(false);
 		getdata_button.setEnabled(false);
-		reset_button.setEnabled(false);
 		start_button.setEnabled(false);
 
 		apulse = new APulseIface(this);
@@ -196,11 +186,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		}
 	}
 
-	public void resetButton(View view) {
-		apulse.reset();
-	}
-
-	public void statusButton(View view) {
+	public void status(View view) {
 		Log.v(TAG, "getting status");
 		APulseIface.APulseStatus status = apulse.getStatus();
 
@@ -214,6 +200,9 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	}
 
 	public void startButton(View view) {
+		//Reset driver
+		apulse.reset();
+		status(view);
 		APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
 
 		try {
@@ -227,8 +216,29 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 		apulse.configCapture(2000, 256, 200);
 		apulse.configTones(tones);
+		app_out.setText("Testing frequency: " + f1 + " ....");
 		apulse.start();
+		mHandler.removeCallbacks(mStartTask);
+		mHandler.post(mStartTask);
 	}
+	
+	//Create thread for playing data and checking status until done
+	private Runnable mStartTask = new Runnable(){
+		public void run(){
+			APulseIface.APulseStatus status = apulse.getStatus();
+			Log.v(TAG,"Checking playback status...");
+			//Keep checking app until status is done and post back on the UI
+			while(status.equals(status.IN_CAPTURING)){
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			Log.v(TAG,"finished capturing ...");
+			mHandler.post(this);
+		}
+	};
 
 	public void getdataButton(View view) {
 		if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
