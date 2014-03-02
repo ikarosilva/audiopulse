@@ -12,7 +12,7 @@ import org.audiopulse.hardware.APulseIface;
 import org.audiopulse.hardware.USBIface;
 import org.audiopulse.io.AudioPulseFilePackager;
 import org.audiopulse.io.AudioPulseFileWriter;
-
+import android.os.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -26,7 +26,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -62,11 +61,10 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	private String fileName; // File name that will be used to save the test
 								// data if the user decide to
 	private privateUsbHandler UsbHandler;
-	private Handler mHandler = new Handler();
+	private MonitorHandler mUIHandler;
 	
 	//Inner class for Usb Handler
 	class privateUsbHandler extends USBIface.USBConnHandler {
-
 		private Switch sw;
 		public privateUsbHandler(Switch s){
 			sw=s;
@@ -76,12 +74,11 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 			getdata_button.setEnabled(true);
 			start_button.setEnabled(true);
 		}
-
 		public void handleError() {
 			textview.setText("Error with permissions");
 			sw.setChecked(false);
 			getdata_button.setEnabled(false);
-			start_button.setEnabled(false);
+			start_button.setEnabled(true); //TODO: change to false!!
 		}
     }
 	
@@ -100,7 +97,6 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.usb_ear_test);
-
 		if (savedInstanceState == null) {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
@@ -108,26 +104,25 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 		textview = (TextView) findViewById(R.id.textView);
 		toggle_button = (Switch) findViewById(R.id.switch1);
-
 		app_out = (EditText) findViewById(R.id.editText3);
 		Log.v(TAG, "initialized app_out to:" + app_out);
 		start_button = (Button) findViewById(R.id.button7);
 		getdata_button = (Button) findViewById(R.id.button8);
 		plotdata_button = (Button) findViewById(R.id.button10);
 		getdata_button.setEnabled(false);
-		start_button.setEnabled(false);
-
+		start_button.setEnabled(true); //TODO: change to false!
+		
+		//Handler responsible for communicating between UI activity and any
+		//thread that requires intensive work
+		mUIHandler = new MonitorHandler(this); 
 		apulse = new APulseIface(this);
 		app_out.setKeyListener(null);
 
 		//Attempt to connect to USB as soon as activity is created
 		UsbHandler=new privateUsbHandler(toggle_button);
-		Log.v(TAG,"Attempting to automatically connect to USB device");
 		if (apulse.usb.connect(UsbHandler) != 0) {
-			Log.v(TAG,"Could do connect to USB device...will need manual connection");
 			toggle_button.setChecked(false);
 		}else{
-			Log.v(TAG,"Connected sucessfully to USB device!");
 			toggle_button.setChecked(true);
 		}
 	}
@@ -137,6 +132,10 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_menu, menu);
+		
+		//Handler responsible for communicating between UI activity and any
+		//thread that requires intensive work
+		mUIHandler = new MonitorHandler(this); 	
 		return true;
 	}
 
@@ -156,10 +155,8 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	 * A placeholder fragment containing a simple view.
 	 */
 	public static class PlaceholderFragment extends Fragment {
-
 		public PlaceholderFragment() {
 		}
-
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -201,45 +198,41 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 	public void startButton(View view) {
 		//Reset driver
-		apulse.reset();
-		status(view);
+		//apulse.reset();
+		//status(view);
+		//TODO: remove comments
+		/*
 		APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
-
 		try {
 			tones[0] = new APulseIface.FixedTone(f1, t1, t2, db1, 0);
 			tones[1] = new APulseIface.FixedTone(f2, t1, t2, db2, 1);
 		} catch (NullPointerException e) {
-			Log.v(TAG,"Invalid inputs: f1= " + f1 + " f2= " + f2 + " db1= " + db1 + " db2= " + db2);
-			app_out.setText("Error with arguments");
+			app_out.setText("Invalid inputs: f1= " + f1 + " f2= " + f2 + " db1= " + db1 + " db2= " + db2);
 			return;
 		}
 
-		apulse.configCapture(2000, 256, 200);
+		apulse.configCapture(2000, 256, 200);//TODO: Get rid of the magic numbers
 		apulse.configTones(tones);
-		app_out.setText("Testing frequency: " + f1 + " ....");
-		apulse.start();
-		mHandler.removeCallbacks(mStartTask);
-		mHandler.post(mStartTask);
+		*/
+		app_out.setText("Testing frequency: " + f1 + " ....\n");
+		
+		Thread monitor=new MonitorThread(mUIHandler);
+		Log.v(TAG,"Thread monitor created, starting thread");
+		app_out.setText("Thread monitor created, starting thread");
+		if(monitor.getState() != Thread.State.TERMINATED){
+			app_out.append("\nstarting thread...");
+			monitor.start();
+		}else{
+			//Create new thread (in case of repeated button presses)
+			app_out.append("\n creating new start thread...");
+			monitor=new MonitorThread(mUIHandler);
+			monitor.start();
+		}
+		
 	}
 	
-	//Create thread for playing data and checking status until done
-	private Runnable mStartTask = new Runnable(){
-		public void run(){
-			APulseIface.APulseStatus status = apulse.getStatus();
-			Log.v(TAG,"Checking playback status...");
-			//Keep checking app until status is done and post back on the UI
-			while(status.equals(status.IN_CAPTURING)){
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			Log.v(TAG,"finished capturing ...");
-			mHandler.post(this);
-		}
-	};
-
+	
+	
 	public void getdataButton(View view) {
 		if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
 			APulseIface.APulseData data = apulse.getData();
@@ -274,7 +267,6 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Log.v(TAG,"handling call back ");
 		Bundle extraData = new Bundle();
 		extraData.putDoubleArray("psd", psd);
 		extraData.putShort("f1", f1);// Test frequency
@@ -438,7 +430,6 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 	@Override
 	public boolean handleMessage(Message msg) {
-		//TODO: clean up. not sure we need this anymore
 		return true;
 	}
 
