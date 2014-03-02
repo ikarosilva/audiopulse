@@ -41,9 +41,8 @@ import android.widget.TextView;
 public class TestEarActivity extends Activity implements Handler.Callback {
 	private static final String TAG = "TestEarActivity";
 	protected Button start_button;
-	protected Button getdata_button;
 	protected Button plotdata_button;
-	private double[] psd;
+	protected double[] psd;
 	private static final File root = Environment.getExternalStorageDirectory();
 	protected TextView textview;
 	protected EditText app_out;
@@ -71,13 +70,11 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		}
 		public void handleConnected() {
 			textview.setText("Connected successfully!");
-			getdata_button.setEnabled(true);
 			start_button.setEnabled(true);
 		}
 		public void handleError() {
 			textview.setText("Error with permissions");
 			sw.setChecked(false);
-			getdata_button.setEnabled(false);
 			start_button.setEnabled(false); 
 		}
     }
@@ -107,10 +104,9 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		app_out = (EditText) findViewById(R.id.editText3);
 		Log.v(TAG, "initialized app_out to:" + app_out);
 		start_button = (Button) findViewById(R.id.button7);
-		getdata_button = (Button) findViewById(R.id.button8);
 		plotdata_button = (Button) findViewById(R.id.button10);
-		getdata_button.setEnabled(false);
 		start_button.setEnabled(false); 
+		plotdata_button.setEnabled(false);
 		
 		//Handler responsible for communicating between UI activity and any
 		//thread that requires intensive work
@@ -231,8 +227,8 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	
 	public void getdataButton(View view) {
 		if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
-			APulseIface.APulseData data = apulse.getData();
-			psd = data.getPSD(); // PSD returns data in dB
+			psd=null;
+			getData();
 			String out = "";
 			for (int i = 0; i < psd.length; i++) {
 				out += String.format("%d:\t%.10f\n",
@@ -244,6 +240,11 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		}
 	}
 
+	public void getData() {
+		APulseIface.APulseData data = apulse.getData();
+		psd = data.getPSD(); // PSD returns data in dB
+	}
+	
 	public void plotdataButton(View view) {
 		
 		//NOTE: Because for DPOAE we are not interested in waveform data, 
