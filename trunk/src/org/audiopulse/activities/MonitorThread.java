@@ -1,12 +1,10 @@
 package org.audiopulse.activities;
 
-import org.audiopulse.activities.MonitorHandler.Messages;
 import org.audiopulse.hardware.APulseIface;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 public class MonitorThread extends Thread
 {
@@ -23,7 +21,7 @@ public class MonitorThread extends Thread
 	@Override
 	public void run()
 	{
-		sendMessage("Monitor started.\n");
+		sendMessage("Testing frequency: .\n");
 		int init = apulse.getStatus().test_state;
 		boolean isRunning=true;
 		switch (init) {
@@ -44,15 +42,16 @@ public class MonitorThread extends Thread
 		while(isRunning){
 			if(apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
 				isRunning=false;
+				sendMessage("Frequency test finished, getting data...");
+				sendAction(MonitorHandler.Messages.RECORDING_COMPLETE);
 			}
 			try {
 				Thread.sleep(200);
 			}catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-		sendMessage("Monitor finished");
-
+		}	
+		
 	}
 
 	private synchronized void sendMessage(String str){
@@ -60,6 +59,11 @@ public class MonitorThread extends Thread
 		Bundle b = new Bundle();
 		b.putString(MonitorHandler.LOGUI,str);
 		msg.setData(b);
+		this.mainThreadHandler.sendMessage(msg);
+	}
+	
+	private synchronized void sendAction(int action){
+		Message msg = this.mainThreadHandler.obtainMessage(action);
 		this.mainThreadHandler.sendMessage(msg);
 	}
 

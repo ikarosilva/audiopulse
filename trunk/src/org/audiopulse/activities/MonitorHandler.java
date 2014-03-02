@@ -21,7 +21,7 @@ public class MonitorHandler extends Handler
 		public static final int LOG = 2;					//add to the test log
 		public static final int PROGRESS = 3;				//progress has been made
 		public static final int IO_COMPLETE = 4;			//io phase is complete
-		public static final int ANALYSIS_COMPLETE = 5;		//analysis block complete
+		public static final int RECORDING_COMPLETE = 5;		//analysis block complete
 		public static final int PROCEDURE_COMPLETE = 6;		//entire test procedure is complete
 	}
 	
@@ -38,7 +38,11 @@ public class MonitorHandler extends Handler
 			Log.v(TAG,pm);
 			parentActivity.app_out.append(pm);
 			break;
-		case Messages.ANALYSIS_COMPLETE:
+		case Messages.RECORDING_COMPLETE:
+			parentActivity.getData();
+			if(parentActivity.psd != null){
+				parentActivity.plotdata_button.setEnabled(true);
+			}
 			break;
 		}
 	}
