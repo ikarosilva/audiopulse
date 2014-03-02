@@ -213,19 +213,18 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		apulse.configTones(tones);
 		app_out.setText("Testing frequency: " + f1 + " ....\n");
 		
-		Thread monitor=new MonitorThread(mUIHandler);
-		Log.v(TAG,"Thread monitor created, starting thread");
-		app_out.setText("Thread monitor created, starting thread");
+		Thread monitor=new MonitorThread(mUIHandler,apulse);
+		Log.v(TAG,"Thread monitor created.");
+		app_out.setText("Thread monitor created.\n");
+		apulse.start();
 		if(monitor.getState() != Thread.State.TERMINATED){
-			app_out.append("\nstarting thread...");
 			monitor.start();
 		}else{
 			//Create new thread (in case of repeated button presses)
 			app_out.append("\n creating new start thread...");
-			monitor=new MonitorThread(mUIHandler);
+			monitor=new MonitorThread(mUIHandler,apulse);
 			monitor.start();
 		}
-		
 	}
 	
 	
