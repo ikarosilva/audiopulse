@@ -7,39 +7,36 @@ import android.util.Log;
 
 public class MonitorThread extends Thread
 {
+	static final String TAG = "MonitorThread";
 	Handler mainThreadHandler = null;
 	int count = 0;
 	public MonitorThread(Handler h)
 	{
 		mainThreadHandler = h;
 	}
-	public static String TAG = "MonitorThread";
 	
 	@Override
 	public void run()
 	{
 		Log.v(TAG,"Starting thread task");
-		Message m = this.mainThreadHandler.obtainMessage();
-		Log.v(TAG,"obtained message");
-		Bundle b = new Bundle();
-		b.putString("logUI","started thread");
-		m.setData(b);
-		Log.v(TAG,"sending first update");
-		this.mainThreadHandler.sendMessage(m);
+		sendMessage("Monitor started");
 		Log.v(TAG,"started execution");
 		try {
 			Thread.sleep(2000);
 		}catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		Log.v(TAG,"obtaining second message");
-		Message m2 = this.mainThreadHandler.obtainMessage();
-		Bundle b2 = new Bundle();
-		b2.putString("logUI","thread finished sucessfuly");
-		m2.setData(b2);
-		Log.v(TAG,"sending second update");
-		this.mainThreadHandler.sendMessage(m2);
+		sendMessage("Monitor finished");
+		
 
+	}
+	
+	private synchronized void sendMessage(String str){
+		Message msg = this.mainThreadHandler.obtainMessage(MonitorHandler.Messages.LOG);
+		Bundle b = new Bundle();
+		b.putString(MonitorHandler.LOGUI,str);
+		msg.setData(b);
+		this.mainThreadHandler.sendMessage(msg);
 	}
 	
 }
