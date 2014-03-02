@@ -10,9 +10,9 @@ public class MonitorThread extends Thread
 {
 	static final String TAG = "MonitorThread";
 	private final APulseIface apulse;
-	Handler mainThreadHandler = null;
+	MonitorHandler mainThreadHandler = null;
 	int count = 0;
-	public MonitorThread(Handler h, APulseIface ap)
+	public MonitorThread(MonitorHandler h, APulseIface ap)
 	{
 		mainThreadHandler = h;
 		apulse=ap;
@@ -21,12 +21,11 @@ public class MonitorThread extends Thread
 	@Override
 	public void run()
 	{
-		sendMessage("Testing frequency: .\n");
 		int init = apulse.getStatus().test_state;
 		boolean isRunning=true;
 		switch (init) {
 		case APulseIface.APulseStatus.TEST_CONFIGURING:
-			sendMessage("Initial driver state is CONFIGURIN, waiting for main activity to start test.\n");
+			sendMessage("Initial driver state is CONFIGURING, waiting for main activity to start test.\n");
 			break;
 		case APulseIface.APulseStatus.TEST_READY:
 			sendMessage("Initial driver state is READY, waiting for main activity to start test...\n");
@@ -42,8 +41,16 @@ public class MonitorThread extends Thread
 		while(isRunning){
 			if(apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE){
 				isRunning=false;
-				sendMessage("Frequency test finished, getting data...");
+				sendMessage("Frequency test finished, getting data...\n");
 				sendAction(MonitorHandler.Messages.RECORDING_COMPLETE);
+				while(mainThreadHandler.dataIsReady == false){
+					try {
+						Thread.sleep(200);
+					}catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				sendMessage("Analyzing data...");
 			}
 			try {
 				Thread.sleep(200);

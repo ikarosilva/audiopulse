@@ -10,7 +10,7 @@ public class MonitorHandler extends Handler
 	public static final String TAG = "MonitorHandler";
 	private TestEarActivity parentActivity = null; 
 	public static final String LOGUI="logUI";
-	
+	public volatile boolean dataIsReady;
 	public MonitorHandler(TestEarActivity testActivity)
 	{
 		parentActivity = testActivity;
@@ -39,9 +39,11 @@ public class MonitorHandler extends Handler
 			parentActivity.app_out.append(pm);
 			break;
 		case Messages.RECORDING_COMPLETE:
+			dataIsReady=false;
 			parentActivity.getData();
 			if(parentActivity.psd != null){
 				parentActivity.plotdata_button.setEnabled(true);
+				dataIsReady=true;
 			}
 			break;
 		}

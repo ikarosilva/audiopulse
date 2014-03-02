@@ -58,10 +58,10 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	double respSPL, noiseSPL, respHz;
 	private static final String protocol = "USbTest";
 	private String fileName; // File name that will be used to save the test
-								// data if the user decide to
+	// data if the user decide to
 	private privateUsbHandler UsbHandler;
 	private MonitorHandler mUIHandler;
-	
+
 	//Inner class for Usb Handler
 	class privateUsbHandler extends USBIface.USBConnHandler {
 		private Switch sw;
@@ -77,8 +77,8 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 			sw.setChecked(false);
 			start_button.setEnabled(false); 
 		}
-    }
-	
+	}
+
 	private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
@@ -96,7 +96,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		setContentView(R.layout.usb_ear_test);
 		if (savedInstanceState == null) {
 			getFragmentManager().beginTransaction()
-					.add(R.id.container, new PlaceholderFragment()).commit();
+			.add(R.id.container, new PlaceholderFragment()).commit();
 		}
 
 		textview = (TextView) findViewById(R.id.textView);
@@ -107,7 +107,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		plotdata_button = (Button) findViewById(R.id.button10);
 		start_button.setEnabled(false); 
 		plotdata_button.setEnabled(false);
-		
+
 		//Handler responsible for communicating between UI activity and any
 		//thread that requires intensive work
 		mUIHandler = new MonitorHandler(this); 
@@ -128,7 +128,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_menu, menu);
-		
+
 		//Handler responsible for communicating between UI activity and any
 		//thread that requires intensive work
 		mUIHandler = new MonitorHandler(this); 	
@@ -208,10 +208,9 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		apulse.configCapture(2000, 256, 200);//TODO: Get rid of the magic numbers
 		apulse.configTones(tones);
 		app_out.setText("Testing frequency: " + f1 + " ....\n");
-		
+
 		Thread monitor=new MonitorThread(mUIHandler,apulse);
-		Log.v(TAG,"Thread monitor created.");
-		app_out.setText("Thread monitor created.\n");
+		app_out.setText("Testing frequency: " + f1 + " kHz.\n");
 		apulse.start();
 		if(monitor.getState() != Thread.State.TERMINATED){
 			monitor.start();
@@ -222,31 +221,18 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 			monitor.start();
 		}
 	}
-	
-	
-	
-	public void getdataButton(View view) {
+
+	public void getData() {
 		if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
-			psd=null;
-			getData();
-			String out = "";
-			for (int i = 0; i < psd.length; i++) {
-				out += String.format("%d:\t%.10f\n",
-						(int) (((double) i) * 31.25), psd[i]);
-			}
-			app_out.setText(out);
+			APulseIface.APulseData data = apulse.getData();
+			psd = data.getPSD(); // PSD returns data in dB
 		} else {
-			app_out.setText("Data not ready...");
+			app_out.setText("Not able to fetch data not ...");
 		}
 	}
 
-	public void getData() {
-		APulseIface.APulseData data = apulse.getData();
-		psd = data.getPSD(); // PSD returns data in dB
-	}
-	
 	public void plotdataButton(View view) {
-		
+
 		//NOTE: Because for DPOAE we are not interested in waveform data, 
 		//we will only the power spectrum data/results
 		int Fs = getResources()
@@ -278,7 +264,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 				PlotSpectralActivity.class);
 		testIntent.putExtras(extraData);
 		startActivity(testIntent);
-	
+
 	}
 
 	@Override
@@ -293,118 +279,118 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Exit",
 					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							Log.i(TAG,
-									"Setting users result to cancell and exiting");
-							setResult(RESULT_CANCELED, null);
-							TestEarActivity.this.finish();
-						}
-					});
+				public void onClick(DialogInterface dialog, int which) {
+					Log.i(TAG,
+							"Setting users result to cancell and exiting");
+					setResult(RESULT_CANCELED, null);
+					TestEarActivity.this.finish();
+				}
+			});
 
 			dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Try Again",
 					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							// this should go back to the test activity by
-							// default
-							TestEarActivity.this.finish();
-						}
-					});
+				public void onClick(DialogInterface dialog, int which) {
+					// this should go back to the test activity by
+					// default
+					TestEarActivity.this.finish();
+				}
+			});
 
 			dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Save & Exit",
 					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							// Pass URI if called from Sana procedure
-							showDialog(0);
-							// Generate the file name based on time stamp of the
-							// test and protocol name
-							// This name will be used to store both the raw file
-							// as well as the zipped (packaged)
-							// file, so the file type extension is not added in
-							// here.
-							fileName = "AP_" + "-" + protocol + "-" + '-' + f1
-									+ "kHz-" + new Date().toString();
-							fileName = fileName.replace(" ", "-").replace(":",
-									"-");
+				public void onClick(DialogInterface dialog, int which) {
+					// Pass URI if called from Sana procedure
+					showDialog(0);
+					// Generate the file name based on time stamp of the
+					// test and protocol name
+					// This name will be used to store both the raw file
+					// as well as the zipped (packaged)
+					// file, so the file type extension is not added in
+					// here.
+					fileName = "AP_" + "-" + protocol + "-" + '-' + f1
+							+ "kHz-" + new Date().toString();
+					fileName = fileName.replace(" ", "-").replace(":",
+							"-");
 
-							respHz = (double) (2.0 * f1 - f2);
-							//Set waveform data to null because we are not interesed
-							dpoaResults = new DPOAEResults(respSPL, noiseSPL,
-									db1, db2, respHz, f1, f2, psd, null,
-									fileName, protocol);
-							// Start lengthy operation in a background thread
-							new Thread(new Runnable() {
-								public void run() {
+					respHz = (double) (2.0 * f1 - f2);
+					//Set waveform data to null because we are not interesed
+					dpoaResults = new DPOAEResults(respSPL, noiseSPL,
+							db1, db2, respHz, f1, f2, psd, null,
+							fileName, protocol);
+					// Start lengthy operation in a background thread
+					new Thread(new Runnable() {
+						public void run() {
 
-									List<String> fileList = new ArrayList<String>();
-									// Store only the PSD, not the frequency x
-									// axis
-									AudioPulseFileWriter fftWriter = new AudioPulseFileWriter(
-											new File(root + "/"
-													+ dpoaResults.getFileName()
-													+ "-fft.raw"), dpoaResults
-													.getDataFFT());
-									fftWriter.start();
-									AudioPulseFileWriter wavWriter = new AudioPulseFileWriter(
-											new File(root + "/"
-													+ dpoaResults.getFileName()
-													+ "-wav.raw"), dpoaResults
-													.getWave());
-									wavWriter.start();
-									try {
-										Log.v(TAG, "Adding file to zip: "
-												+ root + fileName + "-fft.raw");
-										fftWriter.join();
-										Log.v(TAG, "Adding file to zip: "
-												+ root + fileName + "-wav.raw");
-										wavWriter.join();
-										// Add file to list of files to be
-										// zipped
-										fileList.add(root + "/" + fileName
-												+ "-fft.raw");
-										fileList.add(root + "/" + fileName
-												+ "-wav.raw");
-									} catch (InterruptedException e) {
-										Log.e(TAG,
-												"InterruptedException caught: "
-														+ e.getMessage());
-									}
+							List<String> fileList = new ArrayList<String>();
+							// Store only the PSD, not the frequency x
+							// axis
+							AudioPulseFileWriter fftWriter = new AudioPulseFileWriter(
+									new File(root + "/"
+											+ dpoaResults.getFileName()
+											+ "-fft.raw"), dpoaResults
+											.getDataFFT());
+							fftWriter.start();
+							AudioPulseFileWriter wavWriter = new AudioPulseFileWriter(
+									new File(root + "/"
+											+ dpoaResults.getFileName()
+											+ "-wav.raw"), dpoaResults
+											.getWave());
+							wavWriter.start();
+							try {
+								Log.v(TAG, "Adding file to zip: "
+										+ root + fileName + "-fft.raw");
+								fftWriter.join();
+								Log.v(TAG, "Adding file to zip: "
+										+ root + fileName + "-wav.raw");
+								wavWriter.join();
+								// Add file to list of files to be
+								// zipped
+								fileList.add(root + "/" + fileName
+										+ "-fft.raw");
+								fileList.add(root + "/" + fileName
+										+ "-wav.raw");
+							} catch (InterruptedException e) {
+								Log.e(TAG,
+										"InterruptedException caught: "
+												+ e.getMessage());
+							}
 
-									// Zip files
-									AudioPulseFilePackager packager = new AudioPulseFilePackager(
-											fileList);
-									packager.start();
-									File PackagedFile = new File(root, fileName
-											+ ".zip");
+							// Zip files
+							AudioPulseFilePackager packager = new AudioPulseFilePackager(
+									fileList);
+							packager.start();
+							File PackagedFile = new File(root, fileName
+									+ ".zip");
 
-									// Add the Packaged filename to the bundle,
-									// which is passed to Test Activity.
-									Intent output = new Intent();
-									// TODO:figure out why output.putExtra is
-									// giving an exception!!
-									fileName = PackagedFile.getAbsolutePath();
-									output.putExtra("ZIP_URI", Uri
-											.encode(PackagedFile
-													.getAbsolutePath()));
-									Log.i(TAG,
-											"Setting users result to ok and passing intent to activity: "
-													+ PackagedFile
-															.getAbsolutePath());
-									setResult(RESULT_OK, output);
-									try {
-										packager.join();
-									} catch (InterruptedException e) {
-										Log.e(TAG,
-												"Error while packaging data: "
-														+ e.getMessage());
-										e.printStackTrace();
-									}
+							// Add the Packaged filename to the bundle,
+							// which is passed to Test Activity.
+							Intent output = new Intent();
+							// TODO:figure out why output.putExtra is
+							// giving an exception!!
+							fileName = PackagedFile.getAbsolutePath();
+							output.putExtra("ZIP_URI", Uri
+									.encode(PackagedFile
+											.getAbsolutePath()));
+							Log.i(TAG,
+									"Setting users result to ok and passing intent to activity: "
+											+ PackagedFile
+											.getAbsolutePath());
+							setResult(RESULT_OK, output);
+							try {
+								packager.join();
+							} catch (InterruptedException e) {
+								Log.e(TAG,
+										"Error while packaging data: "
+												+ e.getMessage());
+								e.printStackTrace();
+							}
 
-									dismissDialog(0);
-									TestEarActivity.this.finish();
-								}
-							}).start();
+							dismissDialog(0);
+							TestEarActivity.this.finish();
 						}
-					});
+					}).start();
+				}
+			});
 			dialog.show();
 			return true;
 		}
