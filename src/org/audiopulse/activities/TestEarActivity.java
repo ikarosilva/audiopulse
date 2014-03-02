@@ -78,7 +78,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 			textview.setText("Error with permissions");
 			sw.setChecked(false);
 			getdata_button.setEnabled(false);
-			start_button.setEnabled(true); //TODO: change to false!!
+			start_button.setEnabled(false); 
 		}
     }
 	
@@ -110,7 +110,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		getdata_button = (Button) findViewById(R.id.button8);
 		plotdata_button = (Button) findViewById(R.id.button10);
 		getdata_button.setEnabled(false);
-		start_button.setEnabled(true); //TODO: change to false!
+		start_button.setEnabled(false); 
 		
 		//Handler responsible for communicating between UI activity and any
 		//thread that requires intensive work
@@ -198,10 +198,8 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 	public void startButton(View view) {
 		//Reset driver
-		//apulse.reset();
-		//status(view);
-		//TODO: remove comments
-		/*
+		apulse.reset();
+		status(view);
 		APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
 		try {
 			tones[0] = new APulseIface.FixedTone(f1, t1, t2, db1, 0);
@@ -213,7 +211,6 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 		apulse.configCapture(2000, 256, 200);//TODO: Get rid of the magic numbers
 		apulse.configTones(tones);
-		*/
 		app_out.setText("Testing frequency: " + f1 + " ....\n");
 		
 		Thread monitor=new MonitorThread(mUIHandler);
