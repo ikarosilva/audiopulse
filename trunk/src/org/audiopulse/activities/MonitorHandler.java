@@ -23,11 +23,13 @@ public class MonitorHandler extends Handler
 		public static final int IO_COMPLETE = 4;			//io phase is complete
 		public static final int RECORDING_COMPLETE = 5;		//analysis block complete
 		public static final int PROCEDURE_COMPLETE = 6;		//entire test procedure is complete
+		public static final int ANALYZE_DATA = 7;
+		public static final int TEST_FREQUENCY = 8;
 	}
 	
 	@Override
 	public void handleMessage(Message msg) {
-		Log.v(TAG,"handling message " + msg.toString());
+		
 		Bundle data = msg.getData();
 		switch (msg.what) {
 		case Messages.CLEAR_LOG:
@@ -35,18 +37,31 @@ public class MonitorHandler extends Handler
 			break;
 		case Messages.LOG:
 			String pm = data.getString(LOGUI);
-			Log.v(TAG,pm);
 			parentActivity.app_out.append(pm);
+			break;
+		case Messages.TEST_FREQUENCY:
+			parentActivity.doOneTest();//Starts recording for one frequency
 			break;
 		case Messages.RECORDING_COMPLETE:
 			dataIsReady=false;
 			parentActivity.getData();
 			if(parentActivity.psd != null){
+				//The analysis should be quick enough to do on the UI without getting ANR error.
+				//If the case we do get it, we may want to push this to the MonitorThread class.
+				parentActivity.analyzePSD();
+				double diff=Math.round((parentActivity.respSPL-parentActivity.noiseSPL)*10)/10.0;
+				parentActivity.app_out.append("Resp: " + parentActivity.respSPL
+						+ " dB, noise= " + parentActivity.noiseSPL + " dB , diff: " +
+						diff + " SPL");
 				parentActivity.plotdata_button.setEnabled(true);
 				dataIsReady=true;
 			}
 			break;
 		}
+	}
+
+	public synchronized void setCurrentFrequency(short f1, short f2) {
+		parentActivity.setCurrentTestFrequencies(f1, f2);
 	}
 
 }
