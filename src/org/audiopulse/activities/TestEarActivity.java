@@ -48,12 +48,16 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	protected EditText app_out;
 	protected Switch toggle_button;
 	protected APulseIface apulse;
-	private static final short f1=2000;
+	private static final short[] f1={2000,3000,4000};
 	private static final double db1=65;
-	private static final short f2=2400;
+	private static final short[] f2={2400,3600,4800};
+	private short currentTestFrequencyF1;
+	private short currentTestFrequencyF2;
 	private static final double db2=55;
 	private static final short t1=1000;
 	private static final short t2=2000;
+	DPOAEResults responseData;
+	private static int Fs; //sampling frequency in Hz
 	DPOAEResults dpoaResults;
 	double respSPL, noiseSPL, respHz;
 	private static final String protocol = "USbTest";
@@ -87,8 +91,12 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 			}
 		}
-
 	};
+	
+	public void setCurrentTestFrequencies(short F1, short F2){
+		currentTestFrequencyF1=F1;
+		currentTestFrequencyF2=F2;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -180,68 +188,60 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	}
 
 	public void status(View view) {
-		Log.v(TAG, "getting status");
 		APulseIface.APulseStatus status = apulse.getStatus();
-
-		String out = String.format("Version:       %d\n"
-				+ "Test state:    %s\n" + "WaveGen state: %s\n"
-				+ "Input state:   %s\n" + "Error:         %d", status.version,
-				status.testStateString(), status.wgStateString(),
-				status.inStateString(), status.err_code);
-		Log.v(TAG, "setting text");
-		app_out.setText(out);
+		app_out.append("Resetting... Status: " + status.testStateString()+"\n");
 	}
 
 	public void startButton(View view) {
-		//Reset driver
+		//Reset driver in original launch
 		apulse.reset();
 		status(view);
-		APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
-		try {
-			tones[0] = new APulseIface.FixedTone(f1, t1, t2, db1, 0);
-			tones[1] = new APulseIface.FixedTone(f2, t1, t2, db2, 1);
-		} catch (NullPointerException e) {
-			app_out.setText("Invalid inputs: f1= " + f1 + " f2= " + f2 + " db1= " + db1 + " db2= " + db2);
-			return;
-		}
-
-		apulse.configCapture(2000, 256, 200);//TODO: Get rid of the magic numbers
-		apulse.configTones(tones);
-		app_out.setText("Testing frequency: " + f1 + " ....\n");
-
-		Thread monitor=new MonitorThread(mUIHandler,apulse);
-		app_out.setText("Testing frequency: " + f1 + " kHz.\n");
-		apulse.start();
+		Thread monitor=new MonitorThread(mUIHandler,apulse,f1,f2);
 		if(monitor.getState() != Thread.State.TERMINATED){
 			monitor.start();
 		}else{
 			//Create new thread (in case of repeated button presses)
 			app_out.append("\n creating new start thread...");
-			monitor=new MonitorThread(mUIHandler,apulse);
+			monitor=new MonitorThread(mUIHandler,apulse,f1,f2);
 			monitor.start();
 		}
+		
 	}
 
+	public synchronized void doOneTest(){
+		apulse.reset();
+		APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
+		try {
+			tones[0] = new APulseIface.FixedTone(currentTestFrequencyF1, t1, t2, db1, 0);
+			tones[1] = new APulseIface.FixedTone(currentTestFrequencyF2, t1, t2, db2, 1);
+		} catch (NullPointerException e) {
+			app_out.append("Invalid inputs: f1= " + currentTestFrequencyF1 + " f2= " 
+							+ currentTestFrequencyF2 + " db1= " + db1 + " db2= " + db2+ ".\n");
+			return;
+		}
+		//TODO: Get rid of the magic numbers
+		apulse.configCapture(2000, 256, 200);
+		apulse.configTones(tones);
+		app_out.append("Testing frequency: " + currentTestFrequencyF1 + " kHz.\n");
+		apulse.start();
+	}
+	
 	public void getData() {
 		if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
 			APulseIface.APulseData data = apulse.getData();
 			psd = data.getPSD(); // PSD returns data in dB
 		} else {
-			app_out.setText("Not able to fetch data not ...");
+			app_out.setText("Error: Not able to recorded data");
 		}
 	}
 
-	public void plotdataButton(View view) {
-
-		//NOTE: Because for DPOAE we are not interested in waveform data, 
-		//we will only the power spectrum data/results
-		int Fs = getResources()
+	public void analyzePSD(){
+		Fs = getResources()
 				.getInteger(R.integer.recordingSamplingFrequency);
-		respHz = (2.0 * f1 - f2);
+		respHz = (2.0 * currentTestFrequencyF1 - currentTestFrequencyF2);
 		respHz = (respHz <= 0) ? Fs : respHz;
 		respHz = (respHz > (Fs / 2.0)) ? Fs : respHz;
-		DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(psd,Fs,f2,f1,respHz,protocol,fileName);
-		DPOAEResults responseData=null;
+		DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(psd,Fs,currentTestFrequencyF2,currentTestFrequencyF1,respHz,protocol,fileName);
 		try {
 			responseData = dpoaeAnalysis.call();
 			respSPL=responseData.getRespSPL();
@@ -250,9 +250,15 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void plotdataButton(View view) {
+
+		//NOTE: Because for DPOAE we are not interested in waveform data, 
+		//we will only the power spectrum data/results
 		Bundle extraData = new Bundle();
 		extraData.putDoubleArray("psd", psd);
-		extraData.putShort("f1", f1);// Test frequency
+		extraData.putShort("f1", currentTestFrequencyF1);// Test frequency
 		extraData.putDouble("respSPL", respSPL);
 		extraData.putDouble("noiseSPL", noiseSPL);
 		extraData.putDoubleArray("noiseRangeHz",responseData.getNoiseRangeHz());
@@ -307,15 +313,16 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 					// as well as the zipped (packaged)
 					// file, so the file type extension is not added in
 					// here.
-					fileName = "AP_" + "-" + protocol + "-" + '-' + f1
+					fileName = "AP_" + "-" + protocol + "-" + '-' + f1[0]
 							+ "kHz-" + new Date().toString();
 					fileName = fileName.replace(" ", "-").replace(":",
 							"-");
-
-					respHz = (double) (2.0 * f1 - f2);
+					
+					//TODO:Fix frequencies so the results are a package
+					respHz = (double) (2.0 * f1[0] - f2[0]);
 					//Set waveform data to null because we are not interesed
 					dpoaResults = new DPOAEResults(respSPL, noiseSPL,
-							db1, db2, respHz, f1, f2, psd, null,
+							db1, db2, respHz, f1[0], f2[0], psd, null,
 							fileName, protocol);
 					// Start lengthy operation in a background thread
 					new Thread(new Runnable() {
@@ -396,7 +403,6 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		}
 
 		} // of switches
-
 		// exit activity
 		return super.onKeyDown(keyCode, event);
 	}
