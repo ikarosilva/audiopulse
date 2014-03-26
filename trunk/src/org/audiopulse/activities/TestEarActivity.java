@@ -92,7 +92,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 			}
 		}
 	};
-	
+
 	public void setCurrentTestFrequencies(short F1, short F2){
 		currentTestFrequencyF1=F1;
 		currentTestFrequencyF2=F2;
@@ -189,7 +189,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 	public void status(View view) {
 		APulseIface.APulseStatus status = apulse.getStatus();
-		app_out.append("Resetting... Status: " + status.testStateString()+"\n");
+		app_out.append("Status: " + status.testStateString()+"\n");
 	}
 
 	public void startButton(View view) {
@@ -205,7 +205,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 			monitor=new MonitorThread(mUIHandler,apulse,f1,f2);
 			monitor.start();
 		}
-		
+
 	}
 
 	public synchronized void doOneTest(){
@@ -216,7 +216,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 			tones[1] = new APulseIface.FixedTone(currentTestFrequencyF2, t1, t2, db2, 1);
 		} catch (NullPointerException e) {
 			app_out.append("Invalid inputs: f1= " + currentTestFrequencyF1 + " f2= " 
-							+ currentTestFrequencyF2 + " db1= " + db1 + " db2= " + db2+ ".\n");
+					+ currentTestFrequencyF2 + " db1= " + db1 + " db2= " + db2+ ".\n");
 			return;
 		}
 		//TODO: Get rid of the magic numbers
@@ -225,13 +225,24 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		app_out.append("Testing frequency: " + currentTestFrequencyF1 + " kHz.\n");
 		apulse.start();
 	}
-	
+
 	public void getData() {
+		long maxWaitTime=1000;
 		if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
 			APulseIface.APulseData data = apulse.getData();
 			psd = data.getPSD(); // PSD returns data in dB
 		} else {
-			app_out.setText("Error: Not able to recorded data");
+			try {
+				Thread.sleep(maxWaitTime);
+			}catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
+				APulseIface.APulseData data = apulse.getData();
+				psd = data.getPSD(); // PSD returns data in dB	
+			}else {
+				app_out.setText("\nError: Not able to acquire recorded data");
+			}
 		}
 	}
 
@@ -251,7 +262,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void plotdataButton(View view) {
 
 		//NOTE: Because for DPOAE we are not interested in waveform data, 
@@ -317,7 +328,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 							+ "kHz-" + new Date().toString();
 					fileName = fileName.replace(" ", "-").replace(":",
 							"-");
-					
+
 					//TODO:Fix frequencies so the results are a package
 					respHz = (double) (2.0 * f1[0] - f2[0]);
 					//Set waveform data to null because we are not interesed
@@ -391,7 +402,6 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 												+ e.getMessage());
 								e.printStackTrace();
 							}
-
 							dismissDialog(0);
 							TestEarActivity.this.finish();
 						}
