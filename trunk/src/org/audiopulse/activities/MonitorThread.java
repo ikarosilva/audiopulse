@@ -27,18 +27,22 @@ public class MonitorThread extends Thread
 		sendMessage("f1.length: " + f1.length );
 		for(int i=0;i<f1.length;i++){
 			//Set frequency to test
+			sendMessage("\nRunning :" + f1[i]);
 			mainThreadHandler.setCurrentFrequency(f1[i],f2[i]);		
 			//Start test and monitor until complete
 			sendAction(MonitorHandler.Messages.TEST_FREQUENCY); //Test is run through the Handler
 			//TODO: Figue out why we are stuck here in one loop only!
 			monitorOneTest();
+			sendMessage("\nTest for :" + f1[i] + " completed!");
 		}
+		sendMessage("\nFinished all - " + f1.length + " - tests!");
 	}
 
 	private void monitorOneTest(){
 
 		//Reset Driver and loop
 		int init = apulse.getStatus().test_state;
+		//TODO: Make wait time dependent on recording parameters!
 		long maxWaitTime=10000;//Maximum waiting period to wait for the data (in milliseconds)
 		switch (init) {
 		case APulseIface.APulseStatus.TEST_CONFIGURING:
@@ -63,10 +67,9 @@ public class MonitorThread extends Thread
 					sendMessage("\nWaiting for data...");
 				}
 				//Test complete and data has been collected. Exit loop
-				sendMessage("\nexiting test...");
+				sendMessage("\nexiting monitorOneTest...");
 				break;
 			}
-		sendMessage("\nsetting thread to sleep");
 		monitorSleep();
 	}
 		sendMessage("\nexiting monitor test");
