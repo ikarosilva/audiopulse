@@ -27,15 +27,14 @@ public class MonitorThread extends Thread
 		sendMessage("f1.length: " + f1.length );
 		for(int i=0;i<f1.length;i++){
 			//Set frequency to test
-			sendMessage("\nRunning :" + f1[i]);
+			sendMessage("\n\n*** Running f1=" + f1[i] + " f2= " + f2[i]);
 			mainThreadHandler.setCurrentFrequency(f1[i],f2[i]);		
 			//Start test and monitor until complete
 			sendAction(MonitorHandler.Messages.TEST_FREQUENCY); //Test is run through the Handler
-			//TODO: Figue out why we are stuck here in one loop only!
 			monitorOneTest();
 			sendMessage("\nTest for :" + f1[i] + " completed!");
 		}
-		sendMessage("\nFinished all - " + f1.length + " - tests!");
+		sendMessage("\n\nFinished all - " + f1.length + " - tests!");
 	}
 
 	private void monitorOneTest(){
@@ -46,13 +45,13 @@ public class MonitorThread extends Thread
 		long maxWaitTime=10000;//Maximum waiting period to wait for the data (in milliseconds)
 		switch (init) {
 		case APulseIface.APulseStatus.TEST_CONFIGURING:
-			sendMessage("Initial driver state is: CONFIGURING.Waiting for main activity to start test.\n");
+			sendMessage("\nInitial driver state is: CONFIGURING.Waiting for main activity to start test.");
 			break;
 		case APulseIface.APulseStatus.TEST_READY:
-			sendMessage("Initial driver state is: READY. Waiting for main activity to start test...\n");
+			sendMessage("\nInitial driver state is: READY. Waiting for main activity to start test...");
 			break;
 		case APulseIface.APulseStatus.TEST_RESET:
-			sendMessage("Initial driver state is: RESET!\n");
+			sendMessage("\nInitial driver state is: RESET!");
 			break;
 		}
 		sendMessage("\nWaiting for test to complete");
@@ -66,13 +65,11 @@ public class MonitorThread extends Thread
 					monitorSleep();
 					sendMessage("\nWaiting for data...");
 				}
-				//Test complete and data has been collected. Exit loop
-				sendMessage("\nexiting monitorOneTest...");
 				break;
 			}
 		monitorSleep();
 	}
-		sendMessage("\nexiting monitor test");
+		sendMessage("\nExiting monitor test");
 }
 
 

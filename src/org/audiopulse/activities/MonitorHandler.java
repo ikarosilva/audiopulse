@@ -44,10 +44,7 @@ public class MonitorHandler extends Handler
 			break;
 		case Messages.RECORDING_COMPLETE:
 			dataIsReady=false;
-			//TODO: remove debugging information
-			parentActivity.app_out.append("\nGetting data in handler");
 			parentActivity.getData();
-			parentActivity.app_out.append("\nchecking data in handler");
 			if(parentActivity.psd != null){
 				//The analysis should be quick enough to do on the UI without getting ANR error.
 				//If the case we do get it, we may want to push this to the MonitorThread class.
@@ -59,7 +56,6 @@ public class MonitorHandler extends Handler
 				parentActivity.plotdata_button.setEnabled(true);
 				dataIsReady=true;
 			}
-			parentActivity.app_out.append("\ndone processing data in handler");
 			break;
 		}
 	}

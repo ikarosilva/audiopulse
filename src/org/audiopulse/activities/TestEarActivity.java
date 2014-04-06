@@ -194,7 +194,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 	public void startButton(View view) {
 		//Reset driver in original launch
-		apulse.reset();
+		resetDriver();
 		status(view);
 		Thread monitor=new MonitorThread(mUIHandler,apulse,f1,f2);
 		if(monitor.getState() != Thread.State.TERMINATED){
@@ -208,21 +208,28 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 
 	}
 
-	public synchronized void doOneTest(){
+	public void resetDriver(){
 		apulse.reset();
+	}
+	
+	public synchronized void doOneTest(){
+		app_out.append("\nResseting driver state");
+		resetDriver();
+		//TODO: We may need to check that the driver is in the proper state prior
+		//to continuing
 		APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
 		try {
 			tones[0] = new APulseIface.FixedTone(currentTestFrequencyF1, t1, t2, db1, 0);
 			tones[1] = new APulseIface.FixedTone(currentTestFrequencyF2, t1, t2, db2, 1);
 		} catch (NullPointerException e) {
-			app_out.append("Invalid inputs: f1= " + currentTestFrequencyF1 + " f2= " 
-					+ currentTestFrequencyF2 + " db1= " + db1 + " db2= " + db2+ ".\n");
+			app_out.append("\nInvalid inputs: f1= " + currentTestFrequencyF1 + " f2= " 
+					+ currentTestFrequencyF2 + " db1= " + db1 + " db2= " + db2+ ".");
 			return;
 		}
 		//TODO: Get rid of the magic numbers
 		apulse.configCapture(2000, 256, 200);
 		apulse.configTones(tones);
-		app_out.append("Testing frequency: " + currentTestFrequencyF1 + " kHz.\n");
+		app_out.append("\ncurrentTestFrequencyF1: " + currentTestFrequencyF1 + " kHz.");
 		apulse.start();
 	}
 
@@ -241,7 +248,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 				APulseIface.APulseData data = apulse.getData();
 				psd = data.getPSD(); // PSD returns data in dB	
 			}else {
-				app_out.setText("\nError: Not able to acquire recorded data");
+				app_out.append("\nError: Not able to acquire recorded data");
 			}
 		}
 	}
