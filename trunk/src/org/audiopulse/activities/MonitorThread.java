@@ -29,8 +29,11 @@ public class MonitorThread extends Thread
 			//Set frequency to test
 			sendMessage("\n\n*** Running f1=" + f1[i] + " f2= " + f2[i]);
 			mainThreadHandler.setCurrentFrequency(f1[i],f2[i]);		
+			sendMessage("\n\n***Current Frequency is F1= " + mainThreadHandler.getCurrentF1()
+					+ " F2= " + mainThreadHandler.getCurrentF2());
 			//Start test and monitor until complete
 			sendAction(MonitorHandler.Messages.TEST_FREQUENCY); //Test is run through the Handler
+			//This looks like there is some thread contigency issues here
 			monitorOneTest();
 			sendMessage("\nTest for :" + f1[i] + " completed!");
 		}
@@ -43,6 +46,7 @@ public class MonitorThread extends Thread
 		int init = apulse.getStatus().test_state;
 		//TODO: Make wait time dependent on recording parameters!
 		long maxWaitTime=10000;//Maximum waiting period to wait for the data (in milliseconds)
+		sendMessage("\ndriver state is = " + init);
 		switch (init) {
 		case APulseIface.APulseStatus.TEST_CONFIGURING:
 			sendMessage("\nInitial driver state is: CONFIGURING.Waiting for main activity to start test.");
@@ -67,6 +71,7 @@ public class MonitorThread extends Thread
 				}
 				break;
 			}
+		 sendMessage("\ntest running, state = " + stat);
 		monitorSleep();
 	}
 		sendMessage("\nExiting monitor test");
@@ -75,7 +80,7 @@ public class MonitorThread extends Thread
 
 private synchronized void monitorSleep(){
 	try {
-		Thread.sleep(200);
+		Thread.sleep(500);
 	}catch (InterruptedException e) {
 		e.printStackTrace();
 	}	

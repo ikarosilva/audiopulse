@@ -96,6 +96,8 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	public void setCurrentTestFrequencies(short F1, short F2){
 		currentTestFrequencyF1=F1;
 		currentTestFrequencyF2=F2;
+		//app_out.append("Setting current frequencies to : F1=" 
+		//+ F1+ " F2= " + F2 +"\n");
 	}
 
 	@Override
@@ -230,6 +232,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		apulse.configCapture(2000, 256, 200);
 		apulse.configTones(tones);
 		app_out.append("\ncurrentTestFrequencyF1: " + currentTestFrequencyF1 + " kHz.");
+		app_out.append("\ncurrentTestFrequencyF2: " + currentTestFrequencyF2 + " kHz.");
 		apulse.start();
 	}
 
@@ -437,6 +440,14 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	@Override
 	public boolean handleMessage(Message msg) {
 		return true;
+	}
+
+	public short getCurrentF1() {
+		return currentTestFrequencyF1;	
+	}
+	
+	public short getCurrentF2() {
+		return currentTestFrequencyF2;	
 	}
 
 }
