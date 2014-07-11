@@ -63,5 +63,13 @@ public class MonitorHandler extends Handler
 	public synchronized void setCurrentFrequency(short f1, short f2) {
 		parentActivity.setCurrentTestFrequencies(f1, f2);
 	}
+	
+	public synchronized short getCurrentF1() {
+		return parentActivity.getCurrentF1();
+	}
+	
+	public synchronized short getCurrentF2() {
+		return parentActivity.getCurrentF2();
+	}
 
 }
