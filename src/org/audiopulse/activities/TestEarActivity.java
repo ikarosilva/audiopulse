@@ -195,28 +195,12 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	}
 
 	public void startButton(View view) {
-		//Reset driver in original launch
-		resetDriver();
 		status(view);
 		Thread monitor=new MonitorThread(mUIHandler,apulse,f1,f2);
-		if(monitor.getState() != Thread.State.TERMINATED){
-			monitor.start();
-		}else{
-			//Create new thread (in case of repeated button presses)
-			app_out.append("\n creating new start thread...");
-			monitor=new MonitorThread(mUIHandler,apulse,f1,f2);
-			monitor.start();
-		}
-
+		monitor.start();
 	}
 
-	public void resetDriver(){
-		apulse.reset();
-	}
-	
 	public synchronized void doOneTest(){
-		app_out.append("\nResseting driver state");
-		resetDriver();
 		//TODO: We may need to check that the driver is in the proper state prior
 		//to continuing
 		APulseIface.ToneConfig[] tones = new APulseIface.ToneConfig[2];
@@ -236,24 +220,37 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		apulse.start();
 	}
 
-	public void getData() {
-		long maxWaitTime=1000;
+	public void getData() throws Exception {
+		long maxWaitTime=2000;
+		long startTime=System.currentTimeMillis();
+		long endTime=System.currentTimeMillis();
+		psd=null;
 		if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
 			APulseIface.APulseData data = apulse.getData();
 			psd = data.getPSD(); // PSD returns data in dB
 		} else {
-			try {
-				Thread.sleep(maxWaitTime);
-			}catch (InterruptedException e) {
-				e.printStackTrace();
+			while(endTime<(startTime+maxWaitTime)){
+				if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
+					APulseIface.APulseData data = apulse.getData();
+					psd = data.getPSD(); // PSD returns data in dB	
+					break;
+				}else {
+					try {
+						Thread.sleep(200);
+					}catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				endTime=System.currentTimeMillis();
 			}
-			if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
-				APulseIface.APulseData data = apulse.getData();
-				psd = data.getPSD(); // PSD returns data in dB	
-			}else {
-				app_out.append("\nError: Not able to acquire recorded data");
+			if(psd == null){
+				throw new Exception("\n**WARNING: Driver timed out in state: " + apulse.getStatus().inStateString());
 			}
 		}
+	}
+
+	public int getPSDSize(){
+		return psd.length;
 	}
 
 	public void analyzePSD(){
@@ -445,7 +442,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 	public short getCurrentF1() {
 		return currentTestFrequencyF1;	
 	}
-	
+
 	public short getCurrentF2() {
 		return currentTestFrequencyF2;	
 	}

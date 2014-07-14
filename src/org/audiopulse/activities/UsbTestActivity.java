@@ -208,7 +208,6 @@ public class UsbTestActivity extends Activity implements Handler.Callback {
 				+ "Input state:   %s\n" + "Error:         %d", status.version,
 				status.testStateString(), status.wgStateString(),
 				status.inStateString(), status.err_code);
-		Log.v(TAG, "setting text");
 		app_out.setText(out);
 	}
 

@@ -44,10 +44,12 @@ public class MonitorHandler extends Handler
 			break;
 		case Messages.RECORDING_COMPLETE:
 			dataIsReady=false;
+			try{
 			parentActivity.getData();
+			parentActivity.app_out.append("Recording data length=" + parentActivity.getPSDSize());
 			if(parentActivity.psd != null){
 				//The analysis should be quick enough to do on the UI without getting ANR error.
-				//If the case we do get it, we may want to push this to the MonitorThread class.
+				//In the case we do get it, we may want to push this to the MonitorThread class.
 				parentActivity.analyzePSD();
 				double diff=Math.round((parentActivity.respSPL-parentActivity.noiseSPL)*10)/10.0;
 				parentActivity.app_out.append("\nResp: " + parentActivity.respSPL
@@ -55,6 +57,10 @@ public class MonitorHandler extends Handler
 						diff + " SPL");
 				parentActivity.plotdata_button.setEnabled(true);
 				dataIsReady=true;
+			}
+			}catch(Exception e) {
+				//In this case the recording failed. Should we try again ??
+				parentActivity.app_out.append(e.getMessage());
 			}
 			break;
 		}
