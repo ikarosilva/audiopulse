@@ -45,8 +45,9 @@ public class MonitorHandler extends Handler
 		case Messages.RECORDING_COMPLETE:
 			dataIsReady=false;
 			try{
+			parentActivity.app_out.append("\nRetrieving data...");
 			parentActivity.getData();
-			parentActivity.app_out.append("Recording data length=" + parentActivity.getPSDSize());
+			parentActivity.app_out.append("Recorded data size=" + parentActivity.getPSDSize());
 			if(parentActivity.psd != null){
 				//The analysis should be quick enough to do on the UI without getting ANR error.
 				//In the case we do get it, we may want to push this to the MonitorThread class.

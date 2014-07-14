@@ -215,38 +215,14 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		//TODO: Get rid of the magic numbers
 		apulse.configCapture(2000, 256, 200);
 		apulse.configTones(tones);
-		app_out.append("\ncurrentTestFrequencyF1: " + currentTestFrequencyF1 + " kHz.");
+		app_out.append("\n\ncurrentTestFrequencyF1: " + currentTestFrequencyF1 + " kHz.");
 		app_out.append("\ncurrentTestFrequencyF2: " + currentTestFrequencyF2 + " kHz.");
 		apulse.start();
 	}
 
 	public void getData() throws Exception {
-		long maxWaitTime=2000;
-		long startTime=System.currentTimeMillis();
-		long endTime=System.currentTimeMillis();
-		psd=null;
-		if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
 			APulseIface.APulseData data = apulse.getData();
 			psd = data.getPSD(); // PSD returns data in dB
-		} else {
-			while(endTime<(startTime+maxWaitTime)){
-				if (apulse.getStatus().test_state == APulseIface.APulseStatus.TEST_DONE) {
-					APulseIface.APulseData data = apulse.getData();
-					psd = data.getPSD(); // PSD returns data in dB	
-					break;
-				}else {
-					try {
-						Thread.sleep(200);
-					}catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				endTime=System.currentTimeMillis();
-			}
-			if(psd == null){
-				throw new Exception("\n**WARNING: Driver timed out in state: " + apulse.getStatus().inStateString());
-			}
-		}
 	}
 
 	public int getPSDSize(){
@@ -305,7 +281,7 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 					new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					Log.i(TAG,
-							"Setting users result to cancell and exiting");
+							"Setting users result to cancel and exiting");
 					setResult(RESULT_CANCELED, null);
 					TestEarActivity.this.finish();
 				}

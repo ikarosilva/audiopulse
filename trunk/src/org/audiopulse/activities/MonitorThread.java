@@ -24,23 +24,18 @@ public class MonitorThread extends Thread
 	@Override
 	public void run()
 	{
-		sendMessage("Number of tests (f1.length): " + f1.length );
+		sendMessage("Number of tests: " + f1.length );
 		for(int i=0;i<f1.length;i++){
 			//Reset driver in between tests
 			resetDriver();
+
 			//Set frequency to test
-			mainThreadHandler.setCurrentFrequency(f1[i],f2[i]);		
+			mainThreadHandler.setCurrentFrequency(f1[i],f2[i]);
+			
 			//Start test and monitor until complete
 			sendAction(MonitorHandler.Messages.TEST_FREQUENCY); //Test is run through the Handler
-			//This looks like there is some thread contigency issues here
 			monitorOneTest();
 			sendAction(MonitorHandler.Messages.RECORDING_COMPLETE);
-			while(mainThreadHandler.dataIsReady == false){
-				monitorSleep();
-				sendMessage("\nWaiting for data...");
-			}
-			apulse.reset();
-			sendMessage("\nAnalysis for test:" + f1[i] + " finished.\n\n");
 		}
 		sendMessage("\n\n***Finished all - " + f1.length + " - tests!");
 	}
@@ -74,7 +69,7 @@ public class MonitorThread extends Thread
 
 	private synchronized void monitorSleep(){
 		try {
-			Thread.sleep(500);
+			Thread.sleep(200);
 		}catch (InterruptedException e) {
 			e.printStackTrace();
 		}	
