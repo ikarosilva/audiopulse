@@ -24,79 +24,73 @@ public class MonitorThread extends Thread
 	@Override
 	public void run()
 	{
-		sendMessage("f1.length: " + f1.length );
+		sendMessage("Number of tests (f1.length): " + f1.length );
 		for(int i=0;i<f1.length;i++){
+			//Reset driver in between tests
+			resetDriver();
 			//Set frequency to test
-			sendMessage("\n\n*** Running f1=" + f1[i] + " f2= " + f2[i]);
 			mainThreadHandler.setCurrentFrequency(f1[i],f2[i]);		
-			sendMessage("\n\n***Current Frequency is F1= " + mainThreadHandler.getCurrentF1()
-					+ " F2= " + mainThreadHandler.getCurrentF2());
 			//Start test and monitor until complete
 			sendAction(MonitorHandler.Messages.TEST_FREQUENCY); //Test is run through the Handler
 			//This looks like there is some thread contigency issues here
 			monitorOneTest();
-			sendMessage("\nTest for :" + f1[i] + " completed!");
+			sendAction(MonitorHandler.Messages.RECORDING_COMPLETE);
+			while(mainThreadHandler.dataIsReady == false){
+				monitorSleep();
+				sendMessage("\nWaiting for data...");
+			}
+			apulse.reset();
+			sendMessage("\nAnalysis for test:" + f1[i] + " finished.\n\n");
 		}
-		sendMessage("\n\nFinished all - " + f1.length + " - tests!");
+		sendMessage("\n\n***Finished all - " + f1.length + " - tests!");
 	}
 
-	private void monitorOneTest(){
-
-		//Reset Driver and loop
-		int init = apulse.getStatus().test_state;
-		//TODO: Make wait time dependent on recording parameters!
-		long maxWaitTime=10000;//Maximum waiting period to wait for the data (in milliseconds)
-		sendMessage("\ndriver state is = " + init);
-		switch (init) {
-		case APulseIface.APulseStatus.TEST_CONFIGURING:
-			sendMessage("\nInitial driver state is: CONFIGURING.Waiting for main activity to start test.");
-			break;
-		case APulseIface.APulseStatus.TEST_READY:
-			sendMessage("\nInitial driver state is: READY. Waiting for main activity to start test...");
-			break;
-		case APulseIface.APulseStatus.TEST_RESET:
-			sendMessage("\nInitial driver state is: RESET!");
-			break;
+	public void resetDriver(){
+		//Reset driver to make sure it is in an original state
+		apulse.reset();
+		while(true){
+			int stat=apulse.getStatus().test_state;
+			if( stat== APulseIface.APulseStatus.TEST_RESET){
+				break;
+			}
+			sendMessage("\nWaiting for test to be reset...");
+			monitorSleep();
 		}
-		sendMessage("\nWaiting for test to complete");
+	}
+
+
+	private void monitorOneTest(){
+		//TODO: Make wait time dependent on recording parameter time!
 		int stat;
 		while(true){
 			stat=apulse.getStatus().test_state;
 			if( stat== APulseIface.APulseStatus.TEST_DONE){
-				sendMessage("\nTest completed, fetching data...");
-				sendAction(MonitorHandler.Messages.RECORDING_COMPLETE);
-				while(mainThreadHandler.dataIsReady == false){
-					monitorSleep();
-					sendMessage("\nWaiting for data...");
-				}
 				break;
 			}
-		 sendMessage("\ntest running, state = " + stat);
-		monitorSleep();
+			monitorSleep();
+		}
 	}
-		sendMessage("\nExiting monitor test");
-}
 
 
-private synchronized void monitorSleep(){
-	try {
-		Thread.sleep(500);
-	}catch (InterruptedException e) {
-		e.printStackTrace();
-	}	
-}
+	private synchronized void monitorSleep(){
+		try {
+			Thread.sleep(500);
+		}catch (InterruptedException e) {
+			e.printStackTrace();
+		}	
+	}
 
-private synchronized void sendMessage(String str){
-	Message msg = this.mainThreadHandler.obtainMessage(MonitorHandler.Messages.LOG);
-	Bundle b = new Bundle();
-	b.putString(MonitorHandler.LOGUI,str);
-	msg.setData(b);
-	this.mainThreadHandler.sendMessage(msg);
-}
+	private synchronized void sendMessage(String str){
+		Message msg = this.mainThreadHandler.obtainMessage(MonitorHandler.Messages.LOG);
+		Bundle b = new Bundle();
+		b.putString(MonitorHandler.LOGUI,str);
+		msg.setData(b);
+		this.mainThreadHandler.sendMessage(msg);
+	}
 
-private synchronized void sendAction(int action){
-	Message msg = this.mainThreadHandler.obtainMessage(action);
-	this.mainThreadHandler.sendMessage(msg);
-}
+	private synchronized void sendAction(int action){
+		Message msg = this.mainThreadHandler.obtainMessage(action);
+		this.mainThreadHandler.sendMessage(msg);
+	}
 
 }
