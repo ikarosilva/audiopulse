@@ -250,14 +250,7 @@ public class APulseIface {
             	//be sqrt(2)(2^31)
                 ret[i] = ((double)psd[i])/3037000499.97605;
                 ret[i]=(ret[i] == 0) ? -Double.NEGATIVE_INFINITY : 10.0*Math.log10(ret[i]); 
-                Log.w(TAG,"Setting zero to negative infinity in db conversion");
             }
-            
-            /*
-        	double[] x=new double[psd.length];
-        	for(int i=0;i<psd.length;i++)
-        		x[i]=psd[i];
-        		*/
             return ret;
         }
 

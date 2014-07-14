@@ -48,7 +48,7 @@ public class MonitorThread extends Thread
 			if( stat== APulseIface.APulseStatus.TEST_RESET){
 				break;
 			}
-			sendMessage("\nWaiting for test to be reset...");
+			sendMessage("\nTest beinb reset...");
 			monitorSleep();
 		}
 	}

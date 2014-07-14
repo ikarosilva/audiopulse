@@ -215,12 +215,14 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		//TODO: Get rid of the magic numbers
 		apulse.configCapture(2000, 256, 200);
 		apulse.configTones(tones);
-		app_out.append("\n\ncurrentTestFrequencyF1: " + currentTestFrequencyF1 + " kHz.");
-		app_out.append("\ncurrentTestFrequencyF2: " + currentTestFrequencyF2 + " kHz.");
+		app_out.append("\n\n TestF1: " + currentTestFrequencyF1 + " kHz.");
+		app_out.append("\tTestF2: " + currentTestFrequencyF2 + " kHz.");
 		apulse.start();
 	}
 
 	public void getData() throws Exception {
+			//TODO: Confirm that the DSP buffer gets cleared out with 
+			//this call. 
 			APulseIface.APulseData data = apulse.getData();
 			psd = data.getPSD(); // PSD returns data in dB
 	}
@@ -229,12 +231,13 @@ public class TestEarActivity extends Activity implements Handler.Callback {
 		return psd.length;
 	}
 
-	public void analyzePSD(){
+	public void analyzePSD() throws Exception{
 		Fs = getResources()
 				.getInteger(R.integer.recordingSamplingFrequency);
-		respHz = (2.0 * currentTestFrequencyF1 - currentTestFrequencyF2);
-		respHz = (respHz <= 0) ? Fs : respHz;
-		respHz = (respHz > (Fs / 2.0)) ? Fs : respHz;
+		respHz = ((2.0 * currentTestFrequencyF1) - currentTestFrequencyF2);
+		if ( (respHz <= 0) || (respHz > (Fs / 2.0)) )
+			throw new Exception("Invalid response frequency: " + respHz);
+		
 		DPOAEAnalyzer dpoaeAnalysis=new DPOAEAnalyzer(psd,Fs,currentTestFrequencyF2,currentTestFrequencyF1,respHz,protocol,fileName);
 		try {
 			responseData = dpoaeAnalysis.call();
