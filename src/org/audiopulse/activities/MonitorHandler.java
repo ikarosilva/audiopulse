@@ -52,7 +52,7 @@ public class MonitorHandler extends Handler
 				//The analysis should be quick enough to do on the UI without getting ANR error.
 				//In the case we do get it, we may want to push this to the MonitorThread class.
 				parentActivity.analyzePSD();
-				double diff=Math.round((parentActivity.respSPL-parentActivity.noiseSPL)*10)/10.0;
+				double diff=(parentActivity.respSPL-parentActivity.noiseSPL);
 				parentActivity.app_out.append("\nResp: " + parentActivity.respSPL
 						+ " dB, noise= " + parentActivity.noiseSPL + " dB , diff: " +
 						diff + " SPL");
@@ -66,7 +66,7 @@ public class MonitorHandler extends Handler
 			break;
 		}
 	}
-
+	
 	public synchronized void setCurrentFrequency(short f1, short f2) {
 		parentActivity.setCurrentTestFrequencies(f1, f2);
 	}
