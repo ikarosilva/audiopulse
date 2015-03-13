@@ -1,0 +1,24 @@
+#General Guidelines for contributing to the project.
+
+# Introduction #
+
+This is a brief description of minimal guidelines you should follow when contributing to this project.
+
+1. Creating a new Java file
+> A. Follow the general Android coding syntax (ie, general class name should have first letters capitalized, and an instance should have first letter lowercase: eg: general class name: `MyClass`, instance: `myClass`, thread classes should have Runnable appended, Activities classes Activity appended, etc...).
+
+> B. Add the license file template [License](License.md) to your code.
+
+2. Modifying Existing Code
+> A. Make sure your project is up-to-date with the head revision
+> B. Make your changes and make sure your project runs without errors and warnings
+> C. If this is a very significant change to the code (ie, API changes, modifying how a function returns, adding functions/constructors), add your name to the list of contributors. Make sure one of the contributors (listed in the code's license file) revises and accepts your changes.
+> D. Commit
+
+3. Version Control
+> A. Please make sure that the following directories are **not** under version control (svn:ignore in Eclipse/Subversion):
+
+```
+AudioPulse/gen
+AudioPulse/bin
+```
