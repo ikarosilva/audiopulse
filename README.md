@@ -1,2 +1,2 @@
 # audiopulse
-Android application for cellphone based Distortion product otoacoustic emissions measurements
+Android application for cellphone based distortion product otoacoustic emissions measurements
